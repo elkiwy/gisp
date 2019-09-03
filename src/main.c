@@ -133,7 +133,11 @@ List* eval(List* exp, List* env) {
 	  //printf("atom found %s\n", (char*)exp);
 		//Check if is a known symbol
 		for ( ; env != 0; env = cdr(env) ){
-			if (exp == car(car(env)))  return car(cdr(car(env)));}
+		  if (exp == first(car(env))){
+			printf("Found symbol %s in environment\n", (char*)exp);	
+			return second(car(env));
+		  }
+		}
 
 		//Check if it's a number
 		char* err;
