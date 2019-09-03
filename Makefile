@@ -1,5 +1,5 @@
 build/main: src/main.c
-	gcc -g -Wall -std=c11 src/main.c -o build/main
+	gcc -g -Wall src/main.c -o build/main
 
 run: build/main
 	./build/main
@@ -7,7 +7,7 @@ run: build/main
 test: build/main
 	echo "(cons 1 2)" - | ./build/main
 
-debug: build/main
+debug: 
 	gdb build/main
 
 docker-build:
@@ -17,6 +17,6 @@ docker-debug:
 	docker run -it --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined elkiwy/gdb	
 
 clean:
-	rm build/main
+	rm -r build && mkdir build
 
 
