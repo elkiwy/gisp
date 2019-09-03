@@ -199,10 +199,37 @@ List* eval(List* exp, List* env) {
 			extenv = cons(cons(car(names),  cons(eval(car(vars), env), 0)), extenv);
 		return eval (third(car(exp)), extenv);
 	}
-	puts("cannot evaluate expression");
+	puts("cannot evaluate expression\n");
 	return 0;
 }
 
+
+List* numberToList(float num){
+	int numint = (int)num;
+	float numfrac = num - numint;
+	char* str = malloc(32*sizeof(char));
+	if (numfrac == 0){sprintf(str, "%i", numint);
+	}else{            sprintf(str, "%f", num);}
+	return (List*)str;
+}
+
+float numberOperation(char op, float a, float b){
+  if (op=='+'){return a+b;}
+  else if (op=='-'){return a-b;}
+  else if (op=='*'){return a*b;}
+  else if (op=='/'){return a/b;}
+  else{return 0;}
+}
+
+List* applyOperationOnList(char op, List* list){
+	printf("Applying operation %i on list\n", op);
+	float res = atof((char*)first(list));
+	List* current = list;
+	while((current = cdr(current))){
+	  res = numberOperation(op, res, atof((char*)car(current)));
+	}
+	return numberToList(res);
+}
 
 //Define function to be used in Gisp
 List* fcons(List* a)    {  return cons(first(a), second(a));  }
@@ -216,12 +243,10 @@ List* freadobj(List* a) {  look = getchar(); gettoken(); return getobj();  }
 List* fwriteobj(List* a){  print_obj(car(a), 1); puts(""); return e_true;  }
 
 List* flist(List* a) {return a;}
-List* fadd(List* a) {
-	char* err;
-	double n = strtod((char*)first(a), &err);
-	double m = strtod((char*)second(a), &err);
-	return (List*)(uintptr_t)(n + m);
-}
+List* fadd(List* a) {return applyOperationOnList('+', a);}
+List* fsub(List* a) {return applyOperationOnList('-', a);}
+List* fmul(List* a) {return applyOperationOnList('*', a);}
+List* fdiv(List* a) {return applyOperationOnList('/', a);}
 
 
 //Main program entry
@@ -235,9 +260,12 @@ int main(int argc, char* argv[]) {
               cons(cons(intern("null?"), cons((void* )fnull, 0)),
               cons(cons(intern("read"), cons((void* )freadobj, 0)),
               cons(cons(intern("write"), cons((void* )fwriteobj, 0)),
-              cons(cons(intern("+"), cons((void* )fadd, 0)),
+			  cons(cons(intern("+"), cons((void* )fadd, 0)),
+			  cons(cons(intern("-"), cons((void* )fsub, 0)),
+			  cons(cons(intern("*"), cons((void* )fmul, 0)),
+			  cons(cons(intern("/"), cons((void* )fdiv, 0)),
               cons(cons(intern("list"), cons((void* )flist, 0)),
-			  cons(cons(intern("null"), cons(0,0)), 0))))))))))));
+			  cons(cons(intern("null"), cons(0,0)), 0)))))))))))))));
 
   look = getchar();
   gettoken();
