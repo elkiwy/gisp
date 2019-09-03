@@ -2,11 +2,10 @@ FROM alpine AS builder
 RUN apk add build-base gcc libc-dev
 WORKDIR /gisp
 COPY . .
-RUN make 
+RUN make clean && make 
 
 FROM alpine
 RUN apk add build-base gdb
-COPY Makefile .
-COPY --from=builder /gisp/build /build
+COPY --from=builder /gisp .
 ENTRYPOINT ["make", "debug"]
 
