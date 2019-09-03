@@ -5,7 +5,7 @@ COPY . .
 RUN make clean && make 
 
 FROM alpine
-RUN apk add build-base gdb
-COPY --from=builder /gisp .
-ENTRYPOINT ["make", "debug-mi"]
+RUN apk add build-base gdb gcc libc-dev
+COPY . .
+ENTRYPOINT ["make", "debug"]
 
