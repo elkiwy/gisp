@@ -10,6 +10,9 @@ test: build/main
 debug: 
 	gdb build/main
 
+debug-mi: 
+	gdb -i=mi build/main
+
 docker-build:
 	docker build -t elkiwy/gdb .
 
