@@ -104,10 +104,9 @@ void print_obj(List* ob, int head_of_list) {
 		print_obj(car(ob), 1);
 		if (cdr(ob) != 0) {
 			printf(" ");
-			print_obj(cdr(ob), 0);
-		}else{
-			printf(")");
+			print_obj(cdr(ob), 0); //Change to 1 to enable the cons cells view
 		}
+		if (head_of_list) printf(")");
 	}
 }
 
