@@ -118,19 +118,6 @@ void print_obj(List* ob, int head_of_list) {
 
 
 
-//Define function to be used in Gisp
-List* fcons(List* a)    {  return cons(first(a), second(a));  }
-List* fcar(List* a)     {  return car(first(a));  }
-List* fcdr(List* a)     {  return cdr(first(a));  }
-List* feq(List* a)      {  return first(a) == second(a) ? e_true : e_false;  }
-List* fpair(List* a)    {  return is_pair(first(a))       ? e_true : e_false;  }
-List* fatom(List* a)    {  return is_atom(first(a))       ? e_true : e_false;  }
-List* fnull(List* a)    {  return first(a) == 0           ? e_true : e_false; }
-List* freadobj(List* a) {  look = getchar(); gettoken(); return getobj();  }
-List* fwriteobj(List* a){  print_obj(car(a), 1); puts(""); return e_true;  }
-
-//List* flist(List* a) {for (List* current = a; current!=0; current=cdr(current)) {}}
-
 
 //Eval functions
 List* eval(List* exp, List* env);
@@ -143,7 +130,7 @@ List* evlist(List* list, List* env) {
 List* eval(List* exp, List* env) {
 	//If is an atom...
 	if (is_atom(exp) ) {
-	    printf("atom found %s\n", (char*)exp);
+	  //printf("atom found %s\n", (char*)exp);
 		//Check if is a known symbol
 		for ( ; env != 0; env = cdr(env) ){
 			if (exp == car(car(env)))  return car(cdr(car(env)));}
@@ -152,20 +139,20 @@ List* eval(List* exp, List* env) {
 		char* err;
 		strtod((char*)exp, &err);
 		if (*err == 0){
-			printf("returning number\n");
+		  //printf("returning number\n");
 			return exp;			
 		}
 
 		//Else return it as an atom
-		printf("returning null\n");
+		//printf("returning null\n");
 		return 0;
 	//Else if is a list with the first atom being an atom
 	} else if (is_atom(first(exp))) { 
-	    printf("list with atom found %s\n", (char*) first(exp));
+	  //printf("list with atom found %s\n", (char*) first(exp));
 		// (quote X)
 	    if (first(exp) == intern("quote")) {
 			//Return the quoted element as it is
-			printf("returning quoted\n");
+			//printf("returning quoted\n");
 			return second(exp);
 		// (if (cond) (success) (fail))
 		} else if (first(exp) == intern("if")) {
@@ -183,6 +170,7 @@ List* eval(List* exp, List* env) {
 			return ((List* (*) (List*))eval(second(exp), env)) (args);
 		// (function args)
 		} else { 
+			printf("tring to formaggio %s\n", (char*)first(exp));
 			List* primop = eval(first(exp), env);
             //user defined lambda, arg list eval happens in binding  below
 			if (is_pair(primop)) { 
@@ -190,13 +178,12 @@ List* eval(List* exp, List* env) {
 			//Built-in primitive
 			} else if (primop) { 
 				List* result = ((List* (*) (List*))primop) (evlist(cdr(exp), env));
-				printf("evaluated %s\n", (char*)first(exp));
 				return result;
 			}
 		}
 	// ((lambda (params) body) args)
 	} else if (car(car(exp)) == intern("lambda")) {
-		printf("lambda found\n");
+	  //printf("lambda found\n");
 	    //bind names into env and eval body
 		List* extenv = env,* names = second(car(exp)),* vars = cdr(exp);
 		for (  ; names ; names = cdr(names), vars = cdr(vars) )
@@ -207,6 +194,25 @@ List* eval(List* exp, List* env) {
 	return 0;
 }
 
+
+//Define function to be used in Gisp
+List* fcons(List* a)    {  return cons(first(a), second(a));  }
+List* fcar(List* a)     {  return car(first(a));  }
+List* fcdr(List* a)     {  return cdr(first(a));  }
+List* feq(List* a)      {  return first(a) == second(a) ? e_true : e_false;  }
+List* fpair(List* a)    {  return is_pair(first(a))       ? e_true : e_false;  }
+List* fatom(List* a)    {  return is_atom(first(a))       ? e_true : e_false;  }
+List* fnull(List* a)    {  return first(a) == 0           ? e_true : e_false; }
+List* freadobj(List* a) {  look = getchar(); gettoken(); return getobj();  }
+List* fwriteobj(List* a){  print_obj(car(a), 1); puts(""); return e_true;  }
+
+List* flist(List* a) {return a;}
+List* fadd(List* a) {
+	char* err;
+	double n = strtod((char*)first(a), &err);
+	double m = strtod((char*)second(a), &err);
+	return (List*)(uintptr_t)(n + m);
+}
 
 
 //Main program entry
@@ -220,12 +226,15 @@ int main(int argc, char* argv[]) {
               cons(cons(intern("null?"), cons((void* )fnull, 0)),
               cons(cons(intern("read"), cons((void* )freadobj, 0)),
               cons(cons(intern("write"), cons((void* )fwriteobj, 0)),
-              cons(cons(intern("null"), cons(0,0)), 0))))))))));
+              cons(cons(intern("+"), cons((void* )fadd, 0)),
+              cons(cons(intern("list"), cons((void* )flist, 0)),
+			  cons(cons(intern("null"), cons(0,0)), 0))))))))))));
+
   look = getchar();
   gettoken();
-
   List* result = eval(getobj(), env);
   print_obj( result, 1 );
+
   printf("\n");
   printf("\n");
   return 0;
