@@ -174,15 +174,20 @@ List* eval(List* exp, List* env) {
 			return ((List* (*) (List*))eval(second(exp), env)) (args);
 		// (function args)
 		} else { 
-			printf("tring to formaggio %s\n", (char*)first(exp));
+		    printf("searching for symbol %s\n", (char*)first(exp));
 			List* primop = eval(first(exp), env);
             //user defined lambda, arg list eval happens in binding  below
-			if (is_pair(primop)) { 
-				return eval( cons(primop, cdr(exp)), env );
+			//if (is_pair(primop)) { 
+			//	printf("found lambda %s\n", (char*)first(exp));
+			//	return eval( cons(primop, cdr(exp)), env );
 			//Built-in primitive
-			} else if (primop) { 
+			//} else
+			if (primop) { 
+				printf("found primitive %s\n", (char*)first(exp));
 				List* result = ((List* (*) (List*))primop) (evlist(cdr(exp), env));
 				return result;
+			}else{
+				printf("didn't find anything for %s\n", (char*)first(exp));
 			}
 		}
 	// ((lambda (params) body) args)
