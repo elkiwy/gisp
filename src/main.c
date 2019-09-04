@@ -5,18 +5,13 @@
 #include <string.h>
 #include <ctype.h>
 
+
+#include "core.h"
+
 //Handy debug method
 #define debug(m,e) printf("%s:%d: %s:",__FILE__,__LINE__,m); print_obj(e,1); puts("");
 
-//This is the main List structure
-typedef struct List {
-	struct List*  next;
-	void*  data;
-} List;
 
-
-//Global list of symbols
-List* symbols = 0;
 
 
 //Static variables used for input parsing
@@ -41,42 +36,18 @@ static void gettoken() {
 }
 
 
-//Each cons shell is tagged with the lowest pointer bit set to 1, everything else is set to 0
-//Before accessing cons car and cdr we need to untag the pointer to read from memory correctly
-#define is_pair(x) (((uintptr_t)x & 0x1) == 0x1)
-#define is_atom(x) (((uintptr_t)x & 0x1) == 0x0)
-#define untag(x)   ((uintptr_t) x & ~0x1)
-#define tag(x)     ((uintptr_t) x | 0x1)
-#define car(x)     (((List*)untag(x))->data)
-#define cdr(x)     (((List*)untag(x))->next)
-
 //Handy list shortcuts
-#define first(x)   (car(x))
-#define second(x)  (car(cdr(x)))
-#define third(x)   (car(cdr(cdr(x))))
-#define fourth(x)  (car(cdr(cdr(cdr(x)))))
-#define fifth(x)   (car(cdr(cdr(cdr(cdr(x))))))
+#define first(x)   car(x)
+#define second(x)  car(cdr(x))
+#define third(x)   car(cdr(cdr(x)))
+#define fourth(x)  car(cdr(cdr(cdr(x))))
+#define fifth(x)   car(cdr(cdr(cdr(cdr(x)))))
 
 //Define what is true and what is false
 #define e_true     cons( intern("quote"), cons( intern("t"), 0))
 #define e_false    0
 
-//Cons shell
-List* cons(void* _car, void* _cdr) {
-	List* _pair = calloc( 1, sizeof (List) );
-	_pair->data = _car;
-	_pair->next = _cdr;
-	return (List*) tag(_pair);
-}
 
-//Symbols interning
-void* intern(char* sym) {
-	List* _pair = symbols;
-	for ( ; _pair ; _pair = cdr(_pair))
-		if (strncmp(sym, (char*) car(_pair), 32)==0) return car(_pair);
-	symbols = cons(strdup(sym), symbols);
-	return car(symbols);
-}
 
 
 //Get list and get object function to help when parsing
@@ -247,6 +218,7 @@ List* fadd(List* a) {return applyOperationOnList('+', a);}
 List* fsub(List* a) {return applyOperationOnList('-', a);}
 List* fmul(List* a) {return applyOperationOnList('*', a);}
 List* fdiv(List* a) {return applyOperationOnList('/', a);}
+
 
 
 //Main program entry
