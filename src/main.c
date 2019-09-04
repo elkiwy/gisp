@@ -12,8 +12,6 @@
 #define debug(m,e) printf("%s:%d: %s:",__FILE__,__LINE__,m); print_obj(e,1); puts("");
 
 
-
-
 //Static variables used for input parsing
 static int look; 
 static char token[SYMBOL_MAX]; /* token*/
@@ -65,12 +63,6 @@ void print_obj(List* ob, int head_of_list) {
 		if (head_of_list) printf(")");
 	}
 }
-
-
-
-// (list 1 2 3 4)
-// (cons 1 (cons 2 (cons 3 (cons 4 0))))
-
 
 
 
