@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define SYMBOL_MAX  32
 
 //This is the main List structure
 typedef struct List {

@@ -13,7 +13,7 @@ List* symbols = 0;
 void* intern(char* sym) {
 	List* _pair = symbols;
 	for ( ; _pair ; _pair = cdr(_pair)){
-		if (strncmp(sym, (char*) car(_pair), 32)==0){
+		if (strncmp(sym, (char*) car(_pair), SYMBOL_MAX)==0){
 		  return (void*)car(_pair);
 		}
 	}

@@ -16,7 +16,6 @@
 
 //Static variables used for input parsing
 static int look; 
-#define SYMBOL_MAX  32
 static char token[SYMBOL_MAX]; /* token*/
 
 //Input parsing methods
