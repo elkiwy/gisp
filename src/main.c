@@ -35,20 +35,6 @@ static void gettoken() {
 }
 
 
-//Handy list shortcuts
-#define first(x)   car(x)
-#define second(x)  car(cdr(x))
-#define third(x)   car(cdr(cdr(x)))
-#define fourth(x)  car(cdr(cdr(cdr(x))))
-#define fifth(x)   car(cdr(cdr(cdr(cdr(x)))))
-
-//Define what is true and what is false
-#define e_true     cons( intern("quote"), cons( intern("t"), 0))
-#define e_false    0
-
-
-
-
 //Get list and get object function to help when parsing
 // getobj() returns a List or an interned symbol
 // getlist() returns an empty list or a cons with an object and a list

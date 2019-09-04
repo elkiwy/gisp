@@ -21,10 +21,19 @@ typedef struct List {
 #define car(x)     (((List*)untag(x))->data)
 #define cdr(x)     (((List*)untag(x))->next)
 
+//Handy list shortcuts
+#define first(x)   car(x)
+#define second(x)  car(cdr(x))
+#define third(x)   car(cdr(cdr(x)))
+#define fourth(x)  car(cdr(cdr(cdr(x))))
+#define fifth(x)   car(cdr(cdr(cdr(cdr(x)))))
 
 List* cons(void* _car, void* _cdr);
 void* intern(char* sym);
 
+//Define what is true and what is false
+#define e_true     cons( intern("quote"), cons( intern("t"), 0))
+#define e_false    0
 
 
 #endif
