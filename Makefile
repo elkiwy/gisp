@@ -1,5 +1,16 @@
-build/main: src/main.c
-	gcc -g -Wall src/main.c -o build/main
+SRC := src
+OBJ := obj
+
+CC := gcc
+
+SOURCES := $(wildcard $(SRC)/*.c)
+OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
+
+build/main: $(OBJECTS)
+	$(CC) $^ -o $@
+
+$(OBJ)/%.o: $(SRC)/%.c
+	$(CC) -I$(SRC) -c $< -o $@
 
 run: build/main
 	./build/main
@@ -20,7 +31,7 @@ docker-debug: rebuild
 	docker run -it --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined elkiwy/gdb	
 
 clean:
-	rm -r build && mkdir build
+	rm -r build && rm -r $(OBJ) && mkdir build && mkdir $(OBJ)
 
 rebuild: clean build/main
 
