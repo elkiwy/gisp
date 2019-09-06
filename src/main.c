@@ -114,8 +114,8 @@ List* eval(List* exp, List* env) {
 			else
 				return eval(fourth(exp), env);
 		// (lambda (params) body)
-		} else if (first(exp) == intern("lambda")) {
-			return exp; /* todo: create a closure and capture free vars*/
+		//} else if (first(exp) == intern("lambda")) {
+			//return exp; /* todo: create a closure and capture free vars*/
 		// (apply func args)
 		} else if (first(exp) == intern("apply")) { 
 			List* args = evlist(cdr(cdr(exp)), env);
@@ -143,9 +143,10 @@ List* eval(List* exp, List* env) {
 	} else if (car(car(exp)) == intern("lambda")) {
 	  //printf("lambda found\n");
 	    //bind names into env and eval body
-		List* extenv = env,* names = second(car(exp)),* vars = cdr(exp);
-		for (  ; names ; names = cdr(names), vars = cdr(vars) )
-			extenv = cons(cons(car(names),  cons(eval(car(vars), env), 0)), extenv);
+		List *extenv = env, *names = second(car(exp)), *vars = cdr(exp);
+		for (  ; names ; names = cdr(names), vars = cdr(vars) ){
+			extenv = cons(cons(car(names), cons(eval(car(vars), env), 0)), extenv);
+		}
 		return eval (third(car(exp)), extenv);
 	}
 	puts("cannot evaluate expression\n");
