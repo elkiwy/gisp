@@ -154,20 +154,9 @@ List* eval(List* exp, List* env) {
 
 
 
-//Define function to be used in Gisp
-List* fcons(List* a)    {  return cons(first(a), second(a));  }
-List* fcar(List* a)     {  return car(first(a));  }
-List* fcdr(List* a)     {  return cdr(first(a));  }
-List* feq(List* a)      {  return first(a) == second(a) ? e_true : e_false;  }
-List* fpair(List* a)    {  return is_pair(first(a))       ? e_true : e_false;  }
-List* fatom(List* a)    {  return is_atom(first(a))       ? e_true : e_false;  }
-List* fnull(List* a)    {  return first(a) == 0           ? e_true : e_false; }
-List* freadobj(List* a) {  look = getchar(); gettoken(); return getobj();  }
-List* fwriteobj(List* a){  print_obj(car(a), 1); puts(""); return e_true;  }
-
-List* flist(List* a) {return a;}
-
-
+//Basics I/O operations
+List* freadobj(List* a) { look = getchar(); gettoken(); return getobj();  }
+List* fwriteobj(List* a){ print_obj(car(a), 1); puts(""); return e_true;  }
 
 //Main program entry
 int main(int argc, char* argv[]) {
@@ -192,7 +181,6 @@ int main(int argc, char* argv[]) {
   List* result = eval(getobj(), env);
   print_obj( result, 1 );
 
-  printf("\n");
-  printf("\n");
+  printf("\n\n");
   return 0;
 }

@@ -43,6 +43,19 @@ List* fdiv(List* a) {return applyOperationOnList('/', a);}
 
 // ---------------------------------------------
 // List operations
+List* fcons(List* a) { return cons(first(a), second(a)); }
+List* flist(List* a) { return a;}
+List* fcar(List* a)  { return car(first(a)); }
+List* fcdr(List* a)  { return cdr(first(a)); }
+
+
+
+// ---------------------------------------------
+// Test and type checking
+List* feq(List* a)   { return first(a) == second(a) ? e_true : e_false; }
+List* fpair(List* a) { return is_pair(first(a))     ? e_true : e_false; }
+List* fatom(List* a) { return is_atom(first(a))     ? e_true : e_false; }
+List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
 
 
 
