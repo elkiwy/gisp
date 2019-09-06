@@ -107,20 +107,33 @@ List* eval(List* exp, List* env) {
 			//Return the quoted element as it is
 			//printf("returning quoted\n");
 			return second(exp);
+
 		// (if (cond) (success) (fail))
 		} else if (first(exp) == intern("if")) {
 			if (eval(second(exp), env) != 0)
 				return eval(third(exp), env);
 			else
 				return eval(fourth(exp), env);
+
 		// (lambda (params) body)
 		//} else if (first(exp) == intern("lambda")) {
 			//return exp; /* todo: create a closure and capture free vars*/
+
 		// (apply func args)
 		} else if (first(exp) == intern("apply")) { 
 			List* args = evlist(cdr(cdr(exp)), env);
 			args = car(args); /* assumes one argument and that it is a list*/
 			return ((List* (*) (List*))eval(second(exp), env)) (args);
+
+		// (let (binds) body)
+		} else if (first(exp) == intern("let")) {
+			List *extenv = env, *bindings = second(exp);
+			while(bindings){
+				extenv = cons(cons( first(bindings), cons(eval(second(bindings), env), 0)), extenv);
+				bindings = cdr(cdr(bindings));
+			}
+			return eval(third(exp), extenv);
+
 		// (function args)
 		} else { 
 		    printf("searching for symbol %s\n", (char*)first(exp));
