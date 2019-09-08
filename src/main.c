@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <time.h>
 
 #include "core.h"
 #include "language.h"
@@ -174,27 +175,41 @@ List* fwriteobj(List* a){ print_obj(car(a), 1); puts(""); return e_true;  }
 
 //Main program entry
 int main(int argc, char* argv[]) {
-  List* env = cons(cons(intern("car"),		cons((void*)fcar,		0)),
-              cons(cons(intern("cdr"),		cons((void*)fcdr,		0)),
-              cons(cons(intern("cons"),		cons((void*)fcons,		0)),
-              cons(cons(intern("eq?"),		cons((void*)feq,		0)),
-              cons(cons(intern("pair?"),	cons((void*)fpair,		0)),
-              cons(cons(intern("symbol?"),	cons((void*)fatom,		0)),
-              cons(cons(intern("null?"),	cons((void*)fnull,		0)),
-              cons(cons(intern("read"),		cons((void*)freadobj,	0)),
-              cons(cons(intern("write"),	cons((void*)fwriteobj,	0)),
-			  cons(cons(intern("+"),		cons((void*)fadd,		0)),
-			  cons(cons(intern("-"),		cons((void*)fsub,		0)),
-			  cons(cons(intern("*"),		cons((void*)fmul,		0)),
-			  cons(cons(intern("/"),		cons((void*)fdiv,		0)),
-              cons(cons(intern("list"),		cons((void*)flist,		0)),
-			  cons(cons(intern("null"),		cons(0,                 0)), 0)))))))))))))));
 
-  look = getchar();
-  gettoken();
-  List* result = eval(getobj(), env);
-  print_obj( result, 1 );
+	double time = 0.0;
+	clock_t begin = clock();
 
-  printf("\n\n");
-  return 0;
+	List* env = cons(cons(intern("car"),	cons((void*)fcar,		0)),
+				cons(cons(intern("cdr"),	cons((void*)fcdr,		0)),
+				cons(cons(intern("cons"),	cons((void*)fcons,		0)),
+				cons(cons(intern("eq?"),	cons((void*)feq,		0)),
+				cons(cons(intern("pair?"),	cons((void*)fpair,		0)),
+				cons(cons(intern("symbol?"),cons((void*)fatom,		0)),
+				cons(cons(intern("null?"),	cons((void*)fnull,		0)),
+				cons(cons(intern("read"),	cons((void*)freadobj,	0)),
+				cons(cons(intern("write"),	cons((void*)fwriteobj,	0)),
+				cons(cons(intern("+"),		cons((void*)fadd,		0)),
+				cons(cons(intern("-"),		cons((void*)fsub,		0)),
+				cons(cons(intern("*"),		cons((void*)fmul,		0)),
+				cons(cons(intern("/"),		cons((void*)fdiv,		0)),
+				cons(cons(intern("list"),	cons((void*)flist,		0)),
+				cons(cons(intern("null"),	cons(0,                 0)), 0)))))))))))))));
+
+	clock_t end_env = clock();
+
+	look = getchar();
+	gettoken();
+	List* result = eval(getobj(), env);
+	print_obj( result, 1 );
+	
+
+	clock_t end = clock();
+
+	printf("\n\n");
+	time += (double)(end_env - begin) / CLOCKS_PER_SEC;
+	printf("Time elpased for setup %f\n", time);
+	time += (double)(end - end_env) / CLOCKS_PER_SEC;
+	printf("Time elpased for eval %f\n\n", time);
+
+	return 0;
 }
