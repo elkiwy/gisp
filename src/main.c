@@ -21,13 +21,17 @@ static char token[SYMBOL_MAX]; /* token*/
 //Input parsing methods
 int is_space(char x)  { return x == ' ' || x == '\n'; }
 int is_parens(char x) { return x == '(' || x == ')'; }
+
 static void gettoken() {
 	int index = 0;
 	while(is_space(look)) { look = getchar(); }
+
 	if (is_parens(look)) {
 		token[index++] = look;  look = getchar();
 	} else {
-		while(index < SYMBOL_MAX - 1 && look != EOF && !is_space(look) && !is_parens(look)) {
+		int in_quotes = 0;
+		while(index < SYMBOL_MAX - 1 && look != EOF && ((!is_space(look) && !is_parens(look)) || in_quotes)) {
+		    if(look == '"'){in_quotes = !in_quotes;}
 			token[index++] = look;  look = getchar();
 		}
 	}
@@ -89,16 +93,19 @@ List* eval(List* exp, List* env) {
 		  }
 		}
 
+		//Check if it's a string
+		if (*((char*)exp) == '"'){
+		  return exp;
+		}
+
 		//Check if it's a number
 		char* err;
 		strtod((char*)exp, &err);
 		if (*err == 0){
-		  //printf("returning number\n");
 			return exp;			
 		}
 
 		//Else return it as an atom
-		//printf("returning null\n");
 		return 0;
 	//Else if is a list with the first atom being an atom
 	} else if (is_atom(first(exp))) { 
@@ -167,6 +174,26 @@ List* eval(List* exp, List* env) {
 	return 0;
 }
 
+char* trim_quotes(char* s){
+	s++;
+	s[strlen(s)-1] = '\0';
+	return s;
+}
+
+
+List* fstr(List* a) {
+	char* str1 = (char*)first(a);
+	char* str2 = (char*)second(a);
+	str1 = trim_quotes(str1);
+	str2 = trim_quotes(str2);
+
+	char* str_res;
+	str_res = malloc(strlen(str1)+strlen(str2)+1); 
+	strcpy(str_res, str1); 
+	strcat(str_res, str2); 
+
+	return (List*)str_res;
+}
 
 
 //Basics I/O operations
@@ -188,12 +215,13 @@ int main(int argc, char* argv[]) {
 				cons(cons(intern("null?"),	cons((void*)fnull,		0)),
 				cons(cons(intern("read"),	cons((void*)freadobj,	0)),
 				cons(cons(intern("write"),	cons((void*)fwriteobj,	0)),
+				cons(cons(intern("str"),	cons((void*)fstr,   	0)),
 				cons(cons(intern("+"),		cons((void*)fadd,		0)),
 				cons(cons(intern("-"),		cons((void*)fsub,		0)),
 				cons(cons(intern("*"),		cons((void*)fmul,		0)),
 				cons(cons(intern("/"),		cons((void*)fdiv,		0)),
 				cons(cons(intern("list"),	cons((void*)flist,		0)),
-				cons(cons(intern("null"),	cons(0,                 0)), 0)))))))))))))));
+				cons(cons(intern("null"),	cons(0,                 0)), 0))))))))))))))));
 
 	clock_t end_env = clock();
 
