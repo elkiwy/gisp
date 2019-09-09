@@ -27,7 +27,7 @@ debug-mi:
 docker-build:
 	docker build -t elkiwy/gdb .
 
-docker-debug: rebuild
+docker-debug: 
 	docker run -it --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined elkiwy/gdb	
 
 clean:
