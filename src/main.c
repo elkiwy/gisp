@@ -18,6 +18,9 @@
 static int look; 
 static char token[SYMBOL_MAX]; /* token*/
 
+
+List* env_global = 0;
+
 //Input parsing methods
 int is_space(char x)  { return x == ' ' || x == '\n'; }
 int is_parens(char x) { return x == '(' || x == ')'; }
@@ -84,13 +87,21 @@ List* evlist(List* list, List* env) {
 List* eval(List* exp, List* env) {
 	//If is an atom...
 	if (is_atom(exp) ) {
-	  //printf("atom found %s\n", (char*)exp);
+	    printf("atom found %s\n", (char*)exp);
+		//Check if is a known symbol
+		for ( ; env_global != 0; env_global = cdr(env_global) ){
+			if (exp == first(car(env_global))){
+				printf("Found symbol %s in env_global\n", (char*)exp);	
+				return second(car(env_global));
+			}
+		}
+
 		//Check if is a known symbol
 		for ( ; env != 0; env = cdr(env) ){
-		  if (exp == first(car(env))){
-			printf("Found symbol %s in environment\n", (char*)exp);	
-			return second(car(env));
-		  }
+			if (exp == first(car(env))){
+				printf("Found symbol %s in env\n", (char*)exp);	
+				return second(car(env));
+			}
 		}
 
 		//Check if it's a string
@@ -132,6 +143,19 @@ List* eval(List* exp, List* env) {
 			List* args = evlist(cdr(cdr(exp)), env);
 			args = car(args); /* assumes one argument and that it is a list*/
 			return ((List* (*) (List*))eval(second(exp), env)) (args);
+
+		}else if (first(exp) == intern("def")){
+			List* value = eval(third(exp), env);
+
+			env_global = cons(cons(second(exp), cons(value, 0)), env_global);
+
+			for ( ; env != 0; env = cdr(env) ){
+				printf("env_global: %s\n", first(car(env)));
+			}
+
+
+			printf("defining %s as %s\n", second(exp), value);
+			return value;
 
 		}else if (first(exp) == intern("progn")){
 			List *sexp = cdr(exp), *result = 0;	
@@ -178,7 +202,7 @@ List* eval(List* exp, List* env) {
 		}
 		return eval (third(car(exp)), extenv);
 	}
-	puts("cannot evaluate expression\n");
+	printf("cannot evaluate expression %s\n", first(exp));
 	return 0;
 }
 
@@ -214,22 +238,23 @@ int main(int argc, char* argv[]) {
 	double time = 0.0;
 	clock_t begin = clock();
 
-	List* env = cons(cons(intern("car"),	cons((void*)fcar,		0)),
-				cons(cons(intern("cdr"),	cons((void*)fcdr,		0)),
-				cons(cons(intern("cons"),	cons((void*)fcons,		0)),
-				cons(cons(intern("eq?"),	cons((void*)feq,		0)),
-				cons(cons(intern("pair?"),	cons((void*)fpair,		0)),
-				cons(cons(intern("symbol?"),cons((void*)fatom,		0)),
-				cons(cons(intern("null?"),	cons((void*)fnull,		0)),
-				cons(cons(intern("read"),	cons((void*)freadobj,	0)),
-				cons(cons(intern("write"),	cons((void*)fwriteobj,	0)),
-				cons(cons(intern("str"),	cons((void*)fstr,   	0)),
-				cons(cons(intern("+"),		cons((void*)fadd,		0)),
-				cons(cons(intern("-"),		cons((void*)fsub,		0)),
-				cons(cons(intern("*"),		cons((void*)fmul,		0)),
-				cons(cons(intern("/"),		cons((void*)fdiv,		0)),
-				cons(cons(intern("list"),	cons((void*)flist,		0)),
-				cons(cons(intern("null"),	cons(0,                 0)), 0))))))))))))))));
+	env_global = cons(cons(intern("car"),	cons((void*)fcar,		0)),
+				 cons(cons(intern("cdr"),	cons((void*)fcdr,		0)),
+				 cons(cons(intern("cons"),	cons((void*)fcons,		0)),
+				 cons(cons(intern("eq?"),	cons((void*)feq,		0)),
+				 cons(cons(intern("pair?"),	cons((void*)fpair,		0)),
+				 cons(cons(intern("symbol?"),cons((void*)fatom,		0)),
+				 cons(cons(intern("null?"),	cons((void*)fnull,		0)),
+				 cons(cons(intern("read"),	cons((void*)freadobj,	0)),
+				 cons(cons(intern("write"),	cons((void*)fwriteobj,	0)),
+				 cons(cons(intern("str"),	cons((void*)fstr,   	0)),
+				 cons(cons(intern("+"),		cons((void*)fadd,		0)),
+				 cons(cons(intern("-"),		cons((void*)fsub,		0)),
+				 cons(cons(intern("*"),		cons((void*)fmul,		0)),
+				 cons(cons(intern("/"),		cons((void*)fdiv,		0)),
+				 cons(cons(intern("list"),	cons((void*)flist,		0)),
+				 cons(cons(intern("null"),	cons(0,                 0)), 0))))))))))))))));
+	List* env = 0;
 
 	clock_t end_env = clock();
 
