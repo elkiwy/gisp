@@ -95,34 +95,28 @@ List* evlist(List* list, List* env) {
 List* eval(List* exp, List* env) {
 	//If is an atom...
 	if (is_atom(exp) ) {
-	    printf("atom found %s\n", (char*)exp);
-		//Check if is a known symbol
-		for ( ; env_global != 0; env_global = cdr(env_global) ){
-			if (exp == first(car(env_global))){
-				printf("Found symbol %s in env_global\n", (char*)exp);	
-				return second(car(env_global));
-			}
-		}
+	    //printf("atom found %s\n", (char*)exp);
+		//Check into global env
+		List* temp_env = env_global;
+		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
+			if (exp == first(car(temp_env))){
+				return second(car(temp_env));}}
 
-		//Check if is a known symbol
-		for ( ; env != 0; env = cdr(env) ){
-			if (exp == first(car(env))){
-				printf("Found symbol %s in env\n", (char*)exp);	
-				return second(car(env));
-			}
-		}
+		//Check into local env
+		temp_env = env;
+		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
+			if (exp == first(car(temp_env))){
+				return second(car(temp_env));}}
 
 		//Check if it's a string
 		if (*((char*)exp) == '"'){
-		  return exp;
-		}
+		  return exp;}
 
 		//Check if it's a number
 		char* err;
 		strtod((char*)exp, &err);
 		if (*err == 0){
-			return exp;			
-		}
+			return exp;}
 
 		//Else return it as an atom
 		return 0;
@@ -152,19 +146,13 @@ List* eval(List* exp, List* env) {
 			args = car(args); /* assumes one argument and that it is a list*/
 			return ((List* (*) (List*))eval(second(exp), env)) (args);
 
+		// (def symbol sexp)
 		}else if (first(exp) == intern("def")){
 			List* value = eval(third(exp), env);
-
 			env_global = cons(cons(second(exp), cons(value, 0)), env_global);
-
-			for ( ; env != 0; env = cdr(env) ){
-				printf("env_global: %s\n", first(car(env)));
-			}
-
-
-			printf("defining %s as %s\n", second(exp), value);
 			return value;
 
+		// (progn exp1 exp2 ...)
 		}else if (first(exp) == intern("progn")){
 			List *sexp = cdr(exp), *result = 0;	
 			while (sexp){
@@ -184,7 +172,7 @@ List* eval(List* exp, List* env) {
 
 		// (function args)
 		} else { 
-		    printf("searching for symbol %s\n", (char*)first(exp));
+		    //printf("searching for symbol %s\n", (char*)first(exp));
 			List* primop = eval(first(exp), env);
             //user defined lambda, arg list eval happens in binding  below
 			//if (is_pair(primop)) { 
@@ -193,11 +181,9 @@ List* eval(List* exp, List* env) {
 			//Built-in primitive
 			//} else
 			if (primop) { 
-				printf("found primitive %s\n", (char*)first(exp));
+			    //printf("found primitive %s\n", (char*)first(exp));
 				List* result = ((List* (*) (List*))primop) (evlist(cdr(exp), env));
 				return result;
-			}else{
-				printf("didn't find anything for %s\n", (char*)first(exp));
 			}
 		}
 	// ((lambda (params) body) args)
@@ -222,10 +208,11 @@ List* fwriteobj(List* a){ print_obj(car(a), 1); puts(""); return e_true;  }
 
 //Main program entry
 int main(int argc, char* argv[]) {
-
+    //Setup the profiling
 	double time = 0.0;
 	clock_t begin = clock();
 
+	//Create the global environment
 	env_global = cons(cons(intern("car"),	cons((void*)fcar,		0)),
 				 cons(cons(intern("cdr"),	cons((void*)fcdr,		0)),
 				 cons(cons(intern("cons"),	cons((void*)fcons,		0)),
@@ -242,18 +229,27 @@ int main(int argc, char* argv[]) {
 				 cons(cons(intern("/"),		cons((void*)fdiv,		0)),
 				 cons(cons(intern("list"),	cons((void*)flist,		0)),
 				 cons(cons(intern("null"),	cons(0,                 0)), 0))))))))))))))));
-	List* env = 0;
-
 	clock_t end_env = clock();
 
+	//Create an empty local environment
+	List* env = 0;
+
+	//Evaluate all the sexp as an implicit progn
+	List* result = 0;
 	look = getchar();
-	gettoken();
-	List* result = eval(getobj(), env);
-	print_obj( result, 1 );
-	
+	while(look != EOF){
+		gettoken();
+		//Evaluate only if valid tokens
+		if (strlen(token)>0)
+			result = eval(getobj(), env);
+		look = getchar();
+	}
 
+	//Print only the last result as a progn
+	print_obj(result, 1);
+
+	//Print the profiling
 	clock_t end = clock();
-
 	printf("\n\n");
 	time += (double)(end_env - begin) / CLOCKS_PER_SEC;
 	printf("Time elpased for setup %f\n", time);
