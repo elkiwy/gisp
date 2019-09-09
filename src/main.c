@@ -133,6 +133,14 @@ List* eval(List* exp, List* env) {
 			args = car(args); /* assumes one argument and that it is a list*/
 			return ((List* (*) (List*))eval(second(exp), env)) (args);
 
+		}else if (first(exp) == intern("progn")){
+			List *sexp = cdr(exp), *result = 0;	
+			while (sexp){
+			    result = eval(first(sexp), env);
+				sexp = cdr(sexp);
+			}
+			return result;
+
 		// (let (binds) body)
 		} else if (first(exp) == intern("let")) {
 			List *extenv = env, *bindings = second(exp);
