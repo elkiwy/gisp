@@ -7,10 +7,10 @@ SOURCES := $(wildcard $(SRC)/*.c)
 OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 
 build/main: $(OBJECTS)
-	$(CC) $^ -o $@
+	$(CC) $^ -g -Wall -o $@
 
 $(OBJ)/%.o: $(SRC)/%.c
-	$(CC) -I$(SRC) -c $< -o $@
+	$(CC) -g -Wall -I$(SRC) -c $< -o $@
 
 run: build/main
 	./build/main
