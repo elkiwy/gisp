@@ -23,5 +23,9 @@ List* fpair(List* a);
 List* fatom(List* a);
 List* fnull(List* a);
 
+//Strings
+List* fstr(List* a);
+
+
 #endif
 

@@ -59,3 +59,25 @@ List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
 
 
 
+// ---------------------------------------------
+// Strings
+char* trim_quotes(char* s){
+	s++;
+	s[strlen(s)-1] = '\0';
+	return s;
+}
+
+
+List* fstr(List* a) {
+	char* str1 = (char*)first(a);
+	char* str2 = (char*)second(a);
+	str1 = trim_quotes(str1);
+	str2 = trim_quotes(str2);
+
+	char* str_res;
+	str_res = malloc(strlen(str1)+strlen(str2)+1); 
+	strcpy(str_res, str1); 
+	strcat(str_res, str2); 
+
+	return (List*)str_res;
+}
