@@ -74,6 +74,14 @@ void print_obj(List* ob, int head_of_list) {
 }
 
 
+void debug_printEnv(List* a, char* prefix){
+  int i=0;
+  while(a){
+	printf("%s %d - %s\n", prefix, i, car(car(a)));
+	a = cdr(a);
+	i++;
+  }
+}
 
 
 //Eval functions
