@@ -95,17 +95,23 @@ List* evlist(List* list, List* env) {
 List* eval(List* exp, List* env) {
 	//If is an atom...
 	if (is_atom(exp) ) {
-	    //printf("atom found %s\n", (char*)exp);
+	    printf("atom found %s\n", (char*)exp);
 		//Check into global env
 		List* temp_env = env_global;
 		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
 			if (exp == first(car(temp_env))){
+				printf("->Evaluated in global env as: ");
+				print_obj(second(car(temp_env)), 1);
+				printf("\n");
 				return second(car(temp_env));}}
 
 		//Check into local env
 		temp_env = env;
 		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
 			if (exp == first(car(temp_env))){
+				printf("->Evaluated in local env as: ");
+				print_obj(second(car(temp_env)), 1);
+				printf("\n");
 				return second(car(temp_env));}}
 
 		//Check if it's a string
@@ -172,7 +178,7 @@ List* eval(List* exp, List* env) {
 
 		// (function args)
 		} else { 
-		    //printf("searching for symbol %s\n", (char*)first(exp));
+		    printf("Searching for symbol %s\n", (char*)first(exp));
 			List* primop = eval(first(exp), env);
             //user defined lambda, arg list eval happens in binding  below
 			//if (is_pair(primop)) { 
