@@ -7,6 +7,10 @@
 
 #include <time.h>
 
+
+#include "cairo.h"
+#include "cairo-svg.h"
+
 #include "core.h"
 #include "language.h"
 
@@ -214,6 +218,41 @@ List* eval(List* exp, List* env) {
 
 
 
+
+List* fsvg_surface(List* a){
+	float w = atof((char*)second(a));
+	float h = atof((char*)third(a));
+	char* n = first(a);
+	n++;
+	n[strlen(n)-1] = '\0';
+	cairo_surface_t* surface = cairo_svg_surface_create(n, w, h);
+    cairo_svg_surface_restrict_to_version (surface, 1);
+    cairo_surface_set_fallback_resolution (surface, 72., 72.);
+	return surface;
+}
+
+List* fsvg_status(List* a){
+	printf("\nSURFACE STATUS: %s\n", cairo_status_to_string(cairo_surface_status(first(a))));
+	fflush(stdout);
+	return 0;
+}
+
+List* fsvg_context(List* a){
+	cairo_t* context = cairo_create(first(a));
+	return context;
+}
+
+List* fsvg_clean(List* a){
+	cairo_surface_t* surface = first(a);
+	cairo_t* context = second(a);
+	cairo_surface_flush(surface);
+	cairo_surface_finish(surface);
+	cairo_surface_destroy(surface);
+	cairo_destroy(context);
+	return 0;
+}
+
+
 //Basics I/O operations
 List* freadobj(List* a) { look = getchar(); gettoken(); return getobj();  }
 List* fwriteobj(List* a){ print_obj(car(a), 1); puts(""); return e_true;  }
@@ -235,13 +274,18 @@ int main(int argc, char* argv[]) {
 				 cons(cons(intern("read"),	cons((void*)freadobj,	0)),
 				 cons(cons(intern("write"),	cons((void*)fwriteobj,	0)),
 				 cons(cons(intern("str"),	cons((void*)fstr,   	0)),
+				 cons(cons(intern("svg-surface"),	cons((void*)fsvg_surface,   	0)),
+				 cons(cons(intern("svg-context"),	cons((void*)fsvg_context,   	0)),
+				 cons(cons(intern("svg-clean"),  	cons((void*)fsvg_clean,   	0)),
+				 cons(cons(intern("svg-status"),  	cons((void*)fsvg_status,   	0)),
 				 cons(cons(intern("+"),		cons((void*)fadd,		0)),
 				 cons(cons(intern("-"),		cons((void*)fsub,		0)),
 				 cons(cons(intern("*"),		cons((void*)fmul,		0)),
 				 cons(cons(intern("/"),		cons((void*)fdiv,		0)),
 				 cons(cons(intern("list"),	cons((void*)flist,		0)),
-				 cons(cons(intern("null"),	cons(0,                 0)), 0))))))))))))))));
+				 cons(cons(intern("null"),	cons(0,                 0)), 0))))))))))))))))))));
 	clock_t end_env = clock();
+
 
 	//Create an empty local environment
 	List* env = 0;
