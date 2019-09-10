@@ -143,8 +143,8 @@ List* eval(List* exp, List* env) {
 				return eval(fourth(exp), env);
 
 		// (lambda (params) body)
-		//} else if (first(exp) == intern("lambda")) {
-			//return exp; /* todo: create a closure and capture free vars*/
+		} else if (first(exp) == intern("lambda")) {
+			return exp; /* todo: create a closure and capture free vars*/
 
 		// (apply func args)
 		} else if (first(exp) == intern("apply")) { 
@@ -157,6 +157,12 @@ List* eval(List* exp, List* env) {
 			List* value = eval(third(exp), env);
 			env_global = cons(cons(second(exp), cons(value, 0)), env_global);
 			return value;
+
+		// (defn symbol (params) sexp)
+		}else if (first(exp) == intern("defn")){
+			List* lambda = cons(intern("lambda"), cons(third(exp), cons(fourth(exp), 0)));
+			env_global = cons(cons(second(exp), cons(lambda, 0)), env_global);
+			return lambda;
 
 		// (progn exp1 exp2 ...)
 		}else if (first(exp) == intern("progn")){
@@ -180,13 +186,13 @@ List* eval(List* exp, List* env) {
 		} else { 
 		    printf("Searching for symbol %s\n", (char*)first(exp));
 			List* primop = eval(first(exp), env);
+
             //user defined lambda, arg list eval happens in binding  below
-			//if (is_pair(primop)) { 
-			//	printf("found lambda %s\n", (char*)first(exp));
-			//	return eval( cons(primop, cdr(exp)), env );
+			if (is_pair(primop)) { 
+				printf("found lambda %s\n", (char*)first(exp));
+				return eval( cons(primop, cdr(exp)), env );
 			//Built-in primitive
-			//} else
-			if (primop) { 
+			} else if (primop) { 
 			    //printf("found primitive %s\n", (char*)first(exp));
 				List* result = ((List* (*) (List*))primop) (evlist(cdr(exp), env));
 				return result;
