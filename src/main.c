@@ -228,7 +228,7 @@ List* fsvg_surface(List* a){
 	cairo_surface_t* surface = cairo_svg_surface_create(n, w, h);
     cairo_svg_surface_restrict_to_version (surface, 1);
     cairo_surface_set_fallback_resolution (surface, 72., 72.);
-	return surface;
+	return (List*)surface;
 }
 
 List* fsvg_status(List* a){
@@ -239,7 +239,7 @@ List* fsvg_status(List* a){
 
 List* fsvg_context(List* a){
 	cairo_t* context = cairo_create(first(a));
-	return context;
+	return (List*)context;
 }
 
 List* fsvg_clean(List* a){
