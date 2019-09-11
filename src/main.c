@@ -259,33 +259,39 @@ List* fsvg_clean(List* a){
 List* freadobj(List* a) { look = getchar(); gettoken(); return getobj();  }
 List* fwriteobj(List* a){ print_obj(car(a), 1); puts(""); return e_true;  }
 
+//Add a new function to an environment
+List* extendEnv(char* name, void* func, List* env){
+	return cons(cons(intern(name), cons(func, 0)), env);
+}
+
 //Main program entry
 int main(int argc, char* argv[]) {
     //Setup the profiling
 	double time = 0.0;
-	clock_t begin = clock();
 
 	//Create the global environment
-	env_global = cons(cons(intern("car"),	cons((void*)fcar,		0)),
-				 cons(cons(intern("cdr"),	cons((void*)fcdr,		0)),
-				 cons(cons(intern("cons"),	cons((void*)fcons,		0)),
-				 cons(cons(intern("eq?"),	cons((void*)feq,		0)),
-				 cons(cons(intern("pair?"),	cons((void*)fpair,		0)),
-				 cons(cons(intern("symbol?"),cons((void*)fatom,		0)),
-				 cons(cons(intern("null?"),	cons((void*)fnull,		0)),
-				 cons(cons(intern("read"),	cons((void*)freadobj,	0)),
-				 cons(cons(intern("write"),	cons((void*)fwriteobj,	0)),
-				 cons(cons(intern("str"),	cons((void*)fstr,   	0)),
-				 cons(cons(intern("svg-surface"),	cons((void*)fsvg_surface,   	0)),
-				 cons(cons(intern("svg-context"),	cons((void*)fsvg_context,   	0)),
-				 cons(cons(intern("svg-clean"),  	cons((void*)fsvg_clean,   	0)),
-				 cons(cons(intern("svg-status"),  	cons((void*)fsvg_status,   	0)),
-				 cons(cons(intern("+"),		cons((void*)fadd,		0)),
-				 cons(cons(intern("-"),		cons((void*)fsub,		0)),
-				 cons(cons(intern("*"),		cons((void*)fmul,		0)),
-				 cons(cons(intern("/"),		cons((void*)fdiv,		0)),
-				 cons(cons(intern("list"),	cons((void*)flist,		0)),
-				 cons(cons(intern("null"),	cons(0,                 0)), 0))))))))))))))))))));
+	clock_t begin = clock();
+	env_global = extendEnv("null", 0, 0);
+	env_global = extendEnv("list", (void*)flist, env_global);
+	env_global = extendEnv("/", (void*)fdiv, env_global);
+	env_global = extendEnv("*", (void*)fmul, env_global);
+	env_global = extendEnv("+", (void*)fadd, env_global);
+	env_global = extendEnv("-", (void*)fsub, env_global);
+	env_global = extendEnv("svg-surface", (void*)fsvg_surface, env_global);
+	env_global = extendEnv("svg-context", (void*)fsvg_context, env_global);
+	env_global = extendEnv("svg-status",  (void*)fsvg_status, env_global);
+	env_global = extendEnv("svg-clean",   (void*)fsvg_clean, env_global);
+	env_global = extendEnv("svg-line",    (void*)fsvg_line, env_global);
+	env_global = extendEnv("str",   (void*)fstr, env_global);
+	env_global = extendEnv("read",  (void*)fread, env_global);
+	env_global = extendEnv("write", (void*)fwrite, env_global);
+	env_global = extendEnv("null?",   (void*)fnull, env_global);
+	env_global = extendEnv("symbol?", (void*)fatom, env_global);
+	env_global = extendEnv("pair?",   (void*)fpair, env_global);
+	env_global = extendEnv("eq?",     (void*)feq, env_global);
+	env_global = extendEnv("cons", (void*)fcons, env_global);
+	env_global = extendEnv("cdr",  (void*)fcdr, env_global);
+	env_global = extendEnv("car",  (void*)fcar, env_global);
 	clock_t end_env = clock();
 
 
