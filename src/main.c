@@ -254,6 +254,24 @@ List* fsvg_clean(List* a){
 	return 0;
 }
 
+// (svg-line context (0 0) (100 100))
+List* fsvg_line(List* a){
+	cairo_t* context = first(a);
+	printf("\nB: %p\n", context);
+	fflush(stdout);
+	List* p1 = second(a);
+	List* p2 = third(a);
+	float x1 = atof((char*)first(p1));
+	float y1 = atof((char*)second(p1));
+	float x2 = atof((char*)first(p2));
+	float y2 = atof((char*)second(p2));
+	cairo_move_to(context, x1, y1);
+	cairo_line_to(context, x2, y2);
+	cairo_stroke(context);
+	return 0;
+}
+
+
 
 //Basics I/O operations
 List* freadobj(List* a) { look = getchar(); gettoken(); return getobj();  }
