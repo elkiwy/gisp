@@ -20,3 +20,21 @@ void* intern(char* sym) {
 	symbols = cons(strdup(sym), symbols);
 	return (void*)car(symbols);
 }
+
+
+
+double* symbol_to_number(char* sym){
+	double* ptr = malloc(sizeof(double));
+	*ptr = strtod(sym, NULL);
+	return (double*)tag_number(ptr);
+}
+
+double* value_to_number(double value){
+	double* ptr = malloc(sizeof(double));
+	*ptr = value;
+	return (double*)tag_number(ptr);
+}
+
+double numVal(double* number){
+	return *((double*)untag_number(number));
+}

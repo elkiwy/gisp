@@ -15,8 +15,13 @@ typedef struct List {
 
 //Each cons shell is tagged with the lowest pointer bit set to 1, everything else is set to 0
 //Before accessing cons car and cdr we need to untag the pointer to read from memory correctly
-#define is_pair(x) (((uintptr_t)x & 0x1) == 0x1)
-#define is_atom(x) (((uintptr_t)x & 0x1) == 0x0)
+#define is_number(x) (((uintptr_t)x & 0x2) == 0x2)
+#define is_pair(x)   (((uintptr_t)x & 0x1) == 0x1)
+#define is_atom(x)   (((uintptr_t)x & 0x1) == 0x0)
+
+#define untag_number(x) ((uintptr_t) x & ~0x2)
+#define tag_number(x)   ((uintptr_t) x | 0x2)
+
 #define untag(x)   ((uintptr_t) x & ~0x1)
 #define tag(x)     ((uintptr_t) x | 0x1)
 #define car(x)     (((List*)untag(x))->data)
@@ -31,6 +36,10 @@ typedef struct List {
 
 List* cons(void* _car, void* _cdr);
 void* intern(char* sym);
+
+double* symbol_to_number(char* sym);
+double* value_to_number(double value);
+double numVal(double* number);
 
 //Define what is true and what is false
 #define e_true     cons( intern("quote"), cons( intern("t"), 0))

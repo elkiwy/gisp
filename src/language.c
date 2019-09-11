@@ -5,9 +5,9 @@
 // Math operations
 
 ///Convert a float number into a numeric atomic value (untagged List ptr)
-List* numberToList(float num){
+List* numberToList(double num){
 	int numint = (int)num;
-	float numfrac = num - numint;
+	double numfrac = num - numint;
 	char* str = malloc(32*sizeof(char));
 	if (numfrac == 0){sprintf(str, "%i", numint);
 	}else{            sprintf(str, "%f", num);}
@@ -15,7 +15,7 @@ List* numberToList(float num){
 }
 
 ///Apply an operation between two floats
-float numberOperation(char op, float a, float b){
+double numberOperation(char op, double a, double b){
   if (op=='+'){return a+b;}
   else if (op=='-'){return a-b;}
   else if (op=='*'){return a*b;}
@@ -25,12 +25,13 @@ float numberOperation(char op, float a, float b){
 
 ///Apply an operation to all the element of the list
 List* applyOperationOnList(char op, List* list){
-	float res = atof((char*)first(list));
+	double res = numVal((double*)first(list));
 	List* current = list;
 	while((current = cdr(current))){
-	  res = numberOperation(op, res, atof((char*)car(current)));
+		res = numberOperation(op, res, numVal((double*)car(current)));
 	}
-	return numberToList(res);
+	//return numberToList(res);
+	return (List*)value_to_number(res);
 }
 
 //Compose the callable functions

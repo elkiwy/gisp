@@ -65,7 +65,13 @@ List* getlist() {
 //Prints a List object
 void print_obj(List* ob, int head_of_list) {
 	if (!is_pair(ob) ) {
-		printf("%s", ob ? (char*) ob : "null" );
+		if(is_number(ob)){
+			double num = numVal((double*)ob);
+			if ((num - (int)num) == 0){printf("%i", (int)num);
+			}else{printf("%f", num);}
+		}else{
+			printf("%s", ob ? (char*) ob : "null" );
+		}
 	} else {
 		if (head_of_list) printf("(");
 		print_obj(car(ob), 1);
@@ -97,42 +103,50 @@ List* evlist(List* list, List* env) {
 		args = &((List*)untag(*args))->next;}
 	return head;}
 List* eval(List* exp, List* env) {
+	//If is a number tagged...
+	if (is_number(exp)){
+		//printf("number found %s\n", (char*)exp);
+		return exp;
+
 	//If is an atom...
-	if (is_atom(exp) ) {
-	    printf("atom found %s\n", (char*)exp);
+	}else if (is_atom(exp) ) {
+		//printf("atom found %s\n", (char*)exp);
 		//Check into global env
 		List* temp_env = env_global;
 		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
 			if (exp == first(car(temp_env))){
-				printf("->Evaluated in global env as: ");
-				print_obj(second(car(temp_env)), 1);
-				printf("\n");
+				//printf("->Evaluated in global env as: ");
+				//print_obj(second(car(temp_env)), 1);
+				//printf("\n");
 				return second(car(temp_env));}}
 
 		//Check into local env
 		temp_env = env;
 		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
 			if (exp == first(car(temp_env))){
-				printf("->Evaluated in local env as: ");
-				print_obj(second(car(temp_env)), 1);
-				printf("\n");
+				//printf("->Evaluated in local env as: ");
+				//print_obj(second(car(temp_env)), 1);
+				//printf("\n");
 				return second(car(temp_env));}}
 
 		//Check if it's a string
 		if (*((char*)exp) == '"'){
 		  return exp;}
 
-		//Check if it's a number
+		//Check if it's a symbol representing a number (not tagged)
 		char* err;
-		strtod((char*)exp, &err);
+		double v = strtod((char*)exp, &err);
 		if (*err == 0){
-			return exp;}
+			//Convert it into a tagged number
+			//printf("Converting to a number\n");
+			return (List*)value_to_number(v);
+		}
 
 		//Else return it as an atom
 		return 0;
 	//Else if is a list with the first atom being an atom
 	} else if (is_atom(first(exp))) { 
-	  //printf("list with atom found %s\n", (char*) first(exp));
+		//printf("list with atom found %s\n", (char*) first(exp));
 		// (quote X)
 	    if (first(exp) == intern("quote")) {
 			//Return the quoted element as it is
@@ -188,12 +202,12 @@ List* eval(List* exp, List* env) {
 
 		// (function args)
 		} else { 
-		    printf("Searching for symbol %s\n", (char*)first(exp));
+			//printf("Searching for symbol %s\n", (char*)first(exp));
 			List* primop = eval(first(exp), env);
 
             //user defined lambda, arg list eval happens in binding  below
 			if (is_pair(primop)) { 
-				printf("found lambda %s\n", (char*)first(exp));
+				//printf("found lambda %s\n", (char*)first(exp));
 				return eval( cons(primop, cdr(exp)), env );
 			//Built-in primitive
 			} else if (primop) { 
