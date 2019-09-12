@@ -21,12 +21,16 @@
 ;(def square (lambda (x) (* x 2)))
 ;(square 3)
 
+;(vector 2 3 4)
+[2 3 5]
+;(list 2 3)
 
+;(pair? (quote (2 3)))
 
-(def surface (svg-surface "test.svg" 128 128))
-(svg-status surface)
-(def context (svg-context surface))
-(svg-line context (list 0 0) (list 100 100))
-(svg-clean surface context)
+;(def surface (svg-surface "test.svg" 128 128))
+;(svg-status surface)
+;(def context (svg-context surface))
+;(svg-line context (0 0) (100 100))
+;(svg-clean surface context)
 
 

@@ -28,6 +28,8 @@ List* env_global = 0;
 //Input parsing methods
 int is_space(char x)  { return x == ' ' || x == '\n'; }
 int is_parens(char x) { return x == '(' || x == ')'; }
+int is_vect(char x)   { return x == '[' || x == ']'; }
+
 
 static void gettoken() {
 	int index = 0;
@@ -35,14 +37,19 @@ static void gettoken() {
 
 	if (is_parens(look)) {
 		token[index++] = look;  look = getchar();
+
+	} else if (is_vect(look)){
+		token[index++] = look;  look = getchar();
+
 	} else {
 		int in_quotes = 0;
-		while(index < SYMBOL_MAX - 1 && look != EOF && ((!is_space(look) && !is_parens(look)) || in_quotes)) {
+		while(index < SYMBOL_MAX - 1 && look != EOF && ((!is_space(look) && !is_parens(look) && !is_vect(look)) || in_quotes)) {
 			if(look == '"'){in_quotes = !in_quotes;}
 			token[index++] = look;  look = getchar();
 		}
 	}
 	token[index] = '\0';
+	//printf("returning token %s\n", token);
 }
 
 
@@ -52,11 +59,13 @@ static void gettoken() {
 List* getlist();
 void* getobj() {
 	if (token[0] == '(') return getlist();
+	if (token[0] == '[') return cons(intern("vector"), getlist());
 	return intern(token);}
 List* getlist() {
 	List* tmp;
 	gettoken();
 	if (token[0] == ')') return 0;
+	if (token[0] == ']') return 0;
 	tmp = getobj();
 	return cons(tmp, getlist());
 }
@@ -64,15 +73,23 @@ List* getlist() {
 
 //Prints a List object
 void print_obj(List* ob, int head_of_list) {
-	if (!is_pair(ob) ) {
-		if(is_number(ob)){
-			double num = numVal((double*)ob);
-			if ((num - (int)num) == 0){printf("%i", (int)num);
-			}else{printf("%f", num);}
-		}else{
-			printf("%s", ob ? (char*) ob : "null" );
+	//If is an atom
+	if(is_number(ob)){
+		double num = numVal((double*)ob);
+		if ((num - (int)num) == 0){printf("%i", (int)num);
+		}else{printf("%f", num);}
+
+	}else if(is_vector(ob)){
+		void** vec = (void*)untag_vector(ob);
+		int i = 0;
+		printf("[ ");
+		while(vec[i]!=0){
+			print_obj(vec[i], 0); printf(" ");
+			i++;
 		}
-	} else {
+		printf("]");
+
+	} else if (is_pair(ob)){
 		if (head_of_list) printf("(");
 		print_obj(car(ob), 1);
 		if (cdr(ob) != 0) {
@@ -80,6 +97,9 @@ void print_obj(List* ob, int head_of_list) {
 			print_obj(cdr(ob), 0); //Change to 1 to enable the cons cells view
 		}
 		if (head_of_list) printf(")");
+
+	}else{
+		printf("%p", ob ? (char*) ob : "null" );
 	}
 }
 
@@ -285,6 +305,34 @@ List* fsvg_line(List* a){
 
 
 
+
+
+int listLength(List* a){
+	int n = 0;
+	List* current = a;
+	while(current){n++; current = cdr(current);}
+	return n;
+}
+
+
+List* fvec(List* a){
+	int n = listLength(a);
+	void** vec = malloc(sizeof(void*) * (n+1));
+	List* current = a;
+	int i = 0;
+	while(current){
+		vec[i] = first(current);	
+		current = cdr(current);
+		i++;
+	}
+	vec[n] = 0;
+	return (List*)tag_vector(vec);
+}
+
+
+
+
+
 //Basics I/O operations
 List* freadobj(List* a) { look = getchar(); gettoken(); return getobj();  }
 List* fwriteobj(List* a){ print_obj(car(a), 1); puts(""); return e_true;  }
@@ -302,7 +350,8 @@ int main(int argc, char* argv[]) {
 	//Create the global environment
 	clock_t begin = clock();
 	env_global = extendEnv("null", 0, 0);
-	env_global = extendEnv("list", (void*)flist, env_global);
+	env_global = extendEnv("list",   (void*)flist, env_global);
+	env_global = extendEnv("vector", (void*)fvec, env_global);
 	env_global = extendEnv("/", (void*)fdiv, env_global);
 	env_global = extendEnv("*", (void*)fmul, env_global);
 	env_global = extendEnv("+", (void*)fadd, env_global);
@@ -327,6 +376,7 @@ int main(int argc, char* argv[]) {
 
 	//Create an empty local environment
 	List* env = 0;
+	printf("\n");
 
 	//Evaluate all the sexp as an implicit progn
 	List* result = 0;
