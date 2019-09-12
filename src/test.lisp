@@ -22,8 +22,10 @@
 ;(square 3)
 
 ;(vector 2 3 4)
-[2 3 5]
+;[2 3 5]
 ;(list 2 3)
+;(hashmap :a 1 :b 2)
+{:a 1 :b 2}
 
 ;(pair? (quote (2 3)))
 

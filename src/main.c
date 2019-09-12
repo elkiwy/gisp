@@ -7,6 +7,7 @@
 
 #include <time.h>
 
+#include "hashmap.h"
 
 #include "cairo.h"
 #include "cairo-svg.h"
@@ -26,9 +27,10 @@ static char token[SYMBOL_MAX]; /* token*/
 List* env_global = 0;
 
 //Input parsing methods
-int is_space(char x)  { return x == ' ' || x == '\n'; }
-int is_parens(char x) { return x == '(' || x == ')'; }
-int is_vect(char x)   { return x == '[' || x == ']'; }
+int is_space(char x)  {
+	return x == ' ' || x == '\n' || x == '\t';}
+int is_parens(char x) {
+	return x == '(' || x == ')' || x == '[' || x == ']' || x == '{' || x == '}';}
 
 
 static void gettoken() {
@@ -37,13 +39,9 @@ static void gettoken() {
 
 	if (is_parens(look)) {
 		token[index++] = look;  look = getchar();
-
-	} else if (is_vect(look)){
-		token[index++] = look;  look = getchar();
-
 	} else {
 		int in_quotes = 0;
-		while(index < SYMBOL_MAX - 1 && look != EOF && ((!is_space(look) && !is_parens(look) && !is_vect(look)) || in_quotes)) {
+		while(index < SYMBOL_MAX - 1 && look != EOF && ((!is_space(look) && !is_parens(look)) || in_quotes)) {
 			if(look == '"'){in_quotes = !in_quotes;}
 			token[index++] = look;  look = getchar();
 		}
@@ -60,12 +58,14 @@ List* getlist();
 void* getobj() {
 	if (token[0] == '(') return getlist();
 	if (token[0] == '[') return cons(intern("vector"), getlist());
+	if (token[0] == '{') return cons(intern("hashmap"), getlist());
 	return intern(token);}
 List* getlist() {
 	List* tmp;
 	gettoken();
-	if (token[0] == ')') return 0;
-	if (token[0] == ']') return 0;
+	if (token[0] == ')' || token[0] == ']' || token[0] == '}'){
+		return 0;
+	}
 	tmp = getobj();
 	return cons(tmp, getlist());
 }
@@ -73,11 +73,22 @@ List* getlist() {
 
 //Prints a List object
 void print_obj(List* ob, int head_of_list) {
-	//If is an atom
-	if(is_number(ob)){
-		double num = numVal((double*)ob);
-		if ((num - (int)num) == 0){printf("%i", (int)num);
-		}else{printf("%f", num);}
+	if(is_hashmap(ob)){
+		map_t map = (map_t)untag_hashmap(ob);
+		int size = hashmap_length(map);
+		char** keys = malloc(sizeof(void*)*size);
+		void** values = malloc(sizeof(void*)*size);
+		hashmap_keys_and_values(map, keys, values);
+
+		printf("{ ");
+		for (int i=0; i<size; i++){
+			printf("%s ", (char*)keys[i]);
+			print_obj((List*)values[i], 0);
+			printf(" ");
+		}
+		printf("}");
+		free(keys);
+		free(values);
 
 	}else if(is_vector(ob)){
 		void** vec = (void*)untag_vector(ob);
@@ -88,6 +99,11 @@ void print_obj(List* ob, int head_of_list) {
 			i++;
 		}
 		printf("]");
+
+	}else if(is_number(ob)){
+		double num = numVal((double*)ob);
+		if ((num - (int)num) == 0){printf("%i", (int)num);
+		}else{printf("%f", num);}
 
 	} else if (is_pair(ob)){
 		if (head_of_list) printf("(");
@@ -123,8 +139,16 @@ List* evlist(List* list, List* env) {
 		args = &((List*)untag(*args))->next;}
 	return head;}
 List* eval(List* exp, List* env) {
+	//If is a tagged hashmap...
+	if (is_hashmap(exp)){
+		return exp;	
+
+	//If is a tagged vector...
+	}else if (is_vector(exp)){
+		return exp;	
+
 	//If is a number tagged...
-	if (is_number(exp)){
+	}else if (is_number(exp)){
 		//printf("number found %s\n", (char*)exp);
 		return exp;
 
@@ -335,6 +359,23 @@ List* fvec(List* a){
 
 
 
+List* fhashmap(List* a){
+	map_t map = hashmap_new();
+	List* current = a;
+	while(current){
+		char* key = first(current);
+		List* val = second(current);
+		hashmap_put(map, key, val);
+		current = cdr(cdr(current));
+	}
+	return (List*)tag_hashmap(map);
+}
+
+//List* fhashmap_get(List* a){
+//
+//}
+
+
 
 
 //Basics I/O operations
@@ -354,8 +395,9 @@ int main(int argc, char* argv[]) {
 	//Create the global environment
 	clock_t begin = clock();
 	env_global = extendEnv("null", 0, 0);
-	env_global = extendEnv("list",   (void*)flist, env_global);
-	env_global = extendEnv("vector", (void*)fvec, env_global);
+	env_global = extendEnv("list",    (void*)flist, env_global);
+	env_global = extendEnv("vector",  (void*)fvec, env_global);
+	env_global = extendEnv("hashmap", (void*)fhashmap, env_global);
 	env_global = extendEnv("/", (void*)fdiv, env_global);
 	env_global = extendEnv("*", (void*)fmul, env_global);
 	env_global = extendEnv("+", (void*)fadd, env_global);
