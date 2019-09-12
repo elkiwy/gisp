@@ -153,6 +153,10 @@ List* eval(List* exp, List* env) {
 		if (*((char*)exp) == '"'){
 			return exp;}
 
+		//Check if it's a keyword
+		if (*((char*)exp) == ':'){
+			return exp;}
+
 		//Check if it's a symbol representing a number (not tagged)
 		char* err;
 		double v = strtod((char*)exp, &err);
