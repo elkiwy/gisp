@@ -99,7 +99,7 @@ void print_obj(List* ob, int head_of_list) {
 		if (head_of_list) printf(")");
 
 	}else{
-		printf("%p", ob ? (char*) ob : "null" );
+		printf("%s", ob ? (char*) ob : "null" );
 	}
 }
 
