@@ -38,7 +38,7 @@ static void gettoken() {
 	} else {
 		int in_quotes = 0;
 		while(index < SYMBOL_MAX - 1 && look != EOF && ((!is_space(look) && !is_parens(look)) || in_quotes)) {
-		    if(look == '"'){in_quotes = !in_quotes;}
+			if(look == '"'){in_quotes = !in_quotes;}
 			token[index++] = look;  look = getchar();
 		}
 	}
@@ -85,12 +85,12 @@ void print_obj(List* ob, int head_of_list) {
 
 
 void debug_printEnv(List* a, char* prefix){
-  int i=0;
-  while(a){
-	printf("%s %d - %s\n", prefix, i, car(car(a)));
-	a = cdr(a);
-	i++;
-  }
+	int i=0;
+	while(a){
+		printf("%s %d - %s\n", prefix, i, car(car(a)));
+		a = cdr(a);
+		i++;
+	}
 }
 
 
@@ -131,7 +131,7 @@ List* eval(List* exp, List* env) {
 
 		//Check if it's a string
 		if (*((char*)exp) == '"'){
-		  return exp;}
+			return exp;}
 
 		//Check if it's a symbol representing a number (not tagged)
 		char* err;
@@ -148,7 +148,7 @@ List* eval(List* exp, List* env) {
 	} else if (is_atom(first(exp))) { 
 		//printf("list with atom found %s\n", (char*) first(exp));
 		// (quote X)
-	    if (first(exp) == intern("quote")) {
+		if (first(exp) == intern("quote")) {
 			//Return the quoted element as it is
 			//printf("returning quoted\n");
 			return second(exp);
@@ -186,7 +186,7 @@ List* eval(List* exp, List* env) {
 		}else if (first(exp) == intern("progn")){
 			List *sexp = cdr(exp), *result = 0;	
 			while (sexp){
-			    result = eval(first(sexp), env);
+				result = eval(first(sexp), env);
 				sexp = cdr(sexp);
 			}
 			return result;
@@ -205,21 +205,21 @@ List* eval(List* exp, List* env) {
 			//printf("Searching for symbol %s\n", (char*)first(exp));
 			List* primop = eval(first(exp), env);
 
-            //user defined lambda, arg list eval happens in binding  below
+			//user defined lambda, arg list eval happens in binding  below
 			if (is_pair(primop)) { 
 				//printf("found lambda %s\n", (char*)first(exp));
 				return eval( cons(primop, cdr(exp)), env );
 			//Built-in primitive
 			} else if (primop) { 
-			    //printf("found primitive %s\n", (char*)first(exp));
+				//printf("found primitive %s\n", (char*)first(exp));
 				List* result = ((List* (*) (List*))primop) (evlist(cdr(exp), env));
 				return result;
 			}
 		}
 	// ((lambda (params) body) args)
 	} else if (car(car(exp)) == intern("lambda")) {
-	  //printf("lambda found\n");
-	    //bind names into env and eval body
+		//printf("lambda found\n");
+		//bind names into env and eval body
 		List *extenv = env, *names = second(car(exp)), *vars = cdr(exp);
 		for (  ; names ; names = cdr(names), vars = cdr(vars) ){
 			extenv = cons(cons(car(names), cons(eval(car(vars), env), 0)), extenv);
@@ -240,8 +240,8 @@ List* fsvg_surface(List* a){
 	n++;
 	n[strlen(n)-1] = '\0';
 	cairo_surface_t* surface = cairo_svg_surface_create(n, w, h);
-    cairo_svg_surface_restrict_to_version (surface, 1);
-    cairo_surface_set_fallback_resolution (surface, 72., 72.);
+	cairo_svg_surface_restrict_to_version (surface, 1);
+	cairo_surface_set_fallback_resolution (surface, 72., 72.);
 	return (List*)surface;
 }
 
@@ -296,7 +296,7 @@ List* extendEnv(char* name, void* func, List* env){
 
 //Main program entry
 int main(int argc, char* argv[]) {
-    //Setup the profiling
+	//Setup the profiling
 	double time = 0.0;
 
 	//Create the global environment

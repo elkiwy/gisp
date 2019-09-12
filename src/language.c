@@ -16,11 +16,11 @@ List* numberToList(double num){
 
 ///Apply an operation between two floats
 double numberOperation(char op, double a, double b){
-  if (op=='+'){return a+b;}
-  else if (op=='-'){return a-b;}
-  else if (op=='*'){return a*b;}
-  else if (op=='/'){return a/b;}
-  else{return 0;}
+	if (op=='+'){return a+b;}
+	else if (op=='-'){return a-b;}
+	else if (op=='*'){return a*b;}
+	else if (op=='/'){return a/b;}
+	else{return 0;}
 }
 
 ///Apply an operation to all the element of the list

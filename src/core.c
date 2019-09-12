@@ -14,7 +14,7 @@ void* intern(char* sym) {
 	List* _pair = symbols;
 	for ( ; _pair ; _pair = cdr(_pair)){
 		if (strncmp(sym, (char*) car(_pair), SYMBOL_MAX)==0){
-		  return (void*)car(_pair);
+			return (void*)car(_pair);
 		}
 	}
 	symbols = cons(strdup(sym), symbols);
