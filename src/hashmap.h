@@ -78,5 +78,11 @@ extern void hashmap_free(map_t in);
  */
 extern int hashmap_length(map_t in);
 
+
+
+
+extern int hashmap_keys_and_values(map_t in, char** keys, any_t* values);
+
+
 #endif //__HASHMAP_H__
 

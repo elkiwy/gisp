@@ -396,3 +396,24 @@ int hashmap_length(map_t in){
 	else return 0;
 }
 
+
+
+int hashmap_keys_and_values(map_t in, char** keys, any_t* values) {
+	int i;
+	hashmap_map* m = (hashmap_map*) in;
+	if (hashmap_length(m) <= 0)
+		return MAP_MISSING;	
+
+	int j = 0;
+	for(i = 0; i< m->table_size; i++){
+		if(m->data[i].in_use != 0) {
+			any_t val = (any_t) (m->data[i].data);
+			char* key = (char*) (m->data[i].key);
+			keys[j] = key;
+			values[j] = val;
+			j++;
+		}
+	}
+
+    return MAP_OK;
+}
