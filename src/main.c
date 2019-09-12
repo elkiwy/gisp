@@ -360,11 +360,13 @@ int main(int argc, char* argv[]) {
 	env_global = extendEnv("*", (void*)fmul, env_global);
 	env_global = extendEnv("+", (void*)fadd, env_global);
 	env_global = extendEnv("-", (void*)fsub, env_global);
-	env_global = extendEnv("svg-surface", (void*)fsvg_surface, env_global);
-	env_global = extendEnv("svg-context", (void*)fsvg_context, env_global);
-	env_global = extendEnv("svg-status",  (void*)fsvg_status, env_global);
-	env_global = extendEnv("svg-clean",   (void*)fsvg_clean, env_global);
-	env_global = extendEnv("svg-line",    (void*)fsvg_line, env_global);
+
+	env_global = extendEnv("surface",        (void*)fsvg_surface, env_global);
+	env_global = extendEnv("context",        (void*)fsvg_context, env_global);
+	env_global = extendEnv("surface-status", (void*)fsvg_status, env_global);
+	env_global = extendEnv("surface-clean",  (void*)fsvg_clean, env_global);
+	env_global = extendEnv("line",           (void*)fsvg_line, env_global);
+
 	env_global = extendEnv("str",   (void*)fstr, env_global);
 	env_global = extendEnv("read",  (void*)fread, env_global);
 	env_global = extendEnv("write", (void*)fwrite, env_global);
