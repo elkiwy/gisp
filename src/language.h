@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "core.h"
+#include "cairo.h"
+#include "cairo-svg.h"
 
 //Math
 List* fadd(List* a);
@@ -26,6 +28,16 @@ List* fnull(List* a);
 //Strings
 List* fstr(List* a);
 
+//Data structure
+List* fvec(List* a);
+List* fhashmap(List* a);
+
+//Cairo
+List* fsvg_surface(List* a);
+List* fsvg_status(List* a);
+List* fsvg_context(List* a);
+List* fsvg_clean(List* a);
+List* fsvg_line(List* a);
 
 #endif
 
