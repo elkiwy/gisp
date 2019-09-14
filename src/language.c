@@ -94,6 +94,13 @@ int listLength(List* a){
 	return n;
 }
 
+int vecLength(void** v){
+	int n = 0;
+	while(v[n]){n++;}
+	return n;
+}
+
+/// (vector values...)
 List* fvec(List* a){
 	int n = listLength(a);
 	void** vec = malloc(sizeof(void*) * (n+1));
@@ -108,6 +115,7 @@ List* fvec(List* a){
 	return (List*)tag_vector(vec);
 }
 
+/// (hashmap key val ...)
 List* fhashmap(List* a){
 	map_t map = hashmap_new();
 	List* current = a;
@@ -120,9 +128,28 @@ List* fhashmap(List* a){
 	return (List*)tag_hashmap(map);
 }
 
-//List* fhashmap_get(List* a){
-//
-//}
+/// (get m k)
+List* fget(List* a){
+	if (is_hashmap(first(a))){	
+		map_t map = (map_t)untag_hashmap(first(a));
+		char* key = (char*)second(a);
+		List* value = 0;
+		hashmap_get(map, key, (any_t)&value);
+		return value;
+
+	}else if (is_vector(first(a))){
+		void** vec = (void**)untag_vector(first(a));
+		int pos = (int)numVal(second(a));
+		int size = vecLength(vec);
+		if (pos >= size){
+			return 0;
+		}else{
+			return vec[pos];
+		}
+	}else{
+		return 0;
+	}
+}
 
 
 // ---------------------------------------------

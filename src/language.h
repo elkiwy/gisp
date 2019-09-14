@@ -6,6 +6,7 @@
 #include "core.h"
 #include "cairo.h"
 #include "cairo-svg.h"
+#include "hashmap.h"
 
 //Math
 List* fadd(List* a);
@@ -31,6 +32,7 @@ List* fstr(List* a);
 //Data structure
 List* fvec(List* a);
 List* fhashmap(List* a);
+List* fget(List* a);
 
 //Cairo
 List* fsvg_surface(List* a);

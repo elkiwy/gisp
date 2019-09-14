@@ -328,8 +328,11 @@ int main(int argc, char* argv[]) {
 	env_global = extendEnv("pair?",   (void*)fpair, env_global);
 	env_global = extendEnv("eq?",     (void*)feq, env_global);
 	env_global = extendEnv("cons", (void*)fcons, env_global);
+
 	env_global = extendEnv("cdr",  (void*)fcdr, env_global);
 	env_global = extendEnv("car",  (void*)fcar, env_global);
+	env_global = extendEnv("get",  (void*)fget, env_global);
+
 	clock_t end_env = clock();
 
 

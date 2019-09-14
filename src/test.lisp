@@ -25,7 +25,7 @@
 ;[2 3 5]
 ;(list 2 3)
 ;(hashmap :a 1 :b 2)
-{:a 1 :b 2}
+(get [10 20 30] 2)
 
 ;(pair? (quote (2 3)))
 
