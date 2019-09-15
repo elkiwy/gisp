@@ -16,7 +16,7 @@ run: build/main
 	./build/main
 
 test: build/main
-	sed -e '/^;/d' src/test.lisp | ./build/main
+	./build/main src/test.lisp
 
 debug: rebuild
 	gdb build/main

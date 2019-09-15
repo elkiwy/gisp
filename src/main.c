@@ -1,4 +1,3 @@
-/* This lisp dialect used "micro lisp" from A. Carl Douglas as a base.*/
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +21,7 @@ static int look;
 static char token[SYMBOL_MAX]; /* token*/
 
 
+FILE* inputFile = 0;
 List* env_global = 0;
 
 //Input parsing methods
@@ -30,18 +30,35 @@ int is_space(char x)  {
 int is_parens(char x) {
 	return x == '(' || x == ')' || x == '[' || x == ']' || x == '{' || x == '}';}
 
+//Read char from input stream or from input file if provided
+char read_char(){
+	if (inputFile){
+		char c = fgetc(inputFile);
+		while(c == ';'){
+			char* line = 0;
+			size_t size;
+			line = fgetln(inputFile, &size);
+			c = fgetc(inputFile);
+		}
+		return c;
+	}else{
+		return getchar();
+	}
+}
+
+
 
 static void gettoken() {
 	int index = 0;
-	while(is_space(look)) { look = getchar(); }
+	while(is_space(look)) { look = read_char(); }
 
 	if (is_parens(look)) {
-		token[index++] = look;  look = getchar();
+		token[index++] = look;  look = read_char();
 	} else {
 		int in_quotes = 0;
 		while(index < SYMBOL_MAX - 1 && look != EOF && ((!is_space(look) && !is_parens(look)) || in_quotes)) {
 			if(look == '"'){in_quotes = !in_quotes;}
-			token[index++] = look;  look = getchar();
+			token[index++] = look;  look = read_char();
 		}
 	}
 	token[index] = '\0';
@@ -243,7 +260,7 @@ List* eval(List* exp, List* env) {
 
 
 //Basics I/O operations
-List* freadobj(List* a) { look = getchar(); gettoken(); return getobj();  }
+List* freadobj(List* a) { look = read_char(); gettoken(); return getobj();  }
 List* fwriteobj(List* a){ print_obj(car(a), 1); puts(""); return e_true;  }
 
 //Add a new function to an environment
@@ -253,6 +270,13 @@ List* extendEnv(char* name, void* func, List* env){
 
 //Main program entry
 int main(int argc, char* argv[]) {
+	//Check if I have a file to read
+	printf("\n");
+	if (argc>1){
+		printf("Reading from file %s\n", argv[1]);
+		inputFile = fopen(argv[1], "r");
+	}
+
 	//Setup the profiling
 	double time = 0.0;
 
@@ -299,13 +323,13 @@ int main(int argc, char* argv[]) {
 
 	//Evaluate all the sexp as an implicit progn
 	List* result = 0;
-	look = getchar();
+	look = read_char();
 	while(look != EOF){
 		gettoken();
 		//Evaluate only if valid tokens
 		if (strlen(token)>0)
 			result = eval(getobj(), env);
-		look = getchar();
+		look = read_char();
 	}
 
 	//Print only the last result as a progn
