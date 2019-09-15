@@ -25,7 +25,10 @@
 ;[2 3 5]
 ;(list 2 3)
 ;(hashmap :a 1 :b 2)
-(get [10 20 30] 2)
+;(get [10 20 30] 2)
+(range 2 10)
+;(apply write (quote ((hello world))))
+
 
 ;(pair? (quote (2 3)))
 

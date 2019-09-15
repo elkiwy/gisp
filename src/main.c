@@ -309,10 +309,12 @@ int main(int argc, char* argv[]) {
 	env_global = extendEnv("list",    (void*)flist, env_global);
 	env_global = extendEnv("vector",  (void*)fvec, env_global);
 	env_global = extendEnv("hashmap", (void*)fhashmap, env_global);
+
 	env_global = extendEnv("/", (void*)fdiv, env_global);
 	env_global = extendEnv("*", (void*)fmul, env_global);
 	env_global = extendEnv("+", (void*)fadd, env_global);
 	env_global = extendEnv("-", (void*)fsub, env_global);
+	env_global = extendEnv("range", (void*)frange, env_global);
 
 	env_global = extendEnv("surface",        (void*)fsvg_surface, env_global);
 	env_global = extendEnv("context",        (void*)fsvg_context, env_global);

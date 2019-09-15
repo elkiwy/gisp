@@ -13,6 +13,7 @@ List* fadd(List* a);
 List* fsub(List* a);
 List* fmul(List* a);
 List* fdiv(List* a);
+List* frange(List* a);
 
 //List operations
 List* fcons(List* a);
@@ -40,6 +41,7 @@ List* fsvg_status(List* a);
 List* fsvg_context(List* a);
 List* fsvg_clean(List* a);
 List* fsvg_line(List* a);
+
 
 #endif
 

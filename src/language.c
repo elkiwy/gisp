@@ -41,6 +41,26 @@ List* fmul(List* a) {return applyOperationOnList('*', a);}
 List* fdiv(List* a) {return applyOperationOnList('/', a);}
 
 
+List* frange(List* a){
+	double min = 0, max = 0; 
+	if (cdr(a)){
+		min = numVal(first(a));
+		max = numVal(second(a));
+	}else{
+		max = numVal(first(a));
+	}
+	List* ret = 0;
+	for(int i = max-1; i>=min; i--){
+		ret = cons(value_to_number(i), ret);
+	}
+	return ret;
+}
+
+
+
+
+
+
 
 // ---------------------------------------------
 // List operations
