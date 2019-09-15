@@ -26,7 +26,11 @@
 ;(list 2 3)
 ;(hashmap :a 1 :b 2)
 ;(get [10 20 30] 2)
-(range 2 10)
+;(range 2 10)
+;(reverse (range 3))
+
+(map vector (range 3))
+
 ;(apply write (quote ((hello world))))
 
 

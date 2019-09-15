@@ -268,6 +268,7 @@ int main(int argc, char* argv[]) {
 	env_global = extendEnv("+", (void*)fadd, env_global);
 	env_global = extendEnv("-", (void*)fsub, env_global);
 	env_global = extendEnv("range", (void*)frange, env_global);
+	env_global = extendEnv("reverse", (void*)freverse, env_global);
 
 	env_global = extendEnv("surface",        (void*)fsvg_surface, env_global);
 	env_global = extendEnv("context",        (void*)fsvg_context, env_global);
@@ -284,9 +285,10 @@ int main(int argc, char* argv[]) {
 	env_global = extendEnv("eq?",     (void*)feq, env_global);
 	env_global = extendEnv("cons", (void*)fcons, env_global);
 
-	env_global = extendEnv("cdr",  (void*)fcdr, env_global);
-	env_global = extendEnv("car",  (void*)fcar, env_global);
-	env_global = extendEnv("get",  (void*)fget, env_global);
+	env_global = extendEnv("map", (void*)fmap, env_global);
+	env_global = extendEnv("cdr", (void*)fcdr, env_global);
+	env_global = extendEnv("car", (void*)fcar, env_global);
+	env_global = extendEnv("get", (void*)fget, env_global);
 
 	clock_t end_env = clock();
 

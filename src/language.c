@@ -69,6 +69,27 @@ List* flist(List* a) { return a;}
 List* fcar(List* a)  { return car(first(a)); }
 List* fcdr(List* a)  { return cdr(first(a)); }
 
+List* freverse(List* a) {
+	List* ret = 0;
+	List* l = first(a);
+	while(l){
+		ret = cons(car(l), ret);
+		l = cdr(l);
+	}
+	return ret;	
+}
+
+List* fmap(List* a){
+	List* l = second(a);
+	List* ret = 0;
+	while (l){
+		List* val = car(l);
+		List* r = ((List* (*) (List*))first(a))(cons(val, 0));
+		ret = cons(r, ret);
+		l = cdr(l);
+	}
+	return freverse(cons(ret, 0));
+}
 
 
 // ---------------------------------------------
