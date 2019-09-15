@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+#include "hashmap.h"
 
 #define SYMBOL_MAX  32
 
@@ -39,6 +42,9 @@ typedef struct List {
 #define third(x)   car(cdr(cdr(x)))
 #define fourth(x)  car(cdr(cdr(cdr(x))))
 #define fifth(x)   car(cdr(cdr(cdr(cdr(x)))))
+
+
+void print_obj(List* ob, int head_of_list);
 
 List* cons(void* _car, void* _cdr);
 void* intern(char* sym);
