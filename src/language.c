@@ -230,17 +230,19 @@ List* fsvg_clean(List* a){
 	return 0;
 }
 
-// (svg-line context (0 0) (100 100))
+// (svg-line context pointA pointB)
 List* fsvg_line(List* a){
 	cairo_t* context = first(a);
-	List* p1 = second(a);
-	List* p2 = third(a);
-	float x1 = numVal((double*)first(p1));
-	float y1 = numVal((double*)second(p1));
-	float x2 = numVal((double*)first(p2));
-	float y2 = numVal((double*)second(p2));
-	cairo_move_to(context, x1, y1);
-	cairo_line_to(context, x2, y2);
+	map_t p1 = (map_t)untag_hashmap(second(a));
+	map_t p2 = (map_t)untag_hashmap(third(a));
+	double *x1, *y1, *x2, *y2;
+	hashmap_get(p1, ":x", (any_t)&x1);
+	hashmap_get(p1, ":y", (any_t)&y1);
+	hashmap_get(p2, ":x", (any_t)&x2);
+	hashmap_get(p2, ":y", (any_t)&y2);
+	cairo_move_to(context, numVal(x1), numVal(y1));
+	cairo_line_to(context, numVal(x2), numVal(y2));
 	cairo_stroke(context);
 	return 0;
 }
+

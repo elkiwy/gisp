@@ -1,45 +1,12 @@
-;(cons 3 (cons 4 (cons 5 null)))
-;(list 1 2 4 5)
-;(- (+ 1 2 3 (* 4 (/ 8 2))) 1)
-
-;((lambda (x y) (+ x y 10)) 1 3)
-
-;(let (x 3) (+ 1 x))
-;(+ 2 3 (* 2 2))
-;"ciao"
-;(str "a b" "c")
-;(def cacca 2)
-;str
-;(progn (+ 1 2) (* 2 4))
-
-;(def test 2)
-;(* test 8) 
-;(def defn (lamba (name params) )
+(defn point (x y)
+	(hashmap :x x :y y))
 
 
-;(defn square (x) (* x 2))
-;(def square (lambda (x) (* x 2)))
-;(square 3)
 
-;(vector 2 3 4)
-;[2 3 5]
-;(list 2 3)
-;(hashmap :a 1 :b 2)
-;(get [10 20 30] 2)
-;(range 2 10)
-;(reverse (range 3))
-
-(map vector (range 3))
-
-;(apply write (quote ((hello world))))
-
-
-;(pair? (quote (2 3)))
-
-;(def surface (svg-surface "test.svg" 128 128))
-;(svg-status surface)
-;(def context (svg-context surface))
-;(svg-line context (0 0) (100 100))
-;(svg-clean surface context)
+(def s (surface "test.svg" 128 128))
+(surface-status s)
+(def c (context s))
+(line c (point 0 0) (point 100 100))
+(surface-clean s c)
 
 
