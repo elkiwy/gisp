@@ -291,6 +291,14 @@ int main(int argc, char* argv[]) {
 	env_global = extendEnv("*", (void*)fmul, env_global);
 	env_global = extendEnv("+", (void*)fadd, env_global);
 	env_global = extendEnv("-", (void*)fsub, env_global);
+
+	env_global = extendEnv("sin", (void*)fsin, env_global);
+	env_global = extendEnv("cos", (void*)fcos, env_global);
+	env_global = extendEnv("dsin", (void*)fdsin, env_global);
+	env_global = extendEnv("dcos", (void*)fdcos, env_global);
+	env_global = extendEnv("deg", (void*)fdeg, env_global);
+	env_global = extendEnv("rad", (void*)frad, env_global);
+
 	env_global = extendEnv("range", (void*)frange, env_global);
 	env_global = extendEnv("reverse", (void*)freverse, env_global);
 

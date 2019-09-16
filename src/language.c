@@ -29,6 +29,13 @@ List* fsub(List* a) {return applyOperationOnList('-', a);}
 List* fmul(List* a) {return applyOperationOnList('*', a);}
 List* fdiv(List* a) {return applyOperationOnList('/', a);}
 
+List* fsin(List* a) {return (List*)value_to_number(sin(numVal(first(a))));}
+List* fcos(List* a) {return (List*)value_to_number(cos(numVal(first(a))));}
+List* fdsin(List* a) {return (List*)value_to_number(sin(numVal(first(a)) * DEG_TO_RAD));}
+List* fdcos(List* a) {return (List*)value_to_number(cos(numVal(first(a)) * DEG_TO_RAD));}
+
+List* frad(List* a) {return (List*)value_to_number(numVal(first(a)) * DEG_TO_RAD);}
+List* fdeg(List* a) {return (List*)value_to_number(numVal(first(a)) * RAD_TO_DEG);}
 
 List* frange(List* a){
 	double min = 0, max = 0; 

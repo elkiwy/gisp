@@ -3,10 +3,16 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+
 #include "core.h"
 #include "cairo.h"
 #include "cairo-svg.h"
 #include "hashmap.h"
+
+#define PI 3.14159265
+#define DEG_TO_RAD PI/180.0
+#define RAD_TO_DEG 180.0/PI
 
 //Math
 List* fadd(List* a);
@@ -14,6 +20,13 @@ List* fsub(List* a);
 List* fmul(List* a);
 List* fdiv(List* a);
 List* frange(List* a);
+
+List* fsin(List* a);
+List* fcos(List* a);
+List* fdsin(List* a);
+List* fdcos(List* a);
+List* fdeg(List* a);
+List* frad(List* a);
 
 //List operations
 List* fcons(List* a);
