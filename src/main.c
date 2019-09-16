@@ -211,7 +211,10 @@ List* eval(List* exp, List* env) {
 		} else if (first(exp) == intern("let")) {
 			List *extenv = env, *bindings = second(exp);
 			while(bindings){
-				extenv = cons(cons( first(bindings), cons(eval(second(bindings), env), 0)), extenv);
+				List* sym = first(bindings);
+				List* val = eval(second(bindings), env);
+				extenv = cons(cons(sym, cons(val, 0)), extenv);
+				//printf("Binded %s to ", sym); print_obj(val, 1); printf("\n");
 				bindings = cdr(cdr(bindings));
 			}
 			return eval(third(exp), extenv);
