@@ -264,7 +264,12 @@ List* eval(List* exp, List* env) {
 
 //Basics I/O operations
 List* freadobj(List* a) { look = read_char(); gettoken(); return getobj();  }
-List* fwriteobj(List* a){ print_obj(car(a), 1); puts(""); return e_true;  }
+List* fwriteobj(List* a){
+	fflush(stdout);
+	print_obj(car(a), 1);
+	puts("");
+	return e_true;
+}
 
 //Add a new function to an environment
 List* extendEnv(char* name, void* func, List* env){
@@ -312,8 +317,8 @@ int main(int argc, char* argv[]) {
 	env_global = extendEnv("line",           (void*)fsvg_line, env_global);
 
 	env_global = extendEnv("str",   (void*)fstr, env_global);
-	env_global = extendEnv("read",  (void*)fread, env_global);
-	env_global = extendEnv("write", (void*)fwrite, env_global);
+	env_global = extendEnv("read",  (void*)freadobj, env_global);
+	env_global = extendEnv("write", (void*)fwriteobj, env_global);
 	env_global = extendEnv("null?",   (void*)fnull, env_global);
 	env_global = extendEnv("symbol?", (void*)fatom, env_global);
 	env_global = extendEnv("pair?",   (void*)fpair, env_global);
