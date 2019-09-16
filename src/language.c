@@ -4,16 +4,6 @@
 // --------------------------------------------
 // Math operations
 
-///Convert a float number into a numeric atomic value (untagged List ptr)
-List* numberToList(double num){
-	int numint = (int)num;
-	double numfrac = num - numint;
-	char* str = malloc(32*sizeof(char));
-	if (numfrac == 0){sprintf(str, "%i", numint);
-	}else{            sprintf(str, "%f", num);}
-	return (List*)str;
-}
-
 ///Apply an operation between two floats
 double numberOperation(char op, double a, double b){
 	if (op=='+'){return a+b;}
@@ -30,7 +20,6 @@ List* applyOperationOnList(char op, List* list){
 	while((current = cdr(current))){
 		res = numberOperation(op, res, numVal((double*)car(current)));
 	}
-	//return numberToList(res);
 	return (List*)value_to_number(res);
 }
 
