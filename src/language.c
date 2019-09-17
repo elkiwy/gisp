@@ -100,8 +100,13 @@ List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
 // ---------------------------------------------
 // Strings
 char* trim_quotes(char* s){
-	s++;
-	s[strlen(s)-1] = '\0';
+	if (s[0] == '"'){
+		s++;
+	}
+
+	if (s[strlen(s)-1] == '"'){
+		s[strlen(s)-1] = '\0';
+	}
 	return s;
 }
 
