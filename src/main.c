@@ -98,6 +98,20 @@ void debug_printEnv(List* a, char* prefix){
 }
 
 
+//Add a new function to an environment
+List* extendEnv(char* name, void* func, List* env){
+	List* current = env;
+	while(current){
+		if (strcmp(car(car(current)), name) == 0){
+			printf("Overriding def of %s (%s) with %p\n", name, car(car(current)), func);
+			*current = *cons(cons(intern(name), cons(func, 0)), cdr(current));
+			return env;
+		}
+		current = cdr(current);
+	}
+	return cons(cons(intern(name), cons(func, 0)), env);
+}
+
 //Eval functions
 List* eval(List* exp, List* env);
 List* evlist(List* list, List* env) {
@@ -271,10 +285,6 @@ List* fwriteobj(List* a){
 	return e_true;
 }
 
-//Add a new function to an environment
-List* extendEnv(char* name, void* func, List* env){
-	return cons(cons(intern(name), cons(func, 0)), env);
-}
 
 //Main program entry
 int main(int argc, char* argv[]) {
