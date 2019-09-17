@@ -23,6 +23,7 @@ The core system is *heavily influenced* by this article [Lisp in less than 200 l
 - and/or/not boolean operations
 - Fix multiple symbols with same name in different environment nesting level
 - Error messages
+- Reorganize local and global environment with environment layer structs
 
 
 
