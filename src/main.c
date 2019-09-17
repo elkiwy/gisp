@@ -137,22 +137,18 @@ List* eval(List* exp, List* env) {
 	//If is an atom...
 	}else if (is_atom(exp) ) {
 		//printf("atom found %s\n", (char*)exp);
-		//Check into global env
-		List* temp_env = env_global;
+		//Check into local env
+		List* temp_env = env;
 		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
 			if (exp == first(car(temp_env))){
-				//printf("->Evaluated in global env as: ");
-				//print_obj(second(car(temp_env)), 1);
-				//printf("\n");
+				//printf("->Evaluated %s in local env as: ", exp); print_obj(second(car(temp_env)), 1); printf("\n");
 				return second(car(temp_env));}}
 
-		//Check into local env
-		temp_env = env;
+		//Check into global env
+		temp_env = env_global;
 		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
 			if (exp == first(car(temp_env))){
-				//printf("->Evaluated in local env as: ");
-				//print_obj(second(car(temp_env)), 1);
-				//printf("\n");
+				//printf("->Evaluated %s in global env as: ", exp); print_obj(second(car(temp_env)), 1); printf("\n");
 				return second(car(temp_env));}}
 
 		//Check if it's a string
@@ -204,6 +200,7 @@ List* eval(List* exp, List* env) {
 		}else if (first(exp) == intern("def")){
 			List* value = eval(third(exp), env);
 			env_global = cons(cons(second(exp), cons(value, 0)), env_global);
+			//printf("== Defining %s to ", second(exp)); print_obj(value, 1); printf("\n");
 			return value;
 
 		// (defn symbol (params) sexp)
@@ -227,8 +224,9 @@ List* eval(List* exp, List* env) {
 			while(bindings){
 				List* sym = first(bindings);
 				List* val = eval(second(bindings), env);
-				extenv = cons(cons(sym, cons(val, 0)), extenv);
-				//printf("Binded %s to ", sym); print_obj(val, 1); printf("\n");
+				//extenv = cons(cons(sym, cons(val, 0)), extenv);
+				extenv = extendEnv((char*)sym, val, extenv);
+				//printf("== Binded %s to ", (char*)sym); print_obj(val, 1); printf("\n");
 				bindings = cdr(cdr(bindings));
 			}
 			return eval(third(exp), extenv);
