@@ -1,7 +1,5 @@
 #include "core.h"
 
-
-
 //Prints a List object
 void print_obj(List* ob, int head_of_list) {
 	if(is_hashmap(ob)){
@@ -50,13 +48,6 @@ void print_obj(List* ob, int head_of_list) {
 	}
 }
 
-
-
-
-
-
-
-
 //Cons shell
 List* cons(void* _car, void* _cdr) {
 	List* _pair = calloc( 1, sizeof (List) );
@@ -86,21 +77,20 @@ Environment* makeEnvironment(List* _data, Environment* _outer) {
 	return env;
 }
 
-
+//Number objects
 double* symbol_to_number(char* sym){
 	double* ptr = malloc(sizeof(double));
 	*ptr = strtod(sym, NULL);
-	return (double*)tag_number(ptr);
-}
-
+	return (double*)tag_number(ptr);}
 double* value_to_number(double value){
 	double* ptr = malloc(sizeof(double));
 	*ptr = value;
-	return (double*)tag_number(ptr);
-}
-
+	return (double*)tag_number(ptr);}
 double numVal(double* number){
 	return *((double*)untag_number(number));
 }
+
+
+
 
 

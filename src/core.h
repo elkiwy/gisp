@@ -10,6 +10,7 @@
 
 #define SYMBOL_MAX  32
 
+
 //This is the main List structure
 typedef struct List {
 	struct List*  next;
@@ -30,7 +31,6 @@ typedef struct Environment {
 #define is_number(x)  (((uintptr_t)x & 0x2) == 0x2)
 #define is_pair(x)    (((uintptr_t)x & 0x1) == 0x1)
 #define is_atom(x)    (((uintptr_t)x & 0x1) == 0x0)
-
 #define untag_hashmap(x) ((uintptr_t) x & ~0x4)
 #define tag_hashmap(x)   ((uintptr_t) x | 0x4)
 #define untag_vector(x)  ((uintptr_t) x & ~0x3)
@@ -39,7 +39,6 @@ typedef struct Environment {
 #define tag_number(x)    ((uintptr_t) x | 0x2)
 #define untag(x)         ((uintptr_t) x & ~0x1)
 #define tag(x)           ((uintptr_t) x | 0x1)
-
 #define car(x)     (((List*)untag(x))->data)
 #define cdr(x)     (((List*)untag(x))->next)
 
@@ -50,13 +49,15 @@ typedef struct Environment {
 #define fourth(x)  car(cdr(cdr(cdr(x))))
 #define fifth(x)   car(cdr(cdr(cdr(cdr(x)))))
 
-
+//Utility
 void print_obj(List* ob, int head_of_list);
 
+//Core
 List* cons(void* _car, void* _cdr);
 void* intern(char* sym);
 Environment* makeEnvironment(List* _data, Environment* _outer);
 
+//Numbers 
 double* symbol_to_number(char* sym);
 double* value_to_number(double value);
 double numVal(double* number);
