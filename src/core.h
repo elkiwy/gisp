@@ -16,6 +16,13 @@ typedef struct List {
 	void*  data;
 }List;
 
+
+//This is the layered environment structure
+typedef struct Environment {
+	struct Enviroment* outer;
+	List* data;
+}Environment;
+
 //Each cons shell is tagged with the lowest pointer bit set to 1, everything else is set to 0
 //Before accessing cons car and cdr we need to untag the pointer to read from memory correctly
 #define is_hashmap(x) (((uintptr_t)x & 0x4) == 0x4)
@@ -48,6 +55,7 @@ void print_obj(List* ob, int head_of_list);
 
 List* cons(void* _car, void* _cdr);
 void* intern(char* sym);
+Environment* makeEnvironment(List* _data, Environment* _outer);
 
 double* symbol_to_number(char* sym);
 double* value_to_number(double value);

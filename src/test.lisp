@@ -15,18 +15,18 @@
 ;	)
 
 
-(def x "def")
-(write (str "def" x))
+(def x "def ")
+(write (str "def " x))
 
-(let (x "let")
+(let (x "let ")
 	(progn 
-		(write (str "let" x))
-		(let (x "let2")
-			(write (str "let2" x))
-			)
-		(write (str "let" x))
+		(write (str "let " x))
+		(let (x "LET " x (str x "LOT "))
+			(write (str "LET " x))
 		)
+		(write (str "let " x))
 	)
+)
 
 
 (write (str "boh " x))

@@ -78,6 +78,13 @@ void* intern(char* sym) {
 	return (void*)car(symbols);
 }
 
+//Environment layer creation
+Environment* makeEnvironment(List* _data, Environment* _outer) {
+	Environment* env = calloc( 1, sizeof (Environment) );
+	env->data = _data;
+	env->outer = (void*)_outer;
+	return env;
+}
 
 
 double* symbol_to_number(char* sym){

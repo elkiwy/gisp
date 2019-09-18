@@ -22,7 +22,6 @@ static char token[SYMBOL_MAX]; /* token*/
 
 
 FILE* inputFile = 0;
-List* env_global = 0;
 
 //Input parsing methods
 int is_space(char x)  {
@@ -99,28 +98,23 @@ void debug_printEnv(List* a, char* prefix){
 
 
 //Add a new function to an environment
-List* extendEnv(char* name, void* func, List* env){
-	List* current = env;
-	while(current){
-		if (strcmp(car(car(current)), name) == 0){
-			printf("Overriding def of %s (%s) with %p\n", name, car(car(current)), func);
-			*current = *cons(cons(intern(name), cons(func, 0)), cdr(current));
-			return env;
-		}
-		current = cdr(current);
-	}
-	return cons(cons(intern(name), cons(func, 0)), env);
+void extendEnv(char* name, void* value, Environment* env){
+	//Add this symbol and value to the current environment level
+	List* current = env->data;
+	printf("Adding \"%s\" to env %p and current %p\n", name, env, current); fflush(stdout);
+	current = cons(cons(intern(name), cons(value, 0)), current);
+	env->data = current;
 }
 
 //Eval functions
-List* eval(List* exp, List* env);
-List* evlist(List* list, List* env) {
+List* eval(List* exp, Environment* env);
+List* evlist(List* list, Environment* env) {
 	List* head = 0,**args = &head;
 	for ( ; list ; list = cdr(list)) {
 		*args = cons(eval(car(list), env), 0);
 		args = &((List*)untag(*args))->next;}
 	return head;}
-List* eval(List* exp, List* env) {
+List* eval(List* exp, Environment* env) {
 	//If is a tagged hashmap...
 	if (is_hashmap(exp)){
 		return exp;	
@@ -137,19 +131,20 @@ List* eval(List* exp, List* env) {
 	//If is an atom...
 	}else if (is_atom(exp) ) {
 		//printf("atom found %s\n", (char*)exp);
-		//Check into local env
-		List* temp_env = env;
-		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
-			if (exp == first(car(temp_env))){
-				//printf("->Evaluated %s in local env as: ", exp); print_obj(second(car(temp_env)), 1); printf("\n");
-				return second(car(temp_env));}}
 
-		//Check into global env
-		temp_env = env_global;
-		for ( ; temp_env != 0; temp_env = cdr(temp_env) ){
-			if (exp == first(car(temp_env))){
-				//printf("->Evaluated %s in global env as: ", exp); print_obj(second(car(temp_env)), 1); printf("\n");
-				return second(car(temp_env));}}
+		//Check into the environment
+		Environment* currentEnv = env;
+		while(currentEnv){
+			List* currentSymbols = currentEnv->data;
+			for ( ; currentSymbols != 0; currentSymbols = cdr(currentSymbols) ){
+				if (exp == first(car(currentSymbols))){
+					//printf("->Evaluated %s in local env as: ", exp); print_obj(second(car(currentSymbols)), 1); printf("\n");
+					return second(car(currentSymbols));}}
+			//Search it into the outer level
+			currentEnv = currentEnv->outer;
+		}
+
+
 
 		//Check if it's a string
 		if (*((char*)exp) == '"'){
@@ -188,25 +183,27 @@ List* eval(List* exp, List* env) {
 
 		// (lambda (params) body)
 		} else if (first(exp) == intern("lambda")) {
-			return exp; /* todo: create a closure and capture free vars*/
+			return exp;
 
 		// (apply func args)
 		} else if (first(exp) == intern("apply")) { 
 			List* args = evlist(cdr(cdr(exp)), env);
-			args = car(args); /* assumes one argument and that it is a list*/
+			args = car(args);
 			return ((List* (*) (List*))eval(second(exp), env)) (args);
 
 		// (def symbol sexp)
 		}else if (first(exp) == intern("def")){
-			List* value = eval(third(exp), env);
-			env_global = cons(cons(second(exp), cons(value, 0)), env_global);
+			char* sym = second(exp);
+			List* val = eval(third(exp), env);
+			extendEnv(sym, val, env);
 			//printf("== Defining %s to ", second(exp)); print_obj(value, 1); printf("\n");
-			return value;
+			return val;
 
 		// (defn symbol (params) sexp)
 		}else if (first(exp) == intern("defn")){
+			char* sym = second(exp);
 			List* lambda = cons(intern("lambda"), cons(third(exp), cons(fourth(exp), 0)));
-			env_global = cons(cons(second(exp), cons(lambda, 0)), env_global);
+			extendEnv(sym, lambda, env);
 			return lambda;
 
 		// (progn exp1 exp2 ...)
@@ -220,16 +217,17 @@ List* eval(List* exp, List* env) {
 
 		// (let (binds) body)
 		} else if (first(exp) == intern("let")) {
-			List *extenv = env, *bindings = second(exp);
+			//List *extenv = env, *bindings = second(exp);
+			Environment* innerEnv = makeEnvironment(NULL, env);
+			List *bindings = second(exp);
 			while(bindings){
-				List* sym = first(bindings);
-				List* val = eval(second(bindings), env);
-				//extenv = cons(cons(sym, cons(val, 0)), extenv);
-				extenv = extendEnv((char*)sym, val, extenv);
+				char* sym = first(bindings);
+				List* val = eval(second(bindings), innerEnv);
+				extendEnv(sym, val, innerEnv);
 				//printf("== Binded %s to ", (char*)sym); print_obj(val, 1); printf("\n");
 				bindings = cdr(cdr(bindings));
 			}
-			return eval(third(exp), extenv);
+			return eval(third(exp), innerEnv);
 
 		// (function args)
 		} else { 
@@ -251,27 +249,18 @@ List* eval(List* exp, List* env) {
 	} else if (car(car(exp)) == intern("lambda")) {
 		//printf("lambda found\n");
 		//bind names into env and eval body
-		List *extenv = env, *names = second(car(exp)), *vars = cdr(exp);
+		Environment* innerEnv = makeEnvironment(NULL, env);
+		List *names = second(car(exp)), *vars = cdr(exp);
 		for (  ; names ; names = cdr(names), vars = cdr(vars) ){
-			extenv = cons(cons(car(names), cons(eval(car(vars), env), 0)), extenv);
+			char* sym = car(names);
+			List* val = eval(car(vars), innerEnv);
+			extendEnv(sym, val, innerEnv);
 		}
-		return eval (third(car(exp)), extenv);
+		return eval(third(car(exp)), innerEnv);
 	}
 	printf("cannot evaluate expression %s\n", first(exp));
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //Basics I/O operations
@@ -297,52 +286,51 @@ int main(int argc, char* argv[]) {
 	double time = 0.0;
 
 	//Create the global environment
+	Environment* env = makeEnvironment(NULL, NULL);
 	clock_t begin = clock();
-	env_global = extendEnv("null", 0, 0);
-	env_global = extendEnv("list",    (void*)flist, env_global);
-	env_global = extendEnv("vector",  (void*)fvec, env_global);
-	env_global = extendEnv("hashmap", (void*)fhashmap, env_global);
+	extendEnv("null", 0, env);
+	extendEnv("list",    (void*)flist, env);
+	extendEnv("vector",  (void*)fvec, env);
+	extendEnv("hashmap", (void*)fhashmap, env);
 
-	env_global = extendEnv("/", (void*)fdiv, env_global);
-	env_global = extendEnv("*", (void*)fmul, env_global);
-	env_global = extendEnv("+", (void*)fadd, env_global);
-	env_global = extendEnv("-", (void*)fsub, env_global);
+	extendEnv("/", (void*)fdiv, env);
+	extendEnv("*", (void*)fmul, env);
+	extendEnv("+", (void*)fadd, env);
+	extendEnv("-", (void*)fsub, env);
 
-	env_global = extendEnv("sin", (void*)fsin, env_global);
-	env_global = extendEnv("cos", (void*)fcos, env_global);
-	env_global = extendEnv("dsin", (void*)fdsin, env_global);
-	env_global = extendEnv("dcos", (void*)fdcos, env_global);
-	env_global = extendEnv("deg", (void*)fdeg, env_global);
-	env_global = extendEnv("rad", (void*)frad, env_global);
+	extendEnv("sin", (void*)fsin, env);
+	extendEnv("cos", (void*)fcos, env);
+	extendEnv("dsin", (void*)fdsin, env);
+	extendEnv("dcos", (void*)fdcos, env);
+	extendEnv("deg", (void*)fdeg, env);
+	extendEnv("rad", (void*)frad, env);
 
-	env_global = extendEnv("range", (void*)frange, env_global);
-	env_global = extendEnv("reverse", (void*)freverse, env_global);
+	extendEnv("range", (void*)frange, env);
+	extendEnv("reverse", (void*)freverse, env);
 
-	env_global = extendEnv("surface",        (void*)fsvg_surface, env_global);
-	env_global = extendEnv("context",        (void*)fsvg_context, env_global);
-	env_global = extendEnv("surface-status", (void*)fsvg_status, env_global);
-	env_global = extendEnv("surface-clean",  (void*)fsvg_clean, env_global);
-	env_global = extendEnv("line",           (void*)fsvg_line, env_global);
+	extendEnv("surface",        (void*)fsvg_surface, env);
+	extendEnv("context",        (void*)fsvg_context, env);
+	extendEnv("surface-status", (void*)fsvg_status, env);
+	extendEnv("surface-clean",  (void*)fsvg_clean, env);
+	extendEnv("line",           (void*)fsvg_line, env);
 
-	env_global = extendEnv("str",   (void*)fstr, env_global);
-	env_global = extendEnv("read",  (void*)freadobj, env_global);
-	env_global = extendEnv("write", (void*)fwriteobj, env_global);
-	env_global = extendEnv("null?",   (void*)fnull, env_global);
-	env_global = extendEnv("symbol?", (void*)fatom, env_global);
-	env_global = extendEnv("pair?",   (void*)fpair, env_global);
-	env_global = extendEnv("eq?",     (void*)feq, env_global);
-	env_global = extendEnv("cons", (void*)fcons, env_global);
+	extendEnv("str",   (void*)fstr, env);
+	extendEnv("read",  (void*)freadobj, env);
+	extendEnv("write", (void*)fwriteobj, env);
+	extendEnv("null?",   (void*)fnull, env);
+	extendEnv("symbol?", (void*)fatom, env);
+	extendEnv("pair?",   (void*)fpair, env);
+	extendEnv("eq?",     (void*)feq, env);
+	extendEnv("cons", (void*)fcons, env);
 
-	env_global = extendEnv("map", (void*)fmap, env_global);
-	env_global = extendEnv("cdr", (void*)fcdr, env_global);
-	env_global = extendEnv("car", (void*)fcar, env_global);
-	env_global = extendEnv("get", (void*)fget, env_global);
+	extendEnv("map", (void*)fmap, env);
+	extendEnv("cdr", (void*)fcdr, env);
+	extendEnv("car", (void*)fcar, env);
+	extendEnv("get", (void*)fget, env);
 
 	clock_t end_env = clock();
 
 
-	//Create an empty local environment
-	List* env = 0;
 	printf("\n");
 
 	//Evaluate all the sexp as an implicit progn
