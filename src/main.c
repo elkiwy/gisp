@@ -217,17 +217,24 @@ List* eval(List* exp, Environment* env) {
 
 		// (let (binds) body)
 		} else if (first(exp) == intern("let")) {
-			//List *extenv = env, *bindings = second(exp);
+			//Bind all the values
 			Environment* innerEnv = makeEnvironment(NULL, env);
 			List *bindings = second(exp);
 			while(bindings){
 				char* sym = first(bindings);
 				List* val = eval(second(bindings), innerEnv);
 				extendEnv(sym, val, innerEnv);
-				//printf("== Binded %s to ", (char*)sym); print_obj(val, 1); printf("\n");
 				bindings = cdr(cdr(bindings));
+				//printf("== Binded %s to ", (char*)sym); print_obj(val, 1); printf("\n");
 			}
-			return eval(third(exp), innerEnv);
+
+			//Evaluate all the body sexp in an implicit progn
+			List* body = cdr(cdr(exp));
+			List* result = 0;
+			while(body){
+				result = eval(car(body), innerEnv);
+				body = cdr(body);}
+			return result;
 
 		// (function args)
 		} else { 
