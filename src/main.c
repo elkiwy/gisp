@@ -22,6 +22,8 @@ static char token[SYMBOL_MAX]; /* token*/
 
 
 FILE* inputFile = 0;
+char* workingDir = "";
+Environment* global_env = 0;
 
 //Input parsing methods
 int is_space(char x)  {
@@ -101,7 +103,7 @@ void debug_printEnv(List* a, char* prefix){
 void extendEnv(char* name, void* value, Environment* env){
 	//Add this symbol and value to the current environment level
 	List* current = env->data;
-	printf("Adding \"%s\" to env %p and current %p\n", name, env, current); fflush(stdout);
+	//printf("Adding \"%s\" to env %p and current %p\n", name, env, current); fflush(stdout);
 	current = cons(cons(intern(name), cons(value, 0)), current);
 	env->data = current;
 }
@@ -270,8 +272,33 @@ List* eval(List* exp, Environment* env) {
 }
 
 
+//Read the current input in stdin or the inputfile if present
+List* read_and_eval(){
+	List* result = 0;	
+	look = read_char();
+	while(look != EOF){
+		gettoken();
+		//Evaluate only if valid tokens
+		if (strlen(token)>0)
+			result = eval(getobj(), global_env);
+		look = read_char();
+	}
+	return result;
+}
+
 //Basics I/O operations
-List* freadobj(List* a) { look = read_char(); gettoken(); return getobj();  }
+List* fincludefile(List* a){
+	char* path = (char*)trim_quotes(first(a));
+	FILE* originalFile = inputFile;
+	inputFile = fopen(path, "r");
+	read_and_eval();
+	inputFile = originalFile;
+}
+List* freadobj(List* a) {
+	look = read_char();
+	gettoken();
+	return getobj();
+}
 List* fwriteobj(List* a){
 	fflush(stdout);
 	print_obj(car(a), 1);
@@ -285,73 +312,71 @@ int main(int argc, char* argv[]) {
 	//Check if I have a file to read
 	printf("\n");
 	if (argc>1){
-		printf("Reading from file %s\n", argv[1]);
+		printf("Reading from file \"%s\"\n", argv[1]);
 		inputFile = fopen(argv[1], "r");
+		workingDir = argv[1];
+		while (strlen(workingDir)>=1 && workingDir[strlen(workingDir)-1] != '/'){
+			workingDir[strlen(workingDir)-1] = '\0';
+		}
+		printf("Working dir set on: \"%s\"\n", workingDir);
 	}
 
 	//Setup the profiling
 	double time = 0.0;
 
 	//Create the global environment
-	Environment* env = makeEnvironment(NULL, NULL);
 	clock_t begin = clock();
-	extendEnv("null", 0, env);
-	extendEnv("list",    (void*)flist, env);
-	extendEnv("vector",  (void*)fvec, env);
-	extendEnv("hashmap", (void*)fhashmap, env);
+	global_env = makeEnvironment(NULL, NULL);
+	extendEnv("null", 0, global_env);
+	extendEnv("list",    (void*)flist, global_env);
+	extendEnv("vector",  (void*)fvec, global_env);
+	extendEnv("hashmap", (void*)fhashmap, global_env);
 
-	extendEnv("/", (void*)fdiv, env);
-	extendEnv("*", (void*)fmul, env);
-	extendEnv("+", (void*)fadd, env);
-	extendEnv("-", (void*)fsub, env);
+	extendEnv("/", (void*)fdiv, global_env);
+	extendEnv("*", (void*)fmul, global_env);
+	extendEnv("+", (void*)fadd, global_env);
+	extendEnv("-", (void*)fsub, global_env);
 
-	extendEnv("sin", (void*)fsin, env);
-	extendEnv("cos", (void*)fcos, env);
-	extendEnv("dsin", (void*)fdsin, env);
-	extendEnv("dcos", (void*)fdcos, env);
-	extendEnv("deg", (void*)fdeg, env);
-	extendEnv("rad", (void*)frad, env);
+	extendEnv("sin", (void*)fsin, global_env);
+	extendEnv("cos", (void*)fcos, global_env);
+	extendEnv("dsin", (void*)fdsin, global_env);
+	extendEnv("dcos", (void*)fdcos, global_env);
+	extendEnv("deg", (void*)fdeg, global_env);
+	extendEnv("rad", (void*)frad, global_env);
 
-	extendEnv("range", (void*)frange, env);
-	extendEnv("reverse", (void*)freverse, env);
+	extendEnv("range", (void*)frange, global_env);
+	extendEnv("reverse", (void*)freverse, global_env);
 
-	extendEnv("make-surface",   (void*)fsvg_surface, env);
-	extendEnv("make-context",   (void*)fsvg_context, env);
-	extendEnv("surface-status", (void*)fsvg_status, env);
-	extendEnv("surface-clean",  (void*)fsvg_clean, env);
-	extendEnv("line",           (void*)fsvg_line, env);
+	extendEnv("make-surface",   (void*)fsvg_surface, global_env);
+	extendEnv("make-context",   (void*)fsvg_context, global_env);
+	extendEnv("surface-status", (void*)fsvg_status, global_env);
+	extendEnv("surface-clean",  (void*)fsvg_clean, global_env);
+	extendEnv("line",           (void*)fsvg_line, global_env);
 
-	extendEnv("str",   (void*)fstr, env);
-	extendEnv("read",  (void*)freadobj, env);
-	extendEnv("write", (void*)fwriteobj, env);
-	extendEnv("null?",   (void*)fnull, env);
-	extendEnv("symbol?", (void*)fatom, env);
-	extendEnv("pair?",   (void*)fpair, env);
-	extendEnv("eq?",     (void*)feq, env);
-	extendEnv("cons", (void*)fcons, env);
+	extendEnv("str",   (void*)fstr, global_env);
 
-	extendEnv("map", (void*)fmap, env);
-	extendEnv("cdr", (void*)fcdr, env);
-	extendEnv("car", (void*)fcar, env);
-	extendEnv("get", (void*)fget, env);
+	extendEnv("include", (void*)fincludefile, global_env);
+	extendEnv("read",    (void*)freadobj, global_env);
+	extendEnv("write",   (void*)fwriteobj, global_env);
+
+	extendEnv("null?",   (void*)fnull, global_env);
+	extendEnv("symbol?", (void*)fatom, global_env);
+	extendEnv("pair?",   (void*)fpair, global_env);
+	extendEnv("eq?",     (void*)feq, global_env);
+	extendEnv("cons", (void*)fcons, global_env);
+
+	extendEnv("map", (void*)fmap, global_env);
+	extendEnv("cdr", (void*)fcdr, global_env);
+	extendEnv("car", (void*)fcar, global_env);
+	extendEnv("get", (void*)fget, global_env);
 
 	clock_t end_env = clock();
 
 
 	printf("\n");
 
-	//Evaluate all the sexp as an implicit progn
-	List* result = 0;
-	look = read_char();
-	while(look != EOF){
-		gettoken();
-		//Evaluate only if valid tokens
-		if (strlen(token)>0)
-			result = eval(getobj(), env);
-		look = read_char();
-	}
-
-	//Print only the last result as a progn
+	//Evaluate everything 
+	List* result = read_and_eval();
 	print_obj(result, 1);
 
 	//Print the profiling
@@ -364,3 +389,6 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+
+
+

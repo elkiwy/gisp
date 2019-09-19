@@ -1,40 +1,28 @@
-;(defn point (x y)
-;	(hashmap :x x :y y))
-;
-;(def PI 3.14159265)
-;
-;(defn reg-shape (cont center side-n size)
-;	(let (cx (get center :x)
-;		  cy (get center :y))
-;		(progn
-;		(line cont (point (+ cx   0) (+ cy   0)) (point (+ cx 100) (+ cy   0)))
-;		(line cont (point (+ cx 100) (+ cy   0)) (point (+ cx 100) (+ cy 100)))
-;		(line cont (point (+ cx 100) (+ cy 100)) (point (+ cx   0) (+ cy 100)))
-;		(line cont (point (+ cx   0) (+ cy 100)) (point (+ cx   0) (+ cy   0)))
-;	    ))
-;	)
 
 
-(def x "def ")
-(write (str "def " x))
+(include "src/core.lisp")
 
-(let (x "let ")
-	(progn 
-		(write (str "let " x))
-		(let (x "LET " x (str x "LOT "))
-			(write (str "LET " x))
-		)
-		(write (str "let " x))
+(def canvas-w 256)
+(def canvas-h 256)
+
+
+
+
+(defn reg-shape (context center side-n size)
+	(let (cx (get center :x)
+		  cy (get center :y))
+		(line context (point (+ cx   0) (+ cy   0)) (point (+ cx 100) (+ cy   0)))
+		(line context (point (+ cx 100) (+ cy   0)) (point (+ cx 100) (+ cy 100)))
+		(line context (point (+ cx 100) (+ cy 100)) (point (+ cx   0) (+ cy 100)))
+		(line context (point (+ cx   0) (+ cy 100)) (point (+ cx   0) (+ cy   0)))
+	    )
 	)
-)
 
 
-(write (str "boh " x))
+(def s (make-surface "test.svg" canvas-w canvas-h))
+(surface-status s)
+(def c (make-context s))
 
+(reg-shape c (point 10 10) 4 100)
 
-
-;(def s (surface "test.svg" 128 128))
-;(surface-status s)
-;(def c (context s))
-;(reg-shape c (point 10 10) 4 100)
-;(surface-clean s c)
+(surface-clean s c)
