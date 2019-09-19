@@ -99,18 +99,6 @@ List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
 
 // ---------------------------------------------
 // Strings
-char* trim_quotes(char* s){
-	if (s[0] == '"'){
-		s++;
-	}
-
-	if (s[strlen(s)-1] == '"'){
-		s[strlen(s)-1] = '\0';
-	}
-	return s;
-}
-
-
 List* fstr(List* a) {
 	char* str1 = (char*)first(a);
 	char* str2 = (char*)second(a);

@@ -51,6 +51,7 @@ typedef struct Environment {
 
 //Utility
 void print_obj(List* ob, int head_of_list);
+char* trim_quotes(char* s);
 
 //Core
 List* cons(void* _car, void* _cdr);

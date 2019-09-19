@@ -93,4 +93,13 @@ double numVal(double* number){
 
 
 
+char* trim_quotes(char* s){
+	if (s[0] == '"'){s++;}
+	if (s[strlen(s)-1] == '"'){
+		s[strlen(s)-1] = '\0';
+	}
+	return s;
+}
+
+
 
