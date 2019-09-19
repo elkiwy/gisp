@@ -308,8 +308,8 @@ int main(int argc, char* argv[]) {
 	extendEnv("range", (void*)frange, env);
 	extendEnv("reverse", (void*)freverse, env);
 
-	extendEnv("surface",        (void*)fsvg_surface, env);
-	extendEnv("context",        (void*)fsvg_context, env);
+	extendEnv("make-surface",   (void*)fsvg_surface, env);
+	extendEnv("make-context",   (void*)fsvg_context, env);
 	extendEnv("surface-status", (void*)fsvg_status, env);
 	extendEnv("surface-clean",  (void*)fsvg_clean, env);
 	extendEnv("line",           (void*)fsvg_line, env);
