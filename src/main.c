@@ -15,12 +15,9 @@
 //Handy debug method
 #define debug(m,e) printf("%s:%d: %s:",__FILE__,__LINE__,m); print_obj(e,1); puts("");
 
-
-//Static variables used for input parsing
+//Global variables to handle environment and input to parse
 static int look; 
 static char token[SYMBOL_MAX]; /* token*/
-
-
 FILE* inputFile = 0;
 char* workingDir = "";
 Environment* global_env = 0;
@@ -34,6 +31,7 @@ int is_parens(char x) {
 //Read char from input stream or from input file if provided
 char read_char(){
 	if (inputFile){
+		//Read from the input file
 		char c = fgetc(inputFile);
 		while(c == ';'){
 			char* line = 0;
@@ -43,29 +41,33 @@ char read_char(){
 		}
 		return c;
 	}else{
+		//Or read from stdin
 		return getchar();
 	}
 }
 
-
-
+//Get the next token from the input and store it into the token variable
 static void gettoken() {
 	int index = 0;
+
+	//Skip all the white space
 	while(is_space(look)) { look = read_char(); }
 
 	if (is_parens(look)) {
+		//Return just the parens
 		token[index++] = look;  look = read_char();
 	} else {
+		//Return all the chars until a whitespace or a parens
 		int in_quotes = 0;
 		while(index < SYMBOL_MAX - 1 && look != EOF && ((!is_space(look) && !is_parens(look)) || in_quotes)) {
 			if(look == '"'){in_quotes = !in_quotes;}
 			token[index++] = look;  look = read_char();
 		}
 	}
-	token[index] = '\0';
-	//printf("returning token %s\n", token);
-}
 
+	//Terminate the token string
+	token[index] = '\0';
+}
 
 //Get list and get object function to help when parsing
 // getobj() returns a List or an interned symbol
