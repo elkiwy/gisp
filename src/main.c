@@ -77,6 +77,16 @@ void* getobj() {
 	if (token[0] == '(') return getlist();
 	if (token[0] == '[') return cons(intern("vector"), getlist());
 	if (token[0] == '{') return cons(intern("hashmap"), getlist());
+	if (token[0] == '#'){
+		if (look != '('){
+			printf("ERROR: \"#\" should always be followed by a list. \"%c\" was found instead.", look); fflush(stdout);	
+			return 0;
+		}
+		look = read_char();
+		List* expr = getlist();
+		List* lam = cons(intern("lambda"), cons(cons(intern("%"), 0), cons(expr, 0)));
+		return lam;
+	}
 	return intern(token);}
 List* getlist() {
 	List* tmp;

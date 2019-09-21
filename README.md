@@ -15,6 +15,7 @@ The core system is *heavily influenced* by this article [Lisp in less than 200 l
 - **Functions and defs**: *lambda*, *defn*, *def*
 - **Cairo SVG**: *surface*, *context*, *surface-status*, *surface-clean* 
 - **Draw functions**: *line*
+- **Lambdas**: *lambda* creation with support for short clojure-style lambdas with the "#" macro
 
 # Todo
 - REPL
@@ -23,7 +24,7 @@ The core system is *heavily influenced* by this article [Lisp in less than 200 l
 - and/or/not boolean operations
 - Fix multiple symbols with same name in different environment nesting level
 - Error messages
-- Reorganize local and global environment with environment layer structs
+- make defn function create and implicit progn in the function body
 
 
 
