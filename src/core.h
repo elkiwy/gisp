@@ -20,7 +20,7 @@ typedef struct List {
 
 //This is the layered environment structure
 typedef struct Environment {
-	struct Enviroment* outer;
+	struct Environment* outer;
 	List* data;
 }Environment;
 
