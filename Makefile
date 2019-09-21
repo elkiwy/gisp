@@ -7,7 +7,7 @@ SOURCES := $(wildcard $(SRC)/*.c)
 OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 
 build/main: $(OBJECTS)
-	$(CC) $^ -g -Wall -L/usr/local/lib/ -lcairo -o $@
+	$(CC) $^ -g -Wall -L/usr/local/lib/ -lcairo -lm -ldl -o $@
 
 $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) -g -Wall -c $< -I$(SRC) -I/usr/local/include/cairo -o $@

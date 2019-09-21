@@ -28,15 +28,22 @@ int is_space(char x)  {
 int is_parens(char x) {
 	return x == '(' || x == ')' || x == '[' || x == ']' || x == '{' || x == '}';}
 
+
+void skipLine(FILE* inputFile){
+	char c = fgetc(inputFile);
+	while(c != EOF && c != '\n'){
+		c = fgetc(inputFile);
+	}
+	//if (c == '\n'){}
+}
+
 //Read char from input stream or from input file if provided
 char read_char(){
 	if (inputFile){
 		//Read from the input file
 		char c = fgetc(inputFile);
 		while(c == ';'){
-			char* line = 0;
-			size_t size;
-			line = fgetln(inputFile, &size);
+			skipLine(inputFile);
 			c = fgetc(inputFile);
 		}
 		return c;
@@ -104,7 +111,7 @@ List* getlist() {
 void debug_printEnv(List* a, char* prefix){
 	int i=0;
 	while(a){
-		printf("%s %d - %s\n", prefix, i, car(car(a)));
+		printf("%s %d - %s\n", prefix, i, (char*)car(car(a)));
 		a = cdr(a);
 		i++;
 	}
