@@ -285,6 +285,11 @@ List* eval(List* exp, Environment* env) {
 			}
 			return freverse(cons(ret, 0));
 
+		//Keyword map member accessing
+		}else if (*((char*)first(exp)) == ':'){
+			List* obj = eval(second(exp), env);
+			return fget(cons(obj, cons(first(exp), 0)));
+
 		// (function args)
 		} else { 
 			//printf("Searching for symbol %s\n", (char*)first(exp));
