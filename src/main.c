@@ -326,6 +326,7 @@ List* fincludefile(List* a){
 	inputFile = fopen(path, "r");
 	read_and_eval();
 	inputFile = originalFile;
+	return 0;
 }
 List* freadobj(List* a) {
 	look = read_char();
