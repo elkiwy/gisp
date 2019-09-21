@@ -75,17 +75,6 @@ List* freverse(List* a) {
 	return ret;	
 }
 
-List* fmap(List* a){
-	List* l = second(a);
-	List* ret = 0;
-	while (l){
-		List* val = car(l);
-		List* r = ((List* (*) (List*))first(a))(cons(val, 0));
-		ret = cons(r, ret);
-		l = cdr(l);
-	}
-	return freverse(cons(ret, 0));
-}
 
 
 // ---------------------------------------------

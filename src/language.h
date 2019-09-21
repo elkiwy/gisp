@@ -33,7 +33,6 @@ List* fcons(List* a);
 List* flist(List* a);
 List* fcar(List* a);
 List* fcdr(List* a);
-List* fmap(List* a);
 List* freverse(List* a);
 
 //Tests and type checking

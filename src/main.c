@@ -110,8 +110,20 @@ void extendEnv(char* name, void* value, Environment* env){
 	env->data = current;
 }
 
-//Eval functions
 List* eval(List* exp, Environment* env);
+List* apply_lambda(List* lambda, List* args, Environment* env){
+	//bind names into env and eval body
+	Environment* innerEnv = makeEnvironment(NULL, env);
+	List *names = second(lambda), *vars = args;
+	for (  ; names ; names = cdr(names), vars = cdr(vars) ){
+		char* sym = car(names);
+		List* val = eval(car(vars), innerEnv);
+		extendEnv(sym, val, innerEnv);
+	}
+	return eval(third(lambda), innerEnv);
+}
+
+//Eval functions
 List* evlist(List* list, Environment* env) {
 	List* head = 0,**args = &head;
 	for ( ; list ; list = cdr(list)) {
@@ -240,6 +252,29 @@ List* eval(List* exp, Environment* env) {
 				body = cdr(body);}
 			return result;
 
+
+		/// (map function list)
+		}else if (first(exp) == intern("map")){
+			List* ret = 0;
+			List* l = eval(third(exp), env);
+			if (is_pair(second(exp))){
+				//Lambda
+				while (l){
+					List* r = apply_lambda(second(exp), cons(car(l), 0), env);
+					ret = cons(r, ret);
+					l = cdr(l);
+				}
+			}else{
+				//Known function name
+				void* f = eval(second(exp), env);
+				while (l){
+					List* r = ((List* (*) (List*))f)(cons(car(l), 0));
+					ret = cons(r, ret);
+					l = cdr(l);
+				}
+			}
+			return freverse(cons(ret, 0));
+
 		// (function args)
 		} else { 
 			//printf("Searching for symbol %s\n", (char*)first(exp));
@@ -259,19 +294,15 @@ List* eval(List* exp, Environment* env) {
 	// ((lambda (params) body) args)
 	} else if (car(car(exp)) == intern("lambda")) {
 		//printf("lambda found\n");
+
 		//bind names into env and eval body
-		Environment* innerEnv = makeEnvironment(NULL, env);
-		List *names = second(car(exp)), *vars = cdr(exp);
-		for (  ; names ; names = cdr(names), vars = cdr(vars) ){
-			char* sym = car(names);
-			List* val = eval(car(vars), innerEnv);
-			extendEnv(sym, val, innerEnv);
-		}
-		return eval(third(car(exp)), innerEnv);
+		return apply_lambda(car(exp), cdr(exp), env);
+
 	}
 	printf("cannot evaluate expression %s\n", first(exp));
 	return 0;
 }
+
 
 
 //Read the current input in stdin or the inputfile if present
@@ -367,7 +398,6 @@ int main(int argc, char* argv[]) {
 	extendEnv("eq?",     (void*)feq, global_env);
 	extendEnv("cons", (void*)fcons, global_env);
 
-	extendEnv("map", (void*)fmap, global_env);
 	extendEnv("cdr", (void*)fcdr, global_env);
 	extendEnv("car", (void*)fcar, global_env);
 	extendEnv("get", (void*)fget, global_env);
