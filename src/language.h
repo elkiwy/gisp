@@ -28,6 +28,10 @@ List* fdcos(List* a);
 List* fdeg(List* a);
 List* frad(List* a);
 
+List* fpow(List* a);
+List* fsqrt(List* a);
+List* fatan2(List* a);
+
 //List operations
 List* fcons(List* a);
 List* flist(List* a);
