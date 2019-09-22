@@ -292,6 +292,27 @@ List* eval(List* exp, Environment* env) {
 			}
 			return freverse(cons(ret, 0));
 
+		/// (doseq (bind seq) body)
+		}else if (first(exp) == intern("doseq")){
+			Environment* innerEnv = makeEnvironment(NULL, env);
+			char* sym = first(second(exp));
+			List* seq = eval(second(second(exp)), env);
+			List* body = cdr(cdr(exp));
+			List* current = seq;
+			while(seq){
+				//Update the symbol value
+				extendEnv(sym, car(seq), innerEnv);
+				//Eval the body and go to the next
+				List* current = body;
+				while(current){
+					//Eval the body and go to the next
+					eval(car(current), innerEnv);
+					current = cdr(current);
+				}
+				seq = cdr(seq);
+			}
+			return 0;
+
 		//Keyword map member accessing
 		}else if (*((char*)first(exp)) == ':'){
 			List* obj = eval(second(exp), env);
