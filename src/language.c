@@ -167,15 +167,21 @@ List* fhashmap(List* a){
 
 /// (get m k)
 List* fget(List* a){
-	if (is_hashmap(first(a))){	
-		map_t map = (map_t)untag_hashmap(first(a));
+	List* seq = first(a);
+	if(is_pair(seq)){
+		seq = fvec(seq);
+	}
+
+	//Map
+	if (is_hashmap(seq)){	
+		map_t map = (map_t)untag_hashmap(seq);
 		char* key = (char*)second(a);
 		List* value = 0;
 		hashmap_get(map, key, (any_t)&value);
 		return value;
-
-	}else if (is_vector(first(a))){
-		void** vec = (void**)untag_vector(first(a));
+	//Vector
+	}else if (is_vector(seq)){
+		void** vec = (void**)untag_vector(seq);
 		int pos = (int)numVal(second(a));
 		int size = vecLength(vec);
 		if (pos >= size){
