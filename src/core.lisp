@@ -20,17 +20,22 @@
         (+ (:x a) (* pos (- (:x b) (:x a))))
         (+ (:y a) (* pos (- (:y b) (:y a))))))
 
-	
-	
-	
+
+(defn point-move-by-vector (p vect)
+    (point 
+        (+ (:x p) (* (:len vect) (cos (:dir vect))))
+        (+ (:y p) (* -1 (:len vect) (sin (:dir vect))))))
 
 
 (defn reg-shape (context center side-n size)
 	(let (cx   (:x center)
-		  cy   (:y center))
-		(line context (point (+ cx   0) (+ cy   0)) (point (+ cx 100) (+ cy   0)))
-		(line context (point (+ cx 100) (+ cy   0)) (point (+ cx 100) (+ cy 100)))
-		(line context (point (+ cx 100) (+ cy 100)) (point (+ cx   0) (+ cy 100)))
-		(line context (point (+ cx   0) (+ cy 100)) (point (+ cx   0) (+ cy   0)))
+		  cy   (:y center)
+		  step (/ (* PI 2) side-n)
+		  angles (map #(* % step) (range side-n))
+		  points (map #(point-move-by-vector center (vec size %)) angles)
+			 )
+		(doseq (i (range (- side-n 1)))
+			(line context (get points i) (get points (+ i 1))))
+		(line context (last points) (first points))
 	    )
 	)
