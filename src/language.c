@@ -79,6 +79,20 @@ List* freverse(List* a) {
 	return ret;	
 }
 
+List* ffirst(List* a){
+	return first(first(a));
+}
+
+List* flast(List* a){
+	List* l = first(a);
+	List* current = l;
+	List* last = 0;
+	while(current){
+		last = car(current);
+		current = cdr(current);
+	}
+	return last;
+}
 
 
 // ---------------------------------------------

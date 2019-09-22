@@ -38,6 +38,8 @@ List* flist(List* a);
 List* fcar(List* a);
 List* fcdr(List* a);
 List* freverse(List* a);
+List* ffirst(List* a);
+List* flast(List* a);
 
 //Tests and type checking
 List* feq(List* a);
