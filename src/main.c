@@ -298,7 +298,6 @@ List* eval(List* exp, Environment* env) {
 			char* sym = first(second(exp));
 			List* seq = eval(second(second(exp)), env);
 			List* body = cdr(cdr(exp));
-			List* current = seq;
 			while(seq){
 				//Update the symbol value
 				extendEnv(sym, car(seq), innerEnv);
