@@ -6,5 +6,8 @@
 
 (def s (make-surface "test.svg" canvas-w canvas-h))
 (def c (make-context s))
-(reg-shape c (point 100 100) 4 50)
+
+(doseq (i (range 10))
+	(reg-shape c (point 128 128) 4 100 (* i 10)))
+
 (surface-clean s c)

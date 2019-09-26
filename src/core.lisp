@@ -27,11 +27,11 @@
         (+ (:y p) (* -1 (:len vect) (sin (:dir vect))))))
 
 
-(defn reg-shape (context center side-n size)
+(defn reg-shape (context center side-n size angle)
 	(let (cx   (:x center)
 		  cy   (:y center)
 		  step (/ (* PI 2) side-n)
-		  angles (map #(* % step) (range side-n))
+		  angles (map #(+ (* % step) (rad angle)) (range side-n))
 		  points (map #(point-move-by-vector center (vec size %)) angles)
 			 )
 		(doseq (i (range (- side-n 1)))
