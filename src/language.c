@@ -131,12 +131,6 @@ int listLength(List* a){
 	return n;
 }
 
-int vecLength(void** v){
-	int n = 0;
-	while(v[n]){n++;}
-	return n;
-}
-
 /// (vector values...)
 List* fvec(List* a){
 	int n = listLength(a);
@@ -193,6 +187,21 @@ List* fget(List* a){
 		return 0;
 	}
 }
+
+
+/// (count vec)
+List* fcount(List* a){
+	List* arg = first(a);
+	if (is_vector(arg)){
+		void** vec = (void**)untag_vector(arg);
+		int size = vecLength(vec);
+		return (List*)value_to_number(size);
+	}else{
+		printf("%p not supported for count.", arg);
+		return 0;
+	}
+}
+
 
 
 // ---------------------------------------------

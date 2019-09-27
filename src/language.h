@@ -54,6 +54,7 @@ List* fstr(List* a);
 List* fvec(List* a);
 List* fhashmap(List* a);
 List* fget(List* a);
+List* fcount(List* a);
 
 //Cairo
 List* fsvg_surface(List* a);

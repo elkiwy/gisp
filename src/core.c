@@ -103,3 +103,13 @@ char* trim_quotes(char* s){
 
 
 
+
+
+
+int vecLength(void** v){
+	int n = 0;
+	while(v[n]){
+		n++;
+	}
+	return n;
+}
