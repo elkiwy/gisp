@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 
 #include "core.h"
 #include "cairo.h"
@@ -31,6 +32,8 @@ List* frad(List* a);
 List* fpow(List* a);
 List* fsqrt(List* a);
 List* fatan2(List* a);
+List* frand(List* a);
+List* fseed(List* a);
 
 //List operations
 List* fcons(List* a);

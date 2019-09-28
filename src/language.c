@@ -57,6 +57,33 @@ List* frange(List* a){
 }
 
 
+List* fseed(List* a){
+	int seed = 0;
+	if (a){ seed = first(a);
+	}else{  seed = time(NULL);}
+	srand(seed);
+	return 0;
+}
+
+
+
+/// (rand min max) ;min is inclusive, max is exclusive
+/// (rand max) ;max is exclusive
+List* frand(List* a){
+	List* arg1 = first(a);
+	int min = 0;
+	int max = 0;
+	if (cdr(a)){
+		//Min - max
+		min = numVal(arg1);
+		max = numVal(second(a));
+	}else{
+		//Max only
+		max = numVal(arg1);
+	}
+	return (List*)value_to_number(randInt(min, max));
+}
+
 
 
 
