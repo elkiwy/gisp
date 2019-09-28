@@ -30,7 +30,7 @@ void print_obj(List* ob, int head_of_list) {
 		printf("]");
 
 	}else if(is_number(ob)){
-		double num = numVal((double*)ob);
+		double num = numVal(ob);
 		if ((num - (int)num) == 0){printf("%i", (int)num);
 		}else{printf("%f", num);}
 
@@ -86,8 +86,8 @@ double* value_to_number(double value){
 	double* ptr = malloc(sizeof(double));
 	*ptr = value;
 	return (double*)tag_number(ptr);}
-double numVal(double* number){
-	return *((double*)untag_number(number));
+double numVal(List* tagged_number){
+	return *((double*)untag_number(tagged_number));
 }
 
 

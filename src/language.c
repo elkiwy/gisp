@@ -15,10 +15,10 @@ double numberOperation(char op, double a, double b){
 
 ///Apply an operation to all the element of the list
 List* applyOperationOnList(char op, List* list){
-	double res = numVal((double*)first(list));
+	double res = numVal(first(list));
 	List* current = list;
 	while((current = cdr(current))){
-		res = numberOperation(op, res, numVal((double*)car(current)));
+		res = numberOperation(op, res, numVal(car(current)));
 	}
 	return (List*)value_to_number(res);
 }
@@ -207,8 +207,8 @@ List* fcount(List* a){
 // ---------------------------------------------
 // Cairo 
 List* fsvg_surface(List* a){
-	float w = numVal((double*)second(a));
-	float h = numVal((double*)third(a));
+	float w = numVal(second(a));
+	float h = numVal(third(a));
 	char* n = first(a);
 	n++;
 	n[strlen(n)-1] = '\0';
@@ -246,7 +246,7 @@ List* fsvg_line(List* a){
 	cairo_t* context = first(a);
 	map_t p1 = (map_t)untag_hashmap(second(a));
 	map_t p2 = (map_t)untag_hashmap(third(a));
-	double *x1, *y1, *x2, *y2;
+	List *x1, *y1, *x2, *y2;
 	hashmap_get(p1, ":x", (any_t)&x1);
 	hashmap_get(p1, ":y", (any_t)&y1);
 	hashmap_get(p2, ":x", (any_t)&x2);

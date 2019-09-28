@@ -62,7 +62,7 @@ Environment* makeEnvironment(List* _data, Environment* _outer);
 //Numbers 
 double* symbol_to_number(char* sym);
 double* value_to_number(double value);
-double numVal(double* number);
+double numVal(List* tagged_number);
 
 //Define what is true and what is false
 #define e_true     cons( intern("quote"), cons( intern("t"), 0))
