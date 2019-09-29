@@ -42,6 +42,7 @@ List* flist(List* a);
 List* fcar(List* a);
 List* fcdr(List* a);
 List* freverse(List* a);
+List* fconcat(List* a);
 List* ffirst(List* a);
 List* flast(List* a);
 

@@ -107,6 +107,38 @@ List* freverse(List* a) {
 	return ret;	
 }
 
+
+
+void** concatVec(void** v1, void** v2){
+	int size1 = vecLength(v1);
+	int size2 = vecLength(v2);
+	int tot = size1+size2;
+	void** vec = malloc(sizeof(void*) * (tot+1));
+	int i = 0;
+	while(i<size1){ vec[i] = v1[i]; i++;}
+	while(i<tot){   vec[i] = v2[i-size1]; i++;}
+	vec[tot] = 0;
+	return vec;
+}
+
+
+List* fconcat(List* a) {
+	List* v1 = first(a);
+	if(is_vector(v1)){
+		void** untagged_result = (void**)untag_vector(v1);
+		List* current = cdr(a);
+		while(current){
+			void** untagged_item = (void**)untag_vector(car(current));
+			untagged_result = concatVec(untagged_result, untagged_item);
+			current = cdr(current);
+		}
+		return (List*)tag_vector(untagged_result);
+	}else{
+		printf("Concat not yet implemented with type: %p", v1);
+		return 0;
+	}
+}
+
 List* ffirst(List* a){
 	return first(first(a));
 }
