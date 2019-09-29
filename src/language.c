@@ -38,6 +38,7 @@ List* frad(List* a) {return (List*)value_to_number(numVal(first(a)) * DEG_TO_RAD
 List* fdeg(List* a) {return (List*)value_to_number(numVal(first(a)) * RAD_TO_DEG);}
 
 List* fpow(List* a)   {return (List*)value_to_number(pow(numVal(first(a)), numVal(second(a))));}
+List* fmodulo(List* a){return (List*)value_to_number((int)numVal(first(a)) % (int)numVal(second(a)));}
 List* fsqrt(List* a)  {return (List*)value_to_number(sqrt(numVal(first(a))));}
 List* fatan2(List* a) {return (List*)value_to_number(atan2(numVal(first(a)), numVal(second(a))));}
 

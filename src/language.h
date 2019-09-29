@@ -30,6 +30,7 @@ List* fdeg(List* a);
 List* frad(List* a);
 
 List* fpow(List* a);
+List* fmodulo(List* a);
 List* fsqrt(List* a);
 List* fatan2(List* a);
 List* frand(List* a);
