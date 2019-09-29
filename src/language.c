@@ -60,7 +60,7 @@ List* frange(List* a){
 
 List* fseed(List* a){
 	int seed = 0;
-	if (a){ seed = first(a);
+	if (a){ seed = (int)numVal(first(a));
 	}else{  seed = time(NULL);}
 	srand(seed);
 	return 0;
