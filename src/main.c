@@ -408,6 +408,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("vector",  (void*)fvec, global_env);
 	extendEnv("hashmap", (void*)fhashmap, global_env);
 	extendEnv("count",   (void*)fcount, global_env);
+	extendEnv("assoc",   (void*)fassoc, global_env);
 
 	extendEnv("/", (void*)fdiv, global_env);
 	extendEnv("*", (void*)fmul, global_env);

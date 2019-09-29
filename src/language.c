@@ -240,6 +240,30 @@ List* fcount(List* a){
 	}
 }
 
+/// (assoc coll key value)
+List* fassoc(List* a){
+	List* coll = first(a);
+	List* key_val = cdr(a);
+
+	if (is_vector(coll)){
+		void** vec = (void**)untag_vector(coll);
+		int size = vecLength(vec);
+
+		while(key_val){
+			int pos = (int)numVal(first(key_val));
+			if (pos<size){vec[pos] = second(key_val);}
+			key_val = cdr(cdr(key_val));
+		}
+
+		return coll;
+
+	}else{
+		printf("Assoc not yet implemented for pointer type %p", coll);
+		return 0;
+	}
+}
+
+
 
 
 // ---------------------------------------------
