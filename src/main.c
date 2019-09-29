@@ -298,6 +298,7 @@ List* eval(List* exp, Environment* env) {
 			char* sym = first(second(exp));
 			List* seq = eval(second(second(exp)), env);
 			List* body = cdr(cdr(exp));
+			List* ret = 0;
 			while(seq){
 				//Update the symbol value
 				extendEnv(sym, car(seq), innerEnv);
@@ -305,12 +306,12 @@ List* eval(List* exp, Environment* env) {
 				List* current = body;
 				while(current){
 					//Eval the body and go to the next
-					eval(car(current), innerEnv);
+					ret = eval(car(current), innerEnv);
 					current = cdr(current);
 				}
 				seq = cdr(seq);
 			}
-			return 0;
+			return ret;
 
 		//Keyword map member accessing
 		}else if (*((char*)first(exp)) == ':'){
