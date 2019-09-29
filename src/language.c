@@ -125,7 +125,17 @@ List* flast(List* a){
 
 // ---------------------------------------------
 // Test and type checking
-List* feq(List* a)   { return first(a) == second(a) ? e_true : e_false; }
+List* feq(List* a)   {
+	List* v1 = first(a);
+	List* v2 = second(a);
+	if (is_number(v1) && is_number(v2)){
+		double x1 = numVal(v1);	
+		double x2 = numVal(v2);	
+		return x1 == x2 ? e_true : e_false;
+	}else{
+		return first(a) == second(a) ? e_true : e_false;
+	}
+}
 List* fpair(List* a) { return is_pair(first(a))     ? e_true : e_false; }
 List* fatom(List* a) { return is_atom(first(a))     ? e_true : e_false; }
 List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }

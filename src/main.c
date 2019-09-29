@@ -419,6 +419,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("atan2", (void*)fatan2, global_env);
 	extendEnv("rand", (void*)frand, global_env);
 	extendEnv("seed", (void*)fseed, global_env);
+	extendEnv("=", (void*)feq, global_env);
 
 	extendEnv("sin", (void*)fsin, global_env);
 	extendEnv("cos", (void*)fcos, global_env);
