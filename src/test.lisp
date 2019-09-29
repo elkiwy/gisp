@@ -1,3 +1,8 @@
+;(include "src/simplex-noise.lisp")
+;(write "Simplex included")
+
+
+
 (include "src/core.lisp")
 (write "Core included")
 
