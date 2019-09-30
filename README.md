@@ -25,6 +25,7 @@ The core system is *heavily influenced* by this article [Lisp in less than 200 l
 - Fix multiple symbols with same name in different environment nesting level
 - Error messages
 - make defn function create and implicit progn in the function body
+- add garbage collection
 
 
 
