@@ -127,6 +127,17 @@ void** copyVec(void** v){
 	return new;
 }
 
+
+List* vecToList(void** vec){
+	int size = vecLength(vec);
+	List* l = 0;
+	for(int i=size-1; i>=0; i--){
+		l = cons(vec[i], l);
+	}
+	return l;
+}
+
+
 int randInt(int min, int max){
 	int range = max-min;
 	return (rand() % range) + min;

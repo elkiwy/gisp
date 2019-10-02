@@ -274,6 +274,10 @@ List* eval(List* exp, Environment* env) {
 		}else if (first(exp) == intern("map")){
 			List* ret = 0;
 			List* l = eval(third(exp), env);
+
+			//If I got a vector convert it into a list
+			if (is_vector(l)){l = vecToList((void**)untag_vector(l));}
+
 			if (is_pair(second(exp))){
 				//Lambda
 				while (l){
