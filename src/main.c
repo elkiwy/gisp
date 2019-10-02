@@ -439,6 +439,8 @@ int main(int argc, char* argv[]) {
 	extendEnv("dcos", (void*)fdcos, global_env);
 	extendEnv("deg", (void*)fdeg, global_env);
 	extendEnv("rad", (void*)frad, global_env);
+	extendEnv("int", (void*)fint, global_env);
+
 
 	extendEnv("range", (void*)frange, global_env);
 	extendEnv("reverse", (void*)freverse, global_env);

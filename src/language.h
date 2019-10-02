@@ -28,6 +28,7 @@ List* fdsin(List* a);
 List* fdcos(List* a);
 List* fdeg(List* a);
 List* frad(List* a);
+List* fint(List* a);
 
 List* fpow(List* a);
 List* fmodulo(List* a);

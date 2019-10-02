@@ -36,6 +36,7 @@ List* fdcos(List* a) {return (List*)value_to_number(cos(numVal(first(a)) * DEG_T
 
 List* frad(List* a) {return (List*)value_to_number(numVal(first(a)) * DEG_TO_RAD);}
 List* fdeg(List* a) {return (List*)value_to_number(numVal(first(a)) * RAD_TO_DEG);}
+List* fint(List* a) {return (List*)value_to_number((int)numVal(first(a)));}
 
 List* fpow(List* a)   {return (List*)value_to_number(pow(numVal(first(a)), numVal(second(a))));}
 List* fmodulo(List* a){return (List*)value_to_number((int)numVal(first(a)) % (int)numVal(second(a)));}
