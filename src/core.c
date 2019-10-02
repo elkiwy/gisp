@@ -116,6 +116,17 @@ int vecLength(void** v){
 
 
 
+
+void** copyVec(void** v){
+	int size = vecLength(v);
+	void** new = malloc(sizeof(void*) * (size+1));
+	for(int i = 0; i<size; i++){
+		new[i] = v[i];
+	}
+	new[size] = 0;
+	return new;
+}
+
 int randInt(int min, int max){
 	int range = max-min;
 	return (rand() % range) + min;

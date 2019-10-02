@@ -52,6 +52,7 @@ typedef struct Environment {
 //Utility
 void print_obj(List* ob, int head_of_list);
 char* trim_quotes(char* s);
+void** copyVec(void** v);
 int vecLength(void** v);
 int randInt(int min, int max);
 
