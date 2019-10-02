@@ -32,9 +32,6 @@
 		value
 		(N-times (- n 1) f (f value))))
 
-
-
-
 (defn simplex-noise-octave (octave_seed)
 	(progn
     (seed (if (= octave_seed RANDOM-SEED) (rand 99999) octave_seed))
@@ -42,3 +39,53 @@
           perm (concat p p)
           permMod12 (map #(mod % 12) perm))
         { :perm perm :permMod12 permMod12 })))
+
+(defn fast-floor (x)
+    (let (xi (int x))
+        (if (< x xi) (- xi 1) xi)))
+
+(defn dot (grad x y)
+    (+ (* (get grad 0) x)
+       (* (get grad 1) y)))
+
+(def F2 (* 0.5 (- (sqrt 3.0) 1.0)))
+(def G2 (/ (- 3.0 (sqrt 3.0)) 6.0))
+
+(defn contribution (grad-index x y)
+    (let (val (- 0.5 (* x x) (* y y)))
+        (if (< val 0)
+            0
+            (let (val (* val val))
+                (* val val (dot (GRADIENS-3 grad-index) x y))))))
+
+
+(defn noise (octave xin yin)
+    (let (s (* (+ xin yin) F2)
+          i (fast-floor (+ xin s))
+          j (fast-floor (+ yin s))
+          t (* (+ i j) G2)
+          ;Unskew the cell origin back to x, y space
+          X0 (- i t)
+          Y0 (- j t)
+          ;Distances from origin cell
+          x0 (- xin X0) 
+          y0 (- yin Y0)
+		  i1 (if (> x0 y0) 1 0)
+		  j1 (if (> x0 y0) 0 1)
+          x1 (+ (- x0 i1) G2)
+          y1 (+ (- y0 j1) G2)
+          x2 (+ (- x0 1.0) (* 2.0 G2))
+          y2 (+ (- y0 1.0) (* 2.0 G2))
+          ii (bit-and i 255)
+          jj (bit-and j 255)
+          permMod12 (:permMod12 octave)
+          perm (:perm octave)
+          gi0 (get permMod12 (+ ii (get perm jj)))
+          gi1 (get permMod12 (+ ii i1 (get perm (+ jj j1))))
+          gi2 (get permMod12 (+ ii 1  (get perm (+ jj 1))))
+          n0 (contribution gi0 x0 y0)
+          n1 (contribution gi1 x1 y1)
+          n2 (contribution gi2 x2 y2))
+        (* 70 (+ n0 n1 n2))))
+
+
