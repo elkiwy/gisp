@@ -380,9 +380,15 @@ List* freadobj(List* a) {
 	gettoken();
 	return getobj();
 }
+
 List* fwriteobj(List* a){
 	fflush(stdout);
-	print_obj(car(a), 1);
+	List* current = a;
+	while(current){
+		print_obj(car(current), 1);
+		current = cdr(current);
+	}
+
 	puts("");
 	return e_true;
 }
