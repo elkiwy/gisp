@@ -30,6 +30,9 @@ List* fdeg(List* a);
 List* frad(List* a);
 List* fint(List* a);
 
+List* flessThan(List* a);
+List* fgreaterThan(List* a);
+
 List* fpow(List* a);
 List* fmodulo(List* a);
 List* fsqrt(List* a);

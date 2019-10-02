@@ -43,6 +43,10 @@ List* fmodulo(List* a){return (List*)value_to_number((int)numVal(first(a)) % (in
 List* fsqrt(List* a)  {return (List*)value_to_number(sqrt(numVal(first(a))));}
 List* fatan2(List* a) {return (List*)value_to_number(atan2(numVal(first(a)), numVal(second(a))));}
 
+
+List* flessThan(List* a)    {return numVal(first(a)) < numVal(second(a)) ? e_true : e_false;}
+List* fgreaterThan(List* a) {return numVal(first(a)) > numVal(second(a)) ? e_true : e_false;}
+
 List* frange(List* a){
 	double min = 0, max = 0; 
 	if (cdr(a)){
