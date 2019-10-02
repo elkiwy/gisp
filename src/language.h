@@ -21,6 +21,7 @@ List* fsub(List* a);
 List* fmul(List* a);
 List* fdiv(List* a);
 List* frange(List* a);
+List* fbitAnd(List* a);
 
 List* fsin(List* a);
 List* fcos(List* a);

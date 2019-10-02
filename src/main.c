@@ -425,6 +425,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("*", (void*)fmul, global_env);
 	extendEnv("+", (void*)fadd, global_env);
 	extendEnv("-", (void*)fsub, global_env);
+	extendEnv("bit-and", (void*)fbitAnd, global_env);
 	extendEnv("mod",   (void*)fmodulo, global_env);
 	extendEnv("pow",   (void*)fpow, global_env);
 	extendEnv("sqrt",  (void*)fsqrt, global_env);
