@@ -1,6 +1,7 @@
 #include "core.h"
 
-//Prints a List object
+// ------------------------------------------------------------------
+//Generic utilities
 void print_obj(List* ob, int head_of_list) {
 	if(is_hashmap(ob)){
 		map_t map = (map_t)untag_hashmap(ob);
@@ -48,15 +49,13 @@ void print_obj(List* ob, int head_of_list) {
 	}
 }
 
-//Cons shell
-List* cons(void* _car, void* _cdr) {
-	List* _pair = calloc( 1, sizeof (List) );
-	_pair->data = _car;
-	_pair->next = _cdr;
-	return (List*) tag(_pair);
+int randInt(int min, int max){
+	int range = max-min;
+	return (rand() % range) + min;
 }
 
-//Symbols interning
+// ------------------------------------------------------------------
+//Lisp core
 List* symbols = 0;
 void* intern(char* sym) {
 	List* _pair = symbols;
@@ -69,7 +68,13 @@ void* intern(char* sym) {
 	return (void*)car(symbols);
 }
 
-//Environment layer creation
+List* cons(void* _car, void* _cdr) {
+	List* _pair = calloc( 1, sizeof (List) );
+	_pair->data = _car;
+	_pair->next = _cdr;
+	return (List*) tag(_pair);
+}
+
 Environment* makeEnvironment(List* _data, Environment* _outer) {
 	Environment* env = calloc( 1, sizeof (Environment) );
 	env->data = _data;
@@ -77,7 +82,8 @@ Environment* makeEnvironment(List* _data, Environment* _outer) {
 	return env;
 }
 
-//Number objects
+// ------------------------------------------------------------------
+//Number utilities
 double* symbol_to_number(char* sym){
 	double* ptr = malloc(sizeof(double));
 	*ptr = strtod(sym, NULL);
@@ -90,9 +96,8 @@ double numVal(List* tagged_number){
 	return *((double*)untag_number(tagged_number));
 }
 
-
-
-
+// ------------------------------------------------------------------
+//String utilities
 char* trim_quotes(char* s){
 	if (s[0] == '"'){s++;}
 	if (s[strlen(s)-1] == '"'){
@@ -101,11 +106,8 @@ char* trim_quotes(char* s){
 	return s;
 }
 
-
-
-
-
-
+// ------------------------------------------------------------------
+//Vector utilities
 int vecLength(void** v){
 	int n = 0;
 	while(v[n]){
@@ -113,9 +115,6 @@ int vecLength(void** v){
 	}
 	return n;
 }
-
-
-
 
 void** copyVec(void** v){
 	int size = vecLength(v);
@@ -127,7 +126,6 @@ void** copyVec(void** v){
 	return new;
 }
 
-
 List* vecToList(void** vec){
 	int size = vecLength(vec);
 	List* l = 0;
@@ -138,7 +136,3 @@ List* vecToList(void** vec){
 }
 
 
-int randInt(int min, int max){
-	int range = max-min;
-	return (rand() % range) + min;
-}

@@ -15,59 +15,102 @@
 #define DEG_TO_RAD PI/180.0
 #define RAD_TO_DEG 180.0/PI
 
-//Math
+
+
+// ------------------------------------------------------------------
+// Math
 List* fadd(List* a);
 List* fsub(List* a);
 List* fmul(List* a);
 List* fdiv(List* a);
-List* frange(List* a);
+
+// -----------------------------------------
+//Math - Bit-wise operations
 List* fbitAnd(List* a);
 
+// -----------------------------------------
+//Math - Trigonometry
 List* fsin(List* a);
 List* fcos(List* a);
 List* fdsin(List* a);
 List* fdcos(List* a);
 List* fdeg(List* a);
 List* frad(List* a);
+List* fatan2(List* a);
+
+// -----------------------------------------
+//Math - Conversions
 List* fint(List* a);
 
-List* flessThan(List* a);
-List* fgreaterThan(List* a);
-
+// -----------------------------------------
+//Math - Advanced operations
 List* fpow(List* a);
 List* fmodulo(List* a);
 List* fsqrt(List* a);
-List* fatan2(List* a);
+
+// -----------------------------------------
+//Math - Random
 List* frand(List* a);
 List* fseed(List* a);
 
-//List operations
+// -----------------------------------------
+//Math - Misc
+List* frange(List* a);
+
+
+
+// ------------------------------------------------------------------
+// Sequences 
 List* fcons(List* a);
 List* flist(List* a);
 List* fcar(List* a);
 List* fcdr(List* a);
-List* freverse(List* a);
-List* fconcat(List* a);
+List* fcount(List* a);
+
+// -----------------------------------------
+//Sequences - Accessing
 List* ffirst(List* a);
 List* flast(List* a);
+List* fget(List* a);
 
-//Tests and type checking
+// -----------------------------------------
+//Sequences - Manipulations
+List* freverse(List* a);
+List* fconcat(List* a);
+List* fassoc(List* a);
+
+// -----------------------------------------
+//Sequences - Vectors
+List* fvec(List* a);
+
+// -----------------------------------------
+//Sequences - Hashmaps
+List* fhashmap(List* a);
+
+
+
+// ------------------------------------------------------------------
+// Conditions
 List* feq(List* a);
+List* flessThan(List* a);
+List* fgreaterThan(List* a);
+
+// -----------------------------------------
+//Conditions - Type checking
 List* fpair(List* a);
 List* fatom(List* a);
 List* fnull(List* a);
 
-//Strings
+
+
+// ------------------------------------------------------------------
+// Strings
 List* fstr(List* a);
 
-//Data structure
-List* fvec(List* a);
-List* fhashmap(List* a);
-List* fget(List* a);
-List* fcount(List* a);
-List* fassoc(List* a);
 
-//Cairo
+
+// ------------------------------------------------------------------
+// Cairo
 List* fsvg_surface(List* a);
 List* fsvg_status(List* a);
 List* fsvg_context(List* a);

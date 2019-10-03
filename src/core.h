@@ -24,8 +24,10 @@ typedef struct Environment {
 	List* data;
 }Environment;
 
+// ------------------------------------------------------------------
 //Each cons shell is tagged with the lowest pointer bit set to 1, everything else is set to 0
 //Before accessing cons car and cdr we need to untag the pointer to read from memory correctly
+//This tecnique is used to tag numbers, vectors, and hashmaps too.
 #define is_hashmap(x) (((uintptr_t)x & 0x4) == 0x4)
 #define is_vector(x)  (((uintptr_t)x & 0x3) == 0x3)
 #define is_number(x)  (((uintptr_t)x & 0x2) == 0x2)
@@ -42,6 +44,7 @@ typedef struct Environment {
 #define car(x)     (((List*)untag(x))->data)
 #define cdr(x)     (((List*)untag(x))->next)
 
+// ------------------------------------------------------------------
 //Handy list shortcuts
 #define first(x)   car(x)
 #define second(x)  car(cdr(x))
@@ -49,24 +52,34 @@ typedef struct Environment {
 #define fourth(x)  car(cdr(cdr(cdr(x))))
 #define fifth(x)   car(cdr(cdr(cdr(cdr(x)))))
 
-//Utility
+// ------------------------------------------------------------------
+//Generic utility
 void print_obj(List* ob, int head_of_list);
+int randInt(int min, int max);
+
+// ------------------------------------------------------------------
+//String utilities
 char* trim_quotes(char* s);
+
+// ------------------------------------------------------------------
+//Vector utilities
 void** copyVec(void** v);
 List* vecToList(void** vec);
 int vecLength(void** v);
-int randInt(int min, int max);
 
-//Core
-List* cons(void* _car, void* _cdr);
-void* intern(char* sym);
-Environment* makeEnvironment(List* _data, Environment* _outer);
-
-//Numbers 
+// ------------------------------------------------------------------
+//Numbers utilites
 double* symbol_to_number(char* sym);
 double* value_to_number(double value);
 double numVal(List* tagged_number);
 
+// ------------------------------------------------------------------
+//Lisp core functions
+List* cons(void* _car, void* _cdr);
+void* intern(char* sym);
+Environment* makeEnvironment(List* _data, Environment* _outer);
+
+// ------------------------------------------------------------------
 //Define what is true and what is false
 #define e_true     cons( intern("quote"), cons( intern("t"), 0))
 #define e_false    0
