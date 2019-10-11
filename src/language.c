@@ -212,16 +212,7 @@ int listLength(List* a){
 
 /// (vector values...)
 List* fvec(List* a){
-	int n = listLength(a);
-	void** vec = malloc(sizeof(void*) * (n+1));
-	List* current = a;
-	int i = 0;
-	while(current){
-		vec[i] = first(current);	
-		current = cdr(current);
-		i++;
-	}
-	vec[n] = 0;
+	void** vec = listToVec(a);
 	return (List*)tag_vector(vec);
 }
 
