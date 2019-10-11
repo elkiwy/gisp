@@ -41,6 +41,8 @@ List* fatan2(List* a);
 // -----------------------------------------
 //Math - Conversions
 List* fint(List* a);
+List* ffloor(List* a);
+List* fceil(List* a);
 
 // -----------------------------------------
 //Math - Advanced operations

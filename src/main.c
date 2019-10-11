@@ -502,6 +502,8 @@ int main(int argc, char* argv[]) {
 	extendEnv("deg", (void*)fdeg, global_env);
 	extendEnv("rad", (void*)frad, global_env);
 	extendEnv("int", (void*)fint, global_env);
+	extendEnv("floor", (void*)ffloor, global_env);
+	extendEnv("ceil", (void*)fceil, global_env);
 
 
 	extendEnv("range", (void*)frange, global_env);
