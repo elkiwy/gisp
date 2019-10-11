@@ -324,6 +324,35 @@ List* eval(List* exp, Environment* env) {
 			}
 			return freverse(cons(ret, 0));
 
+		/// (mapv function list)
+		}else if (first(exp) == intern("mapv")){
+			List* ret = 0;
+			List* l = eval(third(exp), env);
+
+			//If I got a vector convert it into a list
+			if (is_vector(l)){l = vecToList((void**)untag_vector(l));}
+
+			if (is_pair(second(exp))){
+				//Lambda
+				while (l){
+					List* r = apply_lambda(second(exp), cons(car(l), 0), env);
+					ret = cons(r, ret);
+					l = cdr(l);
+				}
+			}else{
+				//Known function name
+				void* f = eval(second(exp), env);
+				while (l){
+					List* r = ((List* (*) (List*))f)(cons(car(l), 0));
+					ret = cons(r, ret);
+					l = cdr(l);
+				}
+			}
+
+			List* reversedList = freverse(cons(ret, 0)); 
+			void** untagged_vec = listToVec(reversedList);
+			return (List*)tag_vector(untagged_vec);
+
 		/// (doseq (bind seq) body)
 		}else if (first(exp) == intern("doseq")){
 			Environment* innerEnv = makeEnvironment(NULL, env);
