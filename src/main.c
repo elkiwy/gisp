@@ -270,6 +270,34 @@ List* eval(List* exp, Environment* env) {
 			return result;
 
 
+		/// (reduce function start list)
+		}else if (first(exp) == intern("reduce")){
+			List* ret = eval(third(exp), env);
+			List* l = eval(fourth(exp), env);
+
+			//If I got a vector convert it into a list
+			if (is_vector(l)){l = vecToList((void**)untag_vector(l));}
+
+			if (is_pair(second(exp))){
+				//Lambda
+				while (l){
+					List* args = cons(ret, cons(car(l), 0));
+					List* r = apply_lambda(second(exp), args, env);
+					ret = r;
+					l = cdr(l);
+				}
+			}else{
+				//Known function name
+				void* f = eval(second(exp), env);
+				while (l){
+					List* args = cons(ret, cons(car(l), 0));
+					List* r = ((List* (*) (List*))f)(args);
+					ret = r;
+					l = cdr(l);
+				}
+			}
+			return ret;
+
 		/// (map function list)
 		}else if (first(exp) == intern("map")){
 			List* ret = 0;
