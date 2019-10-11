@@ -108,6 +108,25 @@ char* trim_quotes(char* s){
 
 // ------------------------------------------------------------------
 //Vector utilities
+void** listToVec(List* l){
+	//Count elements
+	int n = 0;
+	List* items = l;
+	while(items){n++; items = cdr(items);}
+
+	//Create the vector
+	void** vec = malloc(sizeof(void*) * (n+1));
+	List* current = l;
+	int i = 0;
+	while(current){
+		vec[i] = first(current);	
+		current = cdr(current);
+		i++;
+	}
+	vec[n] = 0;
+	return vec;
+}
+
 int vecLength(void** v){
 	int n = 0;
 	while(v[n]){

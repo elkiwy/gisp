@@ -63,6 +63,7 @@ char* trim_quotes(char* s);
 
 // ------------------------------------------------------------------
 //Vector utilities
+void** listToVec(List* l);
 void** copyVec(void** v);
 List* vecToList(void** vec);
 int vecLength(void** v);
