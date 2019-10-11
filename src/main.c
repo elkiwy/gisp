@@ -486,6 +486,8 @@ int main(int argc, char* argv[]) {
 	extendEnv("mod",   (void*)fmodulo, global_env);
 	extendEnv("pow",   (void*)fpow, global_env);
 	extendEnv("sqrt",  (void*)fsqrt, global_env);
+	extendEnv("log",    (void*)flog, global_env);
+	extendEnv("log10",  (void*)flog10, global_env);
 	extendEnv("atan2", (void*)fatan2, global_env);
 	extendEnv("rand", (void*)frand, global_env);
 	extendEnv("seed", (void*)fseed, global_env);

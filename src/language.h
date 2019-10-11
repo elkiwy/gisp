@@ -47,6 +47,8 @@ List* fint(List* a);
 List* fpow(List* a);
 List* fmodulo(List* a);
 List* fsqrt(List* a);
+List* flog(List* a);
+List* flog10(List* a);
 
 // -----------------------------------------
 //Math - Random

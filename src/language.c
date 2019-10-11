@@ -41,6 +41,8 @@ List* fint(List* a) {return (List*)value_to_number((int)numVal(first(a)));}
 List* fpow(List* a)   {return (List*)value_to_number(pow(numVal(first(a)), numVal(second(a))));}
 List* fmodulo(List* a){return (List*)value_to_number((int)numVal(first(a)) % (int)numVal(second(a)));}
 List* fsqrt(List* a)  {return (List*)value_to_number(sqrt(numVal(first(a))));}
+List* flog(List* a)    {return (List*)value_to_number(log(numVal(first(a))));}
+List* flog10(List* a)  {return (List*)value_to_number(log10(numVal(first(a))));}
 List* fatan2(List* a) {return (List*)value_to_number(atan2(numVal(first(a)), numVal(second(a))));}
 
 List* fbitAnd(List* a){return (List*)value_to_number((int)numVal(first(a)) & (int)numVal(second(a)));}
