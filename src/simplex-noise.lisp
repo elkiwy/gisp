@@ -37,7 +37,7 @@
     (seed (if (= octave_seed RANDOM-SEED) (rand 99999) octave_seed))
     (let (p (N-times NUMBER-OF-SWAPS swap-random P-SUPPLY)
           perm (concat p p)
-          permMod12 (map #(mod % 12) perm))
+          permMod12 (mapv #(mod % 12) perm))
         { :perm perm :permMod12 permMod12 })))
 
 (defn fast-floor (x)
@@ -56,7 +56,7 @@
         (if (< val 0)
             0
             (let (val (* val val))
-                (* val val (dot (GRADIENS-3 grad-index) x y))))))
+                (* val val (dot (get GRADIENS-3 grad-index) x y))))))
 
 
 (defn noise (octave xin yin)
@@ -87,5 +87,31 @@
           n1 (contribution gi1 x1 y1)
           n2 (contribution gi2 x2 y2))
         (* 70 (+ n0 n1 n2))))
+
+
+(defn simplex-noise (largest-feature persistance starting-seed)
+	(progn
+    (seed starting-seed)
+    (let (octaves-count (ceil (/ (log10 largest-feature) (log10 2))))
+        (map (lambda (i) (hashmap :octave (simplex-noise-octave (rand 9999))
+                             :frequency (pow 2 i)
+						     :amplitude (pow persistance (- octaves-count i))))
+			 (range octaves-count)))))
+
+
+(defn simplex-noise-value (simplex-noise x y)
+    (reduce (lambda (result simplex)
+                (let (octave (:octave simplex)
+                      freq   (:frequency simplex)
+                      ampl   (:amplitude simplex))
+
+                    (+ result (* ampl (noise octave (/ x freq) (/ y freq))))
+
+					))
+            0
+            simplex-noise))
+
+
+
 
 
