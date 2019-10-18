@@ -60,3 +60,11 @@ dkms.conf
 
 
 build/
+coverage.html
+test.log
+test.profdata
+default.profraw
+test.c
+test.dSYM
+test
+test.svg
