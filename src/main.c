@@ -24,6 +24,20 @@ Environment* global_env = 0;
 
 
 int vectorCount = 0;
+
+void* INTERN_quote	= 0;
+void* INTERN_if		= 0;
+void* INTERN_lambda	= 0;
+void* INTERN_apply	= 0;
+void* INTERN_def	= 0;
+void* INTERN_defn	= 0;
+void* INTERN_progn	= 0;
+void* INTERN_let	= 0;
+void* INTERN_reduce	= 0;
+void* INTERN_map	= 0;
+void* INTERN_mapv	= 0;
+void* INTERN_doseq	= 0;
+
 //Input parsing methods
 int is_space(char x)  {
 	return x == ' ' || x == '\n' || x == '\t';}
@@ -204,30 +218,30 @@ List* eval(List* exp, Environment* env) {
 	} else if (is_atom(first(exp))) { 
 		//printf("list with atom found %s\n", (char*) first(exp));
 		// (quote X)
-		if (first(exp) == intern("quote")) {
+		if (first(exp) == INTERN_quote) {
 			//Return the quoted element as it is
 			//printf("returning quoted\n");
 			return second(exp);
 
 		// (if (cond) (success) (fail))
-		} else if (first(exp) == intern("if")) {
+		} else if (first(exp) == INTERN_if) {
 			if (eval(second(exp), env) != 0)
 				return eval(third(exp), env);
 			else
 				return eval(fourth(exp), env);
 
 		// (lambda (params) body)
-		} else if (first(exp) == intern("lambda")) {
+		} else if (first(exp) == INTERN_lambda) {
 			return exp;
 
 		// (apply func args)
-		} else if (first(exp) == intern("apply")) { 
+		} else if (first(exp) == INTERN_apply) { 
 			List* args = evlist(cdr(cdr(exp)), env);
 			args = car(args);
 			return ((List* (*) (List*))eval(second(exp), env)) (args);
 
 		// (def symbol sexp)
-		}else if (first(exp) == intern("def")){
+		}else if (first(exp) == INTERN_def){
 			char* sym = second(exp);
 			List* val = eval(third(exp), env);
 			extendEnv(sym, val, env);
@@ -235,14 +249,14 @@ List* eval(List* exp, Environment* env) {
 			return val;
 
 		// (defn symbol (params) sexp)
-		}else if (first(exp) == intern("defn")){
+		}else if (first(exp) == INTERN_defn){
 			char* sym = second(exp);
-			List* lambda = cons(intern("lambda"), cons(third(exp), cons(fourth(exp), 0)));
+			List* lambda = cons(INTERN_lambda, cons(third(exp), cons(fourth(exp), 0)));
 			extendEnv(sym, lambda, env);
 			return lambda;
 
 		// (progn exp1 exp2 ...)
-		}else if (first(exp) == intern("progn")){
+		}else if (first(exp) == INTERN_progn){
 			List *sexp = cdr(exp), *result = 0;	
 			while (sexp){
 				result = eval(first(sexp), env);
@@ -251,7 +265,7 @@ List* eval(List* exp, Environment* env) {
 			return result;
 
 		// (let (binds) body)
-		} else if (first(exp) == intern("let")) {
+		} else if (first(exp) == INTERN_let) {
 			//Bind all the values
 			Environment* innerEnv = makeEnvironment(NULL, env);
 			List *bindings = second(exp);
@@ -273,7 +287,7 @@ List* eval(List* exp, Environment* env) {
 
 
 		/// (reduce function start list)
-		}else if (first(exp) == intern("reduce")){
+		}else if (first(exp) == INTERN_reduce){
 			List* ret = eval(third(exp), env);
 			List* l = eval(fourth(exp), env);
 
@@ -301,7 +315,7 @@ List* eval(List* exp, Environment* env) {
 			return ret;
 
 		/// (map function list)
-		}else if (first(exp) == intern("map")){
+		}else if (first(exp) == INTERN_map){
 			List* ret = 0;
 			List* l = eval(third(exp), env);
 
@@ -327,7 +341,7 @@ List* eval(List* exp, Environment* env) {
 			return freverse(cons(ret, 0));
 
 		/// (mapv function list)
-		}else if (first(exp) == intern("mapv")){
+		}else if (first(exp) == INTERN_mapv){
 			List* ret = 0;
 			List* l = eval(third(exp), env);
 
@@ -398,7 +412,7 @@ List* eval(List* exp, Environment* env) {
 			}
 		}
 	// ((lambda (params) body) args)
-	} else if (car(car(exp)) == intern("lambda")) {
+	} else if (car(car(exp)) == INTERN_lambda) {
 		//printf("lambda found\n");
 
 		//bind names into env and eval body
@@ -535,6 +549,22 @@ int main(int argc, char* argv[]) {
 	extendEnv("cdr", (void*)fcdr, global_env);
 	extendEnv("car", (void*)fcar, global_env);
 	extendEnv("get", (void*)fget, global_env);
+
+
+	INTERN_quote	= intern("quote");
+	INTERN_if		= intern("if");
+	INTERN_lambda	= intern("lambda");
+	INTERN_apply	= intern("apply");
+	INTERN_def		= intern("def");
+	INTERN_defn		= intern("defn");
+	INTERN_progn	= intern("progn");
+	INTERN_let		= intern("let");
+	INTERN_reduce	= intern("reduce");
+	INTERN_map		= intern("map");
+	INTERN_mapv		= intern("mapv");
+	INTERN_doseq	= intern("doseq");
+
+
 
 	clock_t end_env = clock();
 
