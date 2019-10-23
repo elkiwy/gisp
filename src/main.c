@@ -24,6 +24,9 @@ Environment* global_env = 0;
 
 
 int vectorCount = 0;
+int hashmapCount = 0;
+int numberCount = 0;
+int consCount = 0;
 
 void* INTERN_quote	= 0;
 void* INTERN_if		= 0;

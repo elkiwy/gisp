@@ -69,6 +69,7 @@ void* intern(char* sym) {
 }
 
 List* cons(void* _car, void* _cdr) {
+	consCount++;
 	List* _pair = calloc( 1, sizeof (List) );
 	_pair->data = _car;
 	_pair->next = _cdr;
@@ -84,12 +85,18 @@ Environment* makeEnvironment(List* _data, Environment* _outer) {
 
 // ------------------------------------------------------------------
 //Number utilities
-double* symbol_to_number(char* sym){
+double* newNumber(){
+	numberCount++;
 	double* ptr = malloc(sizeof(double));
+	return ptr;
+}
+
+double* symbol_to_number(char* sym){
+	double* ptr = newNumber();
 	*ptr = strtod(sym, NULL);
 	return (double*)tag_number(ptr);}
 double* value_to_number(double value){
-	double* ptr = malloc(sizeof(double));
+	double* ptr = newNumber();
 	*ptr = value;
 	return (double*)tag_number(ptr);}
 double numVal(List* tagged_number){
@@ -105,6 +112,16 @@ char* trim_quotes(char* s){
 	}
 	return s;
 }
+
+
+// ------------------------------------------------------------------
+//Hashmap utilites
+map_t newHashmap(){
+	hashmapCount++;
+	map_t map = hashmap_new();
+	return map;
+}
+
 
 // ------------------------------------------------------------------
 //Vector utilities

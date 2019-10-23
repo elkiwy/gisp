@@ -220,7 +220,7 @@ List* fvec(List* a){
 
 /// (hashmap key val ...)
 List* fhashmap(List* a){
-	map_t map = hashmap_new();
+	map_t map = newHashmap();
 	List* current = a;
 	while(current){
 		char* key = first(current);

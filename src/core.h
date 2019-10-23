@@ -12,6 +12,10 @@
 
 
 extern int vectorCount;
+extern int hashmapCount;
+extern int numberCount;
+extern int consCount;
+
 //This is the main List structure
 typedef struct List {
 	struct List*  next;
@@ -63,6 +67,10 @@ int randInt(int min, int max);
 char* trim_quotes(char* s);
 
 // ------------------------------------------------------------------
+//Hashmap utilites
+map_t newHashmap();
+
+// ------------------------------------------------------------------
 //Vector utilities
 void** newVec(int size);
 void** listToVec(List* l);
@@ -72,6 +80,7 @@ int vecLength(void** v);
 
 // ------------------------------------------------------------------
 //Numbers utilites
+double* newNumber();
 double* symbol_to_number(char* sym);
 double* value_to_number(double value);
 double numVal(List* tagged_number);
