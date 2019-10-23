@@ -108,6 +108,13 @@ char* trim_quotes(char* s){
 
 // ------------------------------------------------------------------
 //Vector utilities
+
+void** newVec(int size){
+	vectorCount++;
+	void** vec = malloc(sizeof(void*) * size);
+	return vec;
+}
+
 void** listToVec(List* l){
 	//Count elements
 	int n = 0;
@@ -115,7 +122,7 @@ void** listToVec(List* l){
 	while(items){n++; items = cdr(items);}
 
 	//Create the vector
-	void** vec = malloc(sizeof(void*) * (n+1));
+	void** vec = newVec(n+1);
 	List* current = l;
 	int i = 0;
 	while(current){
@@ -137,7 +144,7 @@ int vecLength(void** v){
 
 void** copyVec(void** v){
 	int size = vecLength(v);
-	void** new = malloc(sizeof(void*) * (size+1));
+	void** new = newVec(size+1);
 	for(int i = 0; i<size; i++){
 		new[i] = v[i];
 	}
@@ -153,5 +160,6 @@ List* vecToList(void** vec){
 	}
 	return l;
 }
+
 
 

@@ -22,6 +22,8 @@ FILE* inputFile = 0;
 char* workingDir = "";
 Environment* global_env = 0;
 
+
+int vectorCount = 0;
 //Input parsing methods
 int is_space(char x)  {
 	return x == ' ' || x == '\n' || x == '\t';}

@@ -11,6 +11,7 @@
 #define SYMBOL_MAX  32
 
 
+extern int vectorCount;
 //This is the main List structure
 typedef struct List {
 	struct List*  next;
@@ -63,6 +64,7 @@ char* trim_quotes(char* s);
 
 // ------------------------------------------------------------------
 //Vector utilities
+void** newVec(int size);
 void** listToVec(List* l);
 void** copyVec(void** v);
 List* vecToList(void** vec);
