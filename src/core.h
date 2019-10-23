@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "hashmap.h"
 
@@ -16,6 +17,11 @@ extern int hashmapCount;
 extern int numberCount;
 extern int consCount;
 
+extern int environmentCounter_insert;
+extern int environmentCounter_search;
+extern double environmentCounter_searchTimeSum;
+extern double environmentCounter_searchTimeSum_hash;
+
 //This is the main List structure
 typedef struct List {
 	struct List*  next;
@@ -26,7 +32,7 @@ typedef struct List {
 //This is the layered environment structure
 typedef struct Environment {
 	struct Environment* outer;
-	List* data;
+	map_t hashData;
 }Environment;
 
 // ------------------------------------------------------------------
@@ -89,7 +95,9 @@ double numVal(List* tagged_number);
 //Lisp core functions
 List* cons(void* _car, void* _cdr);
 void* intern(char* sym);
-Environment* makeEnvironment(List* _data, Environment* _outer);
+Environment* makeEnvironment(Environment* _outer);
+void extendEnv(char* name, void* value, Environment* env);
+void* searchInEnvironment(List* exp, Environment* env);
 
 // ------------------------------------------------------------------
 //Define what is true and what is false

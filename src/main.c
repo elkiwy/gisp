@@ -27,6 +27,10 @@ int vectorCount = 0;
 int hashmapCount = 0;
 int numberCount = 0;
 int consCount = 0;
+int environmentCounter_insert = 0;
+int environmentCounter_search = 0;
+double environmentCounter_searchTimeSum = 0;
+double environmentCounter_searchTimeSum_hash = 0;
 
 void* INTERN_quote	= 0;
 void* INTERN_if		= 0;
@@ -137,19 +141,12 @@ void debug_printEnv(List* a, char* prefix){
 }
 
 
-//Add a new function to an environment
-void extendEnv(char* name, void* value, Environment* env){
-	//Add this symbol and value to the current environment level
-	List* current = env->data;
-	//printf("Adding \"%s\" to env %p and current %p\n", name, env, current); fflush(stdout);
-	current = cons(cons(intern(name), cons(value, 0)), current);
-	env->data = current;
-}
+
 
 List* eval(List* exp, Environment* env);
 List* apply_lambda(List* lambda, List* args, Environment* env){
 	//bind names into env and eval body
-	Environment* innerEnv = makeEnvironment(NULL, env);
+	Environment* innerEnv = makeEnvironment(env);
 	List *names = second(lambda), *vars = args;
 	for (  ; names ; names = cdr(names), vars = cdr(vars) ){
 		char* sym = car(names);
@@ -184,20 +181,10 @@ List* eval(List* exp, Environment* env) {
 	}else if (is_atom(exp) ) {
 		//printf("atom found %s\n", (char*)exp);
 
-		//Check into the environment
-		Environment* currentEnv = env;
-		while(currentEnv){
-			List* currentSymbols = currentEnv->data;
-			for ( ; currentSymbols != 0; currentSymbols = cdr(currentSymbols) ){
-				if (exp == first(car(currentSymbols))){
-					//printf("->Evaluated %s in local env as: ", exp); print_obj(second(car(currentSymbols)), 1); printf("\n");
-					return second(car(currentSymbols));}}
-			//Search it into the outer level
-			currentEnv = currentEnv->outer;
-		}
-
-
-
+		//Check if I have the symbol in the environment
+		List* symbolValue = searchInEnvironment(exp, env);
+		if (symbolValue != 0) return symbolValue;
+		
 		//Check if it's a string
 		if (*((char*)exp) == '"'){
 			return exp;}
@@ -270,7 +257,7 @@ List* eval(List* exp, Environment* env) {
 		// (let (binds) body)
 		} else if (first(exp) == INTERN_let) {
 			//Bind all the values
-			Environment* innerEnv = makeEnvironment(NULL, env);
+			Environment* innerEnv = makeEnvironment(env);
 			List *bindings = second(exp);
 			while(bindings){
 				char* sym = first(bindings);
@@ -373,8 +360,8 @@ List* eval(List* exp, Environment* env) {
 			return (List*)tag_vector(untagged_vec);
 
 		/// (doseq (bind seq) body)
-		}else if (first(exp) == intern("doseq")){
-			Environment* innerEnv = makeEnvironment(NULL, env);
+		}else if (first(exp) == INTERN_doseq){
+			Environment* innerEnv = makeEnvironment(env);
 			char* sym = first(second(exp));
 			List* seq = eval(second(second(exp)), env);
 			List* body = cdr(cdr(exp));
@@ -422,7 +409,7 @@ List* eval(List* exp, Environment* env) {
 		return apply_lambda(car(exp), cdr(exp), env);
 
 	}
-	printf("cannot evaluate expression %s\n", first(exp));
+	printf("cannot evaluate expression %s in %p\n", first(exp), env);
 	return 0;
 }
 
@@ -489,7 +476,7 @@ int main(int argc, char* argv[]) {
 
 	//Create the global environment
 	clock_t begin = clock();
-	global_env = makeEnvironment(NULL, NULL);
+	global_env = makeEnvironment(NULL);
 	extendEnv("null", 0, global_env);
 	extendEnv("list",    (void*)flist, global_env);
 	extendEnv("vector",  (void*)fvec, global_env);
@@ -585,6 +572,18 @@ int main(int argc, char* argv[]) {
 	printf("Time elpased for setup %f\n", time);
 	time += (double)(end - end_env) / CLOCKS_PER_SEC;
 	printf("Time elpased for eval %f\n\n", time);
+
+
+	printf("Vector count: %d\n", vectorCount);
+	printf("Cons count: %d\n", consCount);
+	printf("Hashmap count: %d\n", hashmapCount);
+	printf("Number count: %d\n", numberCount);
+
+	printf("Environment insert count: %d\n", environmentCounter_insert);
+	printf("Environment search count: %d\n", environmentCounter_search);
+
+	printf("Environment search time: %f\n", environmentCounter_searchTimeSum);
+	printf("Environment search  avg: %f\n", environmentCounter_searchTimeSum/(double)environmentCounter_search);
 
 	return 0;
 }

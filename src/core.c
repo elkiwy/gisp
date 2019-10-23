@@ -76,12 +76,43 @@ List* cons(void* _car, void* _cdr) {
 	return (List*) tag(_pair);
 }
 
-Environment* makeEnvironment(List* _data, Environment* _outer) {
+Environment* makeEnvironment(Environment* _outer) {
 	Environment* env = calloc( 1, sizeof (Environment) );
-	env->data = _data;
+	env->hashData = hashmap_new();
 	env->outer = (void*)_outer;
 	return env;
 }
+
+//Add a new function to an environment
+void extendEnv(char* name, void* value, Environment* env){
+	environmentCounter_insert++;
+	//Add this symbol and value to the current environment level
+	hashmap_put(env->hashData, name, value);
+}
+
+void* searchInEnvironment(List* exp, Environment* env){
+	environmentCounter_search++;
+	clock_t start = clock();
+
+	Environment* currentEnv = env;
+	while(currentEnv){
+		//Search in the hash
+		void* value = 0;
+		hashmap_get(currentEnv->hashData, (char*)exp, (any_t)&value);
+		if (value){
+			clock_t end = clock(); environmentCounter_searchTimeSum += (double)(end - start) / CLOCKS_PER_SEC;
+			return value;
+		}
+
+		//Search it into the outer level
+		currentEnv = currentEnv->outer;
+	}
+
+	clock_t end = clock(); environmentCounter_searchTimeSum += (double)(end - start) / CLOCKS_PER_SEC;
+	return 0;
+}
+
+
 
 // ------------------------------------------------------------------
 //Number utilities
