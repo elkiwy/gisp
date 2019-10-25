@@ -50,22 +50,26 @@ void print_obj(List* ob, int head_of_list) {
 }
 
 int randInt(int min, int max){
-	int range = max-min;
-	return (rand() % range) + min;
+	return (rand() % max-min) + min;
 }
 
 // ------------------------------------------------------------------
 //Lisp core
-List* symbols = 0;
+map_t symbols_hashmap = 0;
 void* intern(char* sym) {
-	List* _pair = symbols;
-	for ( ; _pair ; _pair = cdr(_pair)){
-		if (strncmp(sym, (char*) car(_pair), SYMBOL_MAX)==0){
-			return (void*)car(_pair);
-		}
+	if (symbols_hashmap == 0)
+		symbols_hashmap = hashmap_new();
+	
+
+	void* value = 0;
+	hashmap_get(symbols_hashmap, sym, (any_t)&value);
+	if(value){
+		return value;
+	}else{
+		void* newVal = strdup(sym);
+		hashmap_put(symbols_hashmap, newVal, newVal);
+		return newVal;
 	}
-	symbols = cons(strdup(sym), symbols);
-	return (void*)car(symbols);
 }
 
 List* cons(void* _car, void* _cdr) {
