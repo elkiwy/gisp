@@ -145,27 +145,18 @@ static unsigned long crc32_tab[] = {
    };
 
 /* Return a 32-bit CRC of the contents of the buffer. */
-
-unsigned long crc32(const unsigned char *s, unsigned int len)
-{
-  unsigned int i;
-  unsigned long crc32val;
-  
-  crc32val = 0;
-  for (i = 0;  i < len;  i ++)
-    {
-      crc32val =
-	crc32_tab[(crc32val ^ s[i]) & 0xff] ^
-	  (crc32val >> 8);
-    }
-  return crc32val;
+unsigned long crc32(const unsigned char *s, unsigned int len) {
+	unsigned int i;
+	unsigned long crc32val;
+	crc32val = 0;
+	for (i = 0; i < len; i++) {
+		crc32val = crc32_tab[(crc32val ^ s[i]) & 0xff] ^ (crc32val >> 8);
+	}
+	return crc32val;
 }
 
-/*
- * Hashing function for a string
- */
+/* Hashing function for a string */
 unsigned int hashmap_hash_int(hashmap_map * m, char* keystring){
-
     unsigned long key = crc32((unsigned char*)(keystring), strlen(keystring));
 
 	/* Robert Jenkins' 32 bit Mix Function */
@@ -180,14 +171,11 @@ unsigned int hashmap_hash_int(hashmap_map * m, char* keystring){
 
 	/* Knuth's Multiplicative Method */
 	key = (key >> 3) * 2654435761;
-
 	return key % m->table_size;
 }
 
-/*
- * Return the integer of the location in data
- * to store the point to the item, or MAP_FULL.
- */
+/* Return the integer of the location in data
+ * to store the point to the item, or MAP_FULL. */
 int hashmap_hash(map_t in, char* key){
 	int curr;
 	int i;
@@ -255,9 +243,7 @@ int hashmap_rehash(map_t in){
 	return MAP_OK;
 }
 
-/*
- * Add a pointer to the hashmap with some key
- */
+/* Add a pointer to the hashmap with some key */
 int hashmap_put(map_t in, char* key, any_t value){
 	int index;
 	hashmap_map* m;
@@ -283,9 +269,7 @@ int hashmap_put(map_t in, char* key, any_t value){
 	return MAP_OK;
 }
 
-/*
- * Get your pointer out of the hashmap with a key
- */
+/* Get your pointer out of the hashmap with a key */
 int hashmap_get(map_t in, char* key, any_t *arg){
 	int curr;
 	int i;
