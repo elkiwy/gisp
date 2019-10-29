@@ -163,8 +163,7 @@ map_t newHashmap(){
 
 void** newVec(int size){
 	vectorCount++;
-	void** vec = malloc(sizeof(void*) * size);
-	return vec;
+	return malloc(sizeof(void*) * size);
 }
 
 void** listToVec(List* l){
@@ -195,12 +194,10 @@ int vecLength(void** v){
 }
 
 void** copyVec(void** v){
-	int size = vecLength(v);
-	void** new = newVec(size+1);
-	for(int i = 0; i<size; i++){
-		new[i] = v[i];
-	}
-	new[size] = 0;
+	int s = vecLength(v);
+	void** new = newVec(s+1);
+	memcpy(new, v, s*8);
+	new[s] = 0;
 	return new;
 }
 
