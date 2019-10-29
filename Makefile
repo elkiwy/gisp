@@ -45,11 +45,19 @@ build/main_profiling: $(OBJECTSPROF)
 $(OBJPROF)/%.o: $(SRC)/%.c
 	clang -fprofile-instr-generate -fcoverage-mapping -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
 
-profile: build/main_profiling
+profile-html: build/main_profiling
 	./build/main_profiling src/test.lisp
 	xcrun llvm-profdata merge -output=test.profdata -instr default.profraw
 	xcrun llvm-profdata show -all-functions -counts -ic-targets  test.profdata > test.log
 	xcrun llvm-cov show -format=html -instr-profile=test.profdata build/main_profiling > coverage.html
+
+
+profile-text: build/main_profiling
+	./build/main_profiling src/test.lisp
+	xcrun llvm-profdata merge -output=test.profdata -instr default.profraw
+	xcrun llvm-profdata show -all-functions -counts -ic-targets  test.profdata > test.log
+	xcrun llvm-cov show -format=text -instr-profile=test.profdata build/main_profiling > coverage.txt
+
 
 
 
