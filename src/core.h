@@ -35,6 +35,16 @@ typedef struct Environment {
 	map_t hashData;
 }Environment;
 
+
+//Custom Vector structure
+typedef struct Vector {
+	void* data;
+	int size;
+}Vector;
+
+
+
+
 // ------------------------------------------------------------------
 //Each cons shell is tagged with the lowest pointer bit set to 1, everything else is set to 0
 //Before accessing cons car and cdr we need to untag the pointer to read from memory correctly
@@ -78,11 +88,10 @@ map_t newHashmap();
 
 // ------------------------------------------------------------------
 //Vector utilities
-void** newVec(int size);
-void** listToVec(List* l);
-void** copyVec(void** v);
-List* vecToList(void** vec);
-int vecLength(void** v);
+Vector* newVec(int size);
+Vector* listToVec(List* l);
+Vector* copyVec(Vector* v);
+List* vecToList(Vector* vec);
 
 // ------------------------------------------------------------------
 //Numbers utilites

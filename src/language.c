@@ -120,26 +120,30 @@ List* freverse(List* a) {
 
 
 
-void** concatVec(void** v1, void** v2){
-	int size1 = vecLength(v1);
-	int size2 = vecLength(v2);
+Vector* concatVec(Vector* v1, Vector* v2){
+	int size1 = v1->size;
+	int size2 = v2->size;
 	int tot = size1+size2;
-	void** vec = malloc(sizeof(void*) * (tot+1));
+	Vector* vecObj = newVec(tot);
+	void** data1 = v1->data;
+	void** data2 = v2->data;
+	void** data = vecObj->data;
+
 	int i = 0;
-	while(i<size1){ vec[i] = v1[i]; i++;}
-	while(i<tot){   vec[i] = v2[i-size1]; i++;}
-	vec[tot] = 0;
-	return vec;
+	while(i<size1){ data[i] = data1[i]; i++;}
+	while(i<tot){   data[i] = data2[i-size1]; i++;}
+	data[tot] = 0;
+	return vecObj;
 }
 
 
 List* fconcat(List* a) {
 	List* v1 = first(a);
 	if(is_vector(v1)){
-		void** untagged_result = (void**)untag_vector(v1);
+		Vector* untagged_result = (Vector*)untag_vector(v1);
 		List* current = cdr(a);
 		while(current){
-			void** untagged_item = (void**)untag_vector(car(current));
+			Vector* untagged_item = (Vector*)untag_vector(car(current));
 			untagged_result = concatVec(untagged_result, untagged_item);
 			current = cdr(current);
 		}
@@ -214,7 +218,7 @@ int listLength(List* a){
 
 /// (vector values...)
 List* fvec(List* a){
-	void** vec = listToVec(a);
+	Vector* vec = listToVec(a);
 	return (List*)tag_vector(vec);
 }
 
@@ -247,13 +251,14 @@ List* fget(List* a){
 		return value;
 	//Vector
 	}else if (is_vector(seq)){
-		void** vec = (void**)untag_vector(seq);
+		Vector* vec = (Vector*)untag_vector(seq);
+		int size = vec->size;
 		int pos = (int)numVal(second(a));
-		int size = vecLength(vec);
 		if (pos >= size){
 			return 0;
 		}else{
-			return vec[pos];
+			void** data = vec->data;
+			return data[pos];
 		}
 	}else{
 		return 0;
@@ -265,8 +270,8 @@ List* fget(List* a){
 List* fcount(List* a){
 	List* arg = first(a);
 	if (is_vector(arg)){
-		void** vec = (void**)untag_vector(arg);
-		int size = vecLength(vec);
+		Vector* vec = (Vector*)untag_vector(arg);
+		int size = vec->size;
 		return (List*)value_to_number(size);
 	}else{
 		printf("%p not supported for count.", arg);
@@ -281,13 +286,16 @@ List* fassoc(List* a){
 	List* key_val = cdr(a);
 
 	if (is_vector(coll)){
-		void** old = (void**)untag_vector(coll);
-		void** new = copyVec(old);
+		Vector* old = (Vector*)untag_vector(coll);
+		Vector* new = copyVec(old);
 
-		int size = vecLength(old);
+		int size = old->size;
 		while(key_val){
 			int pos = (int)numVal(first(key_val));
-			if (pos<size){new[pos] = second(key_val);}
+			if (pos<size){
+				void** data = new->data;
+				data[pos] = second(key_val);
+			}
 			key_val = cdr(cdr(key_val));
 		}
 		return (List*)tag_vector(new);

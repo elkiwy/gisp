@@ -282,7 +282,7 @@ List* eval(List* exp, Environment* env) {
 			List* l = eval(fourth(exp), env);
 
 			//If I got a vector convert it into a list
-			if (is_vector(l)){l = vecToList((void**)untag_vector(l));}
+			if (is_vector(l)){l = vecToList((Vector*)untag_vector(l));}
 
 			if (is_pair(second(exp))){
 				//Lambda
@@ -310,7 +310,7 @@ List* eval(List* exp, Environment* env) {
 			List* l = eval(third(exp), env);
 
 			//If I got a vector convert it into a list
-			if (is_vector(l)){l = vecToList((void**)untag_vector(l));}
+			if (is_vector(l)){l = vecToList((Vector*)untag_vector(l));}
 
 			if (is_pair(second(exp))){
 				//Lambda
@@ -336,7 +336,7 @@ List* eval(List* exp, Environment* env) {
 			List* l = eval(third(exp), env);
 
 			//If I got a vector convert it into a list
-			if (is_vector(l)){l = vecToList((void**)untag_vector(l));}
+			if (is_vector(l)){l = vecToList((Vector*)untag_vector(l));}
 
 			if (is_pair(second(exp))){
 				//Lambda
@@ -356,7 +356,7 @@ List* eval(List* exp, Environment* env) {
 			}
 
 			List* reversedList = freverse(cons(ret, 0)); 
-			void** untagged_vec = listToVec(reversedList);
+			Vector* untagged_vec = listToVec(reversedList);
 			return (List*)tag_vector(untagged_vec);
 
 		/// (doseq (bind seq) body)

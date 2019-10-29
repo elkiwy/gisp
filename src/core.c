@@ -21,12 +21,13 @@ void print_obj(List* ob, int head_of_list) {
 		free(values);
 
 	}else if(is_vector(ob)){
-		void** vec = (void*)untag_vector(ob);
-		int i = 0;
+		Vector* vec = (void*)untag_vector(ob);
+		void** data = vec->data;
+		int size = vec->size;
+
 		printf("[ ");
-		while(vec[i]!=0){
-			print_obj(vec[i], 0); printf(" ");
-			i++;
+		for(int i = 0; i<size; i++){
+			print_obj(data[i], 0); printf(" ");
 		}
 		printf("]");
 
@@ -161,51 +162,49 @@ map_t newHashmap(){
 // ------------------------------------------------------------------
 //Vector utilities
 
-void** newVec(int size){
+Vector* newVec(int _size){
 	vectorCount++;
-	return malloc(sizeof(void*) * size);
+	Vector* _vec = calloc(1, sizeof(Vector));
+	_vec->data = malloc(sizeof(void*) * (_size + 1));
+	_vec->size = _size;
+	return (Vector*)_vec;
 }
 
-void** listToVec(List* l){
+Vector* listToVec(List* l){
 	//Count elements
 	int n = 0;
 	List* items = l;
 	while(items){n++; items = cdr(items);}
 
 	//Create the vector
-	void** vec = newVec(n+1);
+	Vector* vec = newVec(n);
+	void** data = vec->data;
 	List* current = l;
 	int i = 0;
 	while(current){
-		vec[i] = first(current);	
+		data[i] = first(current);	
 		current = cdr(current);
 		i++;
 	}
-	vec[n] = 0;
+	data[n] = 0;
 	return vec;
 }
 
-int vecLength(void** v){
-	int n = 0;
-	while(v[n]){
-		n++;
-	}
-	return n;
-}
-
-void** copyVec(void** v){
-	int s = vecLength(v);
-	void** new = newVec(s+1);
-	memcpy(new, v, s*8);
-	new[s] = 0;
+Vector* copyVec(Vector* v){
+	int s = v->size;
+	Vector* new = newVec(s);
+	void** data = new->data;
+	memcpy(new->data, v->data, s*8);
+	data[s] = 0;
 	return new;
 }
 
-List* vecToList(void** vec){
-	int size = vecLength(vec);
+List* vecToList(Vector* vec){
+	int size = vec->size;
+	void** data = vec->data;
 	List* l = 0;
 	for(int i=size-1; i>=0; i--){
-		l = cons(vec[i], l);
+		l = cons(data[i], l);
 	}
 	return l;
 }
