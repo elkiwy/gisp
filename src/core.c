@@ -61,7 +61,6 @@ void* intern(char* sym) {
 	if (symbols_hashmap == 0)
 		symbols_hashmap = hashmap_new();
 	
-
 	void* value = 0;
 	hashmap_get(symbols_hashmap, sym, (any_t)&value);
 	if(value){
@@ -75,14 +74,14 @@ void* intern(char* sym) {
 
 List* cons(void* _car, void* _cdr) {
 	consCount++;
-	List* _pair = calloc( 1, sizeof (List) );
+	List* _pair = malloc( sizeof(List) );
 	_pair->data = _car;
 	_pair->next = _cdr;
 	return (List*) tag(_pair);
 }
 
 Environment* makeEnvironment(Environment* _outer) {
-	Environment* env = calloc( 1, sizeof (Environment) );
+	Environment* env = malloc( sizeof(Environment) );
 	env->hashData = hashmap_new();
 	env->outer = (void*)_outer;
 	return env;
@@ -164,8 +163,8 @@ map_t newHashmap(){
 
 Vector* newVec(int _size){
 	vectorCount++;
-	Vector* _vec = calloc(1, sizeof(Vector));
-	_vec->data = malloc(sizeof(void*) * (_size + 1));
+	Vector* _vec = malloc(sizeof(Vector));
+	_vec->data = calloc(_size + 1, sizeof(void*));
 	_vec->size = _size;
 	return (Vector*)_vec;
 }
