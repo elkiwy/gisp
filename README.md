@@ -11,7 +11,7 @@ Gisp will provide an extensive graphic library full of useful
 functions to create, manipulate, and draw basic points, lines, and shapes.
 
 
-# Language Features
+## Language Features
 These functions are currently available inside the project:
 - **Math**: *add*, *sub*, *mul*, *div*, *bitAnd*, *sin*, *cos*, *dsin*, *dcos*, *deg*, *rad*, *atan2*, *int*, *floor*, *ceil*, *pow*, *modulo*, *sqrt*, *log*, *log10*, *rand*, *seed*, *range*
 - **Sequences**: *cons*, *list*, *car*, *cdr*, *count*, *first*, *last*, *get*, *reverse*, *concat*, *assoc*, *vec*, *hashmap*
@@ -35,18 +35,18 @@ These features are also present as macros:
 - **profile**
 
 
-# Full Documentation
+## Full Documentation
 I'm working to get an automatic documentation system with doc strings and it will be available as soon as possible.
 
 
-# Todo
+## Todo
 - REPL
 - advanced string functions
 - Error messages
 - Garbage collection
 
 
-# Credits
+## Credits
 Gisp is *heavily influenced* by:
  - [Lisp in less than 200 lines of C](https://carld.github.io/2017/06/20/lisp-in-less-than-200-lines-of-c.html) for its core system.
  - [Clojure](https://clojure.org) for the language syntax.
