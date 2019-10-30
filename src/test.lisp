@@ -2,13 +2,15 @@
 (include "src/core.lisp")
 )
 
+(profile :whole-execution
 (profile :simplex-include 
 (include "src/simplex-noise.lisp")
 )
 
 
 (profile :simplex-setup
-(def simplex (simplex-noise 64 0.5 0))
+(seed)
+(def simplex (simplex-noise 64 0.5 (rand 99999)))
 )
 
 (profile :simplex-test
@@ -20,8 +22,8 @@
 )
 
 (profile :drawing-setup
-(def canvas-w 256)
-(def canvas-h 256)
+(def canvas-w 512)
+(def canvas-h 512)
 (def s (make-surface "test.svg" canvas-w canvas-h))
 (def c (make-context s))
 )
@@ -42,7 +44,7 @@
 			(doseq (i (range nx))
 				(let (cx  (+ (* ts i) (* ts 0.5))
 					  cy  (+ (* ts j) (* ts 0.5))
-					  n   (* 80 (+ 0.5 (simplex-noise-value simplex (* i scale) (* j scale)))))
+					  n   (* 40 (+ 0.5 (simplex-noise-value simplex (* i scale) (* j scale)))))
 					(doseq (k (range n))
 						(line c
 								(point (+ cx (rand (* nlineMul ts) (* plineMul ts))) (+ cy (rand (* nlineMul ts) (* plineMul ts))))
@@ -53,4 +55,5 @@
 
 (profile :drawing-clean
 (surface-clean s c)
+)
 )
