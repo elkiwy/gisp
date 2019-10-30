@@ -44,6 +44,7 @@ void* INTERN_reduce	= 0;
 void* INTERN_map	= 0;
 void* INTERN_mapv	= 0;
 void* INTERN_doseq	= 0;
+void* INTERN_profile= 0;
 
 //Input parsing methods
 int is_space(char x)  {
@@ -380,6 +381,27 @@ List* eval(List* exp, Environment* env) {
 			}
 			return ret;
 
+		/// (profile tag body)
+		}else if (first(exp) == INTERN_profile){
+			//Get the tag
+			List* tag = eval(second(exp), env);
+
+			//Eval and profile
+			clock_t begin = clock();
+			List* ret = 0;
+			List* seq = cdr(cdr(exp));
+			while(seq){
+				ret = eval(car(seq), env);
+				seq = cdr(seq);
+			}
+			clock_t end = clock();
+
+			//Print the result
+			printf("PROFILE for %s : %f seconds\n", (char*)tag, (double)(end - begin) / CLOCKS_PER_SEC);
+
+			//Return the value
+			return ret;
+
 		//Keyword map member accessing
 		}else if (*((char*)first(exp)) == ':'){
 			List* obj = eval(second(exp), env);
@@ -553,6 +575,7 @@ int main(int argc, char* argv[]) {
 	INTERN_map		= intern("map");
 	INTERN_mapv		= intern("mapv");
 	INTERN_doseq	= intern("doseq");
+	INTERN_profile	= intern("profile");
 
 
 
