@@ -51,7 +51,7 @@ void print_obj(List* ob, int head_of_list) {
 }
 
 int randInt(int min, int max){
-	return (rand() % max-min) + min;
+	return (rand() % (max-min)) + min;
 }
 
 // ------------------------------------------------------------------
