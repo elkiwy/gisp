@@ -23,7 +23,6 @@ List* applyOperationOnList(char op, List* list){
 	return (List*)value_to_number(res);
 }
 
-//Compose the callable functions
 List* fadd(List* a) {return applyOperationOnList('+', a);}
 List* fsub(List* a) {return applyOperationOnList('-', a);}
 List* fmul(List* a) {return applyOperationOnList('*', a);}
