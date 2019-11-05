@@ -60,6 +60,8 @@ List* fseed(List* a);
 // -----------------------------------------
 //Math - Misc
 List* frange(List* a);
+List* fminNum(List* a);
+List* fmaxNum(List* a);
 
 
 

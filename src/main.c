@@ -533,6 +533,8 @@ int main(int argc, char* argv[]) {
 	extendEnv("floor", (void*)ffloor, global_env);
 	extendEnv("ceil", (void*)fceil, global_env);
 
+	extendEnv("min", (void*)fminNum, global_env);
+	extendEnv("max", (void*)fmaxNum, global_env);
 
 	extendEnv("range", (void*)frange, global_env);
 	extendEnv("reverse", (void*)freverse, global_env);

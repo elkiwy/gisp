@@ -40,6 +40,47 @@ List* fint(List* a)   {return (List*)value_to_number((int)numVal(first(a)));}
 List* ffloor(List* a) {return (List*)value_to_number((int)numVal(first(a)));}
 List* fceil(List* a)  {return (List*)value_to_number(1+(int)numVal(first(a)));}
 
+List* fminNum(List* a)  {
+	List* arg = car(a);
+
+	if(is_pair(arg)){
+		List* l = arg;
+		double n1 = numVal(first(l));
+		double min = n1;
+		while(l){
+			n1 = numVal(first(l));
+			if(n1 < min){min = n1;}
+			l = cdr(l);
+		}
+		return (List*)value_to_number(min);
+
+	}else if(is_vector(arg)){
+		//TODO
+	}
+	return 0;
+}
+
+List* fmaxNum(List* a)  {
+	List* arg = car(a);
+
+	if(is_pair(arg)){
+		List* l = arg;
+		double n1 = numVal(first(l));
+		double max = n1;
+		while(l){
+			n1 = numVal(first(l));
+			if(n1 > max){max = n1;}
+			l = cdr(l);
+		}
+		return (List*)value_to_number(max);
+
+	}else if(is_vector(arg)){
+		//TODO
+	}
+	return 0;
+}
+
+
 List* fpow(List* a)   {return (List*)value_to_number(pow(numVal(first(a)), numVal(second(a))));}
 List* fmodulo(List* a){return (List*)value_to_number((int)numVal(first(a)) % (int)numVal(second(a)));}
 List* fsqrt(List* a)  {return (List*)value_to_number(sqrt(numVal(first(a))));}
