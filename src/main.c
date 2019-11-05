@@ -17,6 +17,7 @@
 
 //Global variables to handle environment and input to parse
 static int look; 
+static int exitFlag = 0;
 static char token[SYMBOL_MAX]; /* token*/
 FILE* inputFile = 0;
 char* workingDir = "";
@@ -381,6 +382,12 @@ List* eval(List* exp, Environment* env) {
 			}
 			return ret;
 
+		}else if (first(exp)== intern("exit")){
+			printf("exiting \n");fflush(stdout);
+			look = EOF;
+			exitFlag = 1;
+			return 0;
+
 		/// (profile tag body)
 		}else if (first(exp) == INTERN_profile){
 			//Get the tag
@@ -446,7 +453,12 @@ List* read_and_eval(){
 		//Evaluate only if valid tokens
 		if (strlen(token)>0)
 			result = eval(getobj(), global_env);
-		look = read_char();
+
+		if (exitFlag==0){
+			look = read_char();
+		}else{
+			look = EOF;
+		}
 	}
 	return result;
 }
