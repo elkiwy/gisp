@@ -67,4 +67,5 @@ default.profraw
 test.c
 test.dSYM
 test
-test.svg
+*.svg
+*.png
