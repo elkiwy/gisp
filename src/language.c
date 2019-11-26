@@ -386,6 +386,7 @@ List* fsvg_clean(List* a){
 	return 0;
 }
 
+
 // (svg-line context pointA pointB)
 List* fsvg_line(List* a){
 	cairo_t* context = first(a);
@@ -402,3 +403,11 @@ List* fsvg_line(List* a){
 	return 0;
 }
 
+
+
+List* fsvg_to_png(List* a){
+	cairo_surface_t* surface = first(a);
+	char* filename = second(a);
+	cairo_surface_write_to_png(surface, filename);
+	return 0;
+}
