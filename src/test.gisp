@@ -1,0 +1,36 @@
+(include "src/core.lisp")
+(include "src/simplex-noise.lisp")
+
+
+(seed)
+(def simplex (simplex-noise 32 0.9 (rand 99999)))
+
+
+(def canvas-w 1024)
+(def canvas-h 1024)
+(def s (make-surface "test.svg" canvas-w canvas-h))
+(def c (make-context s))
+
+
+(doseq (ts (list 16 32 64 128 256 512))
+	(let (scale    6
+		  plineMul 0.5
+		  nlineMul (* -1 plineMul)
+		  nx       (/ canvas-w ts)
+		  ny       (/ canvas-h ts))
+		(doseq (j (range 1 (- ny 1)))
+			(doseq (i (range 1 (- nx 1)))
+				(let (cx          (+ (* ts i) (* ts 0.5))
+					  cy          (+ (* ts j) (* ts 0.5))
+					  simplex-val (simplex-noise-value simplex (* (/ i nx) scale) (* (/ j ny) scale))
+					  n           (* 30 (+ 0.5 simplex-val)))
+					(doseq (k (range n))
+						(line c
+							(point (+ cx (rand (* nlineMul ts) (* plineMul ts))) (+ cy (rand (* nlineMul ts) (* plineMul ts))))
+							(point (+ cx (rand (* nlineMul ts) (* plineMul ts))) (+ cy (rand (* nlineMul ts) (* plineMul ts)))))))))))
+
+
+(surface-to-png s "test.png")
+(surface-clean s c)
+
+
