@@ -354,9 +354,7 @@ List* fassoc(List* a){
 List* fsvg_surface(List* a){
 	float w = numVal(second(a));
 	float h = numVal(third(a));
-	char* n = first(a);
-	n++;
-	n[strlen(n)-1] = '\0';
+	char* n = trim_quotes(first(a));
 	cairo_surface_t* surface = cairo_svg_surface_create(n, w, h);
 	cairo_svg_surface_restrict_to_version(surface, 1);
 	cairo_surface_set_fallback_resolution(surface, 72., 72.);
@@ -407,7 +405,7 @@ List* fsvg_line(List* a){
 
 List* fsvg_to_png(List* a){
 	cairo_surface_t* surface = first(a);
-	char* filename = second(a);
+	char* filename = trim_quotes(second(a));
 	cairo_surface_write_to_png(surface, filename);
 	return 0;
 }
