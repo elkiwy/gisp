@@ -369,6 +369,8 @@ List* fsvg_status(List* a){
 
 List* fsvg_context(List* a){
 	cairo_t* context = cairo_create(first(a));
+	cairo_set_source_rgb(context, 1, 1, 1);
+	cairo_paint(context);
 	cairo_set_line_width(context, 1);
 	cairo_set_source_rgb(context, 0, 0, 0);
 	return (List*)context;
