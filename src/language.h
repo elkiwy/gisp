@@ -7,8 +7,15 @@
 #include <time.h>
 
 #include "core.h"
+
+#ifdef __APPLE__
 #include "cairo.h"
 #include "cairo-svg.h"
+#elif __linux__
+#include "cairo/cairo.h"
+#include "cairo/cairo-svg.h"
+#endif
+
 #include "hashmap.h"
 
 #define PI 3.14159265
