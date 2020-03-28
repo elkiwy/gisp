@@ -23,23 +23,23 @@ List* applyOperationOnList(char op, List* list){
 	return (List*)value_to_number(res);
 }
 
-List* fadd(List* a) {return applyOperationOnList('+', a);}
-List* fsub(List* a) {return applyOperationOnList('-', a);}
-List* fmul(List* a) {return applyOperationOnList('*', a);}
-List* fdiv(List* a) {return applyOperationOnList('/', a);}
+__attribute__((aligned(16))) List* fadd(List* a) {return applyOperationOnList('+', a);}
+__attribute__((aligned(16))) List* fsub(List* a) {return applyOperationOnList('-', a);}
+__attribute__((aligned(16))) List* fmul(List* a) {return applyOperationOnList('*', a);}
+__attribute__((aligned(16))) List* fdiv(List* a) {return applyOperationOnList('/', a);}
 
-List* fsin(List* a) {return (List*)value_to_number(sin(numVal(first(a))));}
-List* fcos(List* a) {return (List*)value_to_number(cos(numVal(first(a))));}
-List* fdsin(List* a) {return (List*)value_to_number(sin(numVal(first(a)) * DEG_TO_RAD));}
-List* fdcos(List* a) {return (List*)value_to_number(cos(numVal(first(a)) * DEG_TO_RAD));}
+__attribute__((aligned(16))) List* fsin(List* a) {return (List*)value_to_number(sin(numVal(first(a))));}
+__attribute__((aligned(16))) List* fcos(List* a) {return (List*)value_to_number(cos(numVal(first(a))));}
+__attribute__((aligned(16))) List* fdsin(List* a) {return (List*)value_to_number(sin(numVal(first(a)) * DEG_TO_RAD));}
+__attribute__((aligned(16))) List* fdcos(List* a) {return (List*)value_to_number(cos(numVal(first(a)) * DEG_TO_RAD));}
 
-List* frad(List* a) {return (List*)value_to_number(numVal(first(a)) * DEG_TO_RAD);}
-List* fdeg(List* a) {return (List*)value_to_number(numVal(first(a)) * RAD_TO_DEG);}
-List* fint(List* a)   {return (List*)value_to_number((int)numVal(first(a)));}
-List* ffloor(List* a) {return (List*)value_to_number((int)numVal(first(a)));}
-List* fceil(List* a)  {return (List*)value_to_number(1+(int)numVal(first(a)));}
+__attribute__((aligned(16))) List* frad(List* a) {return (List*)value_to_number(numVal(first(a)) * DEG_TO_RAD);}
+__attribute__((aligned(16))) List* fdeg(List* a) {return (List*)value_to_number(numVal(first(a)) * RAD_TO_DEG);}
+__attribute__((aligned(16))) List* fint(List* a)   {return (List*)value_to_number((int)numVal(first(a)));}
+__attribute__((aligned(16))) List* ffloor(List* a) {return (List*)value_to_number((int)numVal(first(a)));}
+__attribute__((aligned(16))) List* fceil(List* a)  {return (List*)value_to_number(1+(int)numVal(first(a)));}
 
-List* fminNum(List* a)  {
+__attribute__((aligned(16))) List* fminNum(List* a)  {
 	List* arg = car(a);
 
 	if(is_pair(arg)){
@@ -59,7 +59,7 @@ List* fminNum(List* a)  {
 	return 0;
 }
 
-List* fmaxNum(List* a)  {
+__attribute__((aligned(16))) List* fmaxNum(List* a)  {
 	List* arg = car(a);
 
 	if(is_pair(arg)){
@@ -80,20 +80,20 @@ List* fmaxNum(List* a)  {
 }
 
 
-List* fpow(List* a)   {return (List*)value_to_number(pow(numVal(first(a)), numVal(second(a))));}
-List* fmodulo(List* a){return (List*)value_to_number((int)numVal(first(a)) % (int)numVal(second(a)));}
-List* fsqrt(List* a)  {return (List*)value_to_number(sqrt(numVal(first(a))));}
-List* flog(List* a)    {return (List*)value_to_number(log(numVal(first(a))));}
-List* flog10(List* a)  {return (List*)value_to_number(log10(numVal(first(a))));}
-List* fatan2(List* a) {return (List*)value_to_number(atan2(numVal(first(a)), numVal(second(a))));}
+__attribute__((aligned(16))) List* fpow(List* a)   {return (List*)value_to_number(pow(numVal(first(a)), numVal(second(a))));}
+__attribute__((aligned(16))) List* fmodulo(List* a){return (List*)value_to_number((int)numVal(first(a)) % (int)numVal(second(a)));}
+__attribute__((aligned(16))) List* fsqrt(List* a)  {return (List*)value_to_number(sqrt(numVal(first(a))));}
+__attribute__((aligned(16))) List* flog(List* a)    {return (List*)value_to_number(log(numVal(first(a))));}
+__attribute__((aligned(16))) List* flog10(List* a)  {return (List*)value_to_number(log10(numVal(first(a))));}
+__attribute__((aligned(16))) List* fatan2(List* a) {return (List*)value_to_number(atan2(numVal(first(a)), numVal(second(a))));}
 
-List* fbitAnd(List* a){return (List*)value_to_number((int)numVal(first(a)) & (int)numVal(second(a)));}
+__attribute__((aligned(16))) List* fbitAnd(List* a){return (List*)value_to_number((int)numVal(first(a)) & (int)numVal(second(a)));}
 
-List* flessThan(List* a)    {return numVal(first(a)) < numVal(second(a)) ? e_true : e_false;}
-List* fgreaterThan(List* a) {return numVal(first(a)) > numVal(second(a)) ? e_true : e_false;}
+__attribute__((aligned(16))) List* flessThan(List* a)    {return numVal(first(a)) < numVal(second(a)) ? e_true : e_false;}
+__attribute__((aligned(16))) List* fgreaterThan(List* a) {return numVal(first(a)) > numVal(second(a)) ? e_true : e_false;}
 
 
-List* frange(List* a){
+__attribute__((aligned(16))) List* frange(List* a){
 	double min = 0, max = 0; 
 	if (cdr(a)){
 		min = numVal(first(a));
@@ -109,7 +109,7 @@ List* frange(List* a){
 }
 
 
-List* fseed(List* a){
+__attribute__((aligned(16))) List* fseed(List* a){
 	int seed = 0;
 	if (a){ seed = (int)numVal(first(a));
 	}else{  seed = time(NULL);}
@@ -121,7 +121,7 @@ List* fseed(List* a){
 
 /// (rand min max) ;min is inclusive, max is exclusive
 /// (rand max) ;max is exclusive
-List* frand(List* a){
+__attribute__((aligned(16))) List* frand(List* a){
 	List* arg1 = first(a);
 	int min = 0;
 	int max = 0;
@@ -143,12 +143,12 @@ List* frand(List* a){
 
 // ---------------------------------------------
 // List operations
-List* fcons(List* a) { return cons(first(a), second(a)); }
-List* flist(List* a) { return a;}
-List* fcar(List* a)  { return car(first(a)); }
-List* fcdr(List* a)  { return cdr(first(a)); }
+__attribute__((aligned(16))) List* fcons(List* a) { return cons(first(a), second(a)); }
+__attribute__((aligned(16))) List* flist(List* a) { return a;}
+__attribute__((aligned(16))) List* fcar(List* a)  { return car(first(a)); }
+__attribute__((aligned(16))) List* fcdr(List* a)  { return cdr(first(a)); }
 
-List* freverse(List* a) {
+__attribute__((aligned(16))) List* freverse(List* a) {
 	List* ret = 0;
 	List* l = first(a);
 	while(l){
@@ -160,7 +160,7 @@ List* freverse(List* a) {
 
 
 
-Vector* concatVec(Vector* v1, Vector* v2){
+__attribute__((aligned(16))) Vector* concatVec(Vector* v1, Vector* v2){
 	int size1 = v1->size;
 	int size2 = v2->size;
 	int tot = size1+size2;
@@ -177,7 +177,7 @@ Vector* concatVec(Vector* v1, Vector* v2){
 }
 
 
-List* fconcat(List* a) {
+__attribute__((aligned(16))) List* fconcat(List* a) {
 	List* v1 = first(a);
 	if(is_vector(v1)){
 		Vector* untagged_result = (Vector*)untag_vector(v1);
@@ -194,11 +194,11 @@ List* fconcat(List* a) {
 	}
 }
 
-List* ffirst(List* a){
+__attribute__((aligned(16))) List* ffirst(List* a){
 	return first(first(a));
 }
 
-List* flast(List* a){
+__attribute__((aligned(16))) List* flast(List* a){
 	List* l = first(a);
 	List* current = l;
 	List* last = 0;
@@ -212,7 +212,7 @@ List* flast(List* a){
 
 // ---------------------------------------------
 // Test and type checking
-List* feq(List* a)   {
+__attribute__((aligned(16))) List* feq(List* a)   {
 	List* v1 = first(a);
 	List* v2 = second(a);
 	if (is_number(v1) && is_number(v2)){
@@ -223,15 +223,15 @@ List* feq(List* a)   {
 		return first(a) == second(a) ? e_true : e_false;
 	}
 }
-List* fpair(List* a) { return is_pair(first(a))     ? e_true : e_false; }
-List* fatom(List* a) { return is_atom(first(a))     ? e_true : e_false; }
-List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
+__attribute__((aligned(16))) List* fpair(List* a) { return is_pair(first(a))     ? e_true : e_false; }
+__attribute__((aligned(16))) List* fatom(List* a) { return is_atom(first(a))     ? e_true : e_false; }
+__attribute__((aligned(16))) List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
 
 
 
 // ---------------------------------------------
 // Strings
-List* fstr(List* a) {
+__attribute__((aligned(16))) List* fstr(List* a) {
 	char* str1 = (char*)first(a);
 	char* str2 = (char*)second(a);
 	str1 = trim_quotes(str1);
@@ -249,7 +249,7 @@ List* fstr(List* a) {
 
 // ---------------------------------------------
 // Data structures
-int listLength(List* a){
+__attribute__((aligned(16))) int listLength(List* a){
 	int n = 0;
 	List* current = a;
 	while(current){n++; current = cdr(current);}
@@ -257,13 +257,13 @@ int listLength(List* a){
 }
 
 /// (vector values...)
-List* fvec(List* a){
+__attribute__((aligned(16))) List* fvec(List* a){
 	Vector* vec = listToVec(a);
 	return (List*)tag_vector(vec);
 }
 
 /// (hashmap key val ...)
-List* fhashmap(List* a){
+__attribute__((aligned(16))) List* fhashmap(List* a){
 	map_t map = newHashmap();
 	List* current = a;
 	while(current){
@@ -276,7 +276,7 @@ List* fhashmap(List* a){
 }
 
 /// (get m k)
-List* fget(List* a){
+__attribute__((aligned(16))) List* fget(List* a){
 	List* seq = first(a);
 	if(is_pair(seq)){
 		seq = fvec(seq);
@@ -307,7 +307,7 @@ List* fget(List* a){
 
 
 /// (count vec)
-List* fcount(List* a){
+__attribute__((aligned(16))) List* fcount(List* a){
 	List* arg = first(a);
 	if (is_vector(arg)){
 		Vector* vec = (Vector*)untag_vector(arg);
@@ -321,7 +321,7 @@ List* fcount(List* a){
 
 
 /// (assoc coll key value)
-List* fassoc(List* a){
+__attribute__((aligned(16))) List* fassoc(List* a){
 	List* coll = first(a);
 	List* key_val = cdr(a);
 
@@ -351,7 +351,7 @@ List* fassoc(List* a){
 
 // ---------------------------------------------
 // Cairo 
-List* fsvg_surface(List* a){
+__attribute__((aligned(16))) List* fsvg_surface(List* a){
 	float w = numVal(second(a));
 	float h = numVal(third(a));
 	char* n = trim_quotes(first(a));
@@ -361,13 +361,13 @@ List* fsvg_surface(List* a){
 	return (List*)surface;
 }
 
-List* fsvg_status(List* a){
+__attribute__((aligned(16))) List* fsvg_status(List* a){
 	printf("\nSURFACE STATUS: %s\n", cairo_status_to_string(cairo_surface_status(first(a))));
 	fflush(stdout);
 	return 0;
 }
 
-List* fsvg_context(List* a){
+__attribute__((aligned(16))) List* fsvg_context(List* a){
 	cairo_t* context = cairo_create(first(a));
 	cairo_set_source_rgb(context, 1, 1, 1);
 	cairo_paint(context);
@@ -376,7 +376,7 @@ List* fsvg_context(List* a){
 	return (List*)context;
 }
 
-List* fsvg_clean(List* a){
+__attribute__((aligned(16))) List* fsvg_clean(List* a){
 	cairo_surface_t* surface = first(a);
 	cairo_t* context = second(a);
 	cairo_surface_flush(surface);
@@ -388,7 +388,7 @@ List* fsvg_clean(List* a){
 
 
 // (svg-line context pointA pointB)
-List* fsvg_line(List* a){
+__attribute__((aligned(16))) List* fsvg_line(List* a){
 	cairo_t* context = first(a);
 	map_t p1 = (map_t)untag_hashmap(second(a));
 	map_t p2 = (map_t)untag_hashmap(third(a));
@@ -405,7 +405,7 @@ List* fsvg_line(List* a){
 
 
 
-List* fsvg_to_png(List* a){
+__attribute__((aligned(16))) List* fsvg_to_png(List* a){
 	cairo_surface_t* surface = first(a);
 	char* filename = trim_quotes(second(a));
 	cairo_surface_write_to_png(surface, filename);

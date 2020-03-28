@@ -470,7 +470,7 @@ List* read_and_eval(){
 }
 
 //Basics I/O operations
-List* fincludefile(List* a){
+__attribute__((aligned(16))) List* fincludefile(List* a){
 	char* path = (char*)trim_quotes(first(a));
 	FILE* originalFile = inputFile;
 	inputFile = fopen(path, "r");
@@ -480,13 +480,13 @@ List* fincludefile(List* a){
 	//printf("done including %s \n\n", path);fflush(stdout);
 	return 0;
 }
-List* freadobj(List* a) {
+__attribute__((aligned(16))) List* freadobj(List* a) {
 	look = read_char();
 	gettoken();
 	return getobj();
 }
 
-List* fwriteobj(List* a){
+__attribute__((aligned(16))) List* fwriteobj(List* a){
 	fflush(stdout);
 	List* current = a;
 	while(current){
