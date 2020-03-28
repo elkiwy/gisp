@@ -166,6 +166,7 @@ List* evlist(List* list, Environment* env) {
 		args = &((List*)untag(*args))->next;}
 	return head;}
 List* eval(List* exp, Environment* env) {
+	//printf("Eval %p in %p\n", (void*)exp, (void*)env);fflush(stdout);
 	//If is a tagged hashmap...
 	if (is_hashmap(exp)){
 		return exp;	
@@ -185,7 +186,9 @@ List* eval(List* exp, Environment* env) {
 
 		//Check if I have the symbol in the environment
 		List* symbolValue = searchInEnvironment(exp, env);
+		//printf(" symbol found symbol \"%p\"\n", (void*)symbolValue);
 		if (symbolValue != 0) return symbolValue;
+		//printf("symbol not found\n");
 		
 		//Check if it's a string
 		if (*((char*)exp) == '"'){
@@ -234,10 +237,11 @@ List* eval(List* exp, Environment* env) {
 
 		// (def symbol sexp)
 		}else if (first(exp) == INTERN_def){
+			//printf("\n---found def expression \n");fflush(stdout);
 			char* sym = second(exp);
 			List* val = eval(third(exp), env);
 			extendEnv(sym, val, env);
-			//printf("== Defining %s to ", second(exp)); print_obj(value, 1); printf("\n");
+			//printf("== Done Defining %s ", second(exp)); print_obj(val, 1); printf("\n"); fflush(stdout);
 			return val;
 
 		// (defn symbol (params) sexp)
@@ -416,16 +420,16 @@ List* eval(List* exp, Environment* env) {
 
 		// (function args)
 		} else { 
-			//printf("Searching for symbol %s\n", (char*)first(exp));
+			//printf("-----Searching for symbol %s\n", (char*)first(exp));
 			List* primop = eval(first(exp), env);
 
 			//user defined lambda, arg list eval happens in binding  below
 			if (is_pair(primop)) { 
-				//printf("found lambda %s\n", (char*)first(exp));
+				//printf("-----found lambda %s\n", (char*)first(exp));
 				return eval( cons(primop, cdr(exp)), env );
 			//Built-in primitive
 			} else if (primop) { 
-				//printf("found primitive %s\n", (char*)first(exp));
+				//printf("-----found primitive %s\n", (char*)first(exp));
 				List* result = ((List* (*) (List*))primop) (evlist(cdr(exp), env));
 				return result;
 			}
@@ -436,9 +440,11 @@ List* eval(List* exp, Environment* env) {
 
 		//bind names into env and eval body
 		return apply_lambda(car(exp), cdr(exp), env);
-
 	}
-	printf("cannot evaluate expression %s in %p\n", first(exp), env);
+
+	printf("cannot evaluate exp: %s %s in %p\n", exp, (char*)first(exp), env);
+
+
 	return 0;
 }
 
@@ -468,8 +474,10 @@ List* fincludefile(List* a){
 	char* path = (char*)trim_quotes(first(a));
 	FILE* originalFile = inputFile;
 	inputFile = fopen(path, "r");
+	//printf("\nincluding %s inputFile %p\n", path, (void*)inputFile);fflush(stdout);
 	read_and_eval();
 	inputFile = originalFile;
+	//printf("done including %s \n\n", path);fflush(stdout);
 	return 0;
 }
 List* freadobj(List* a) {

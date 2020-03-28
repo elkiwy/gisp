@@ -4,6 +4,7 @@
 //Generic utilities
 void print_obj(List* ob, int head_of_list) {
 	if(is_hashmap(ob)){
+		//printf("printing hashmap\n");fflush(stdout);
 		map_t map = (map_t)untag_hashmap(ob);
 		int size = hashmap_length(map);
 		char** keys = malloc(sizeof(void*)*size);
@@ -21,6 +22,7 @@ void print_obj(List* ob, int head_of_list) {
 		free(values);
 
 	}else if(is_vector(ob)){
+		//printf("printing vector\n");fflush(stdout);
 		Vector* vec = (void*)untag_vector(ob);
 		void** data = vec->data;
 		int size = vec->size;
@@ -32,11 +34,13 @@ void print_obj(List* ob, int head_of_list) {
 		printf("]");
 
 	}else if(is_number(ob)){
+		//printf("printing number %p\n", (void*)ob);fflush(stdout);
 		double num = numVal(ob);
 		if ((num - (int)num) == 0){printf("%i", (int)num);
 		}else{printf("%f", num);}
 
 	} else if (is_pair(ob)){
+		//printf("printing pair\n");fflush(stdout);
 		if (head_of_list) printf("(");
 		print_obj(car(ob), 1);
 		if (cdr(ob) != 0) {
@@ -91,10 +95,13 @@ Environment* makeEnvironment(Environment* _outer) {
 void extendEnv(char* name, void* value, Environment* env){
 	environmentCounter_insert++;
 	//Add this symbol and value to the current environment level
+	//printf("adding \"%s\" as %p\n", name, value);fflush(stdout);
 	hashmap_put(env->hashData, name, value);
 }
 
 void* searchInEnvironment(List* exp, Environment* env){
+	//printf("++Search in environment \"%s\"\n", exp);fflush(stdout);
+	
 	environmentCounter_search++;
 	clock_t start = clock();
 
@@ -105,6 +112,7 @@ void* searchInEnvironment(List* exp, Environment* env){
 		hashmap_get(currentEnv->hashData, (char*)exp, (any_t)&value);
 		if (value){
 			clock_t end = clock(); environmentCounter_searchTimeSum += (double)(end - start) / CLOCKS_PER_SEC;
+			//printf("++Found value:\"%p\"\n", value);fflush(stdout);
 			return value;
 		}
 
@@ -113,6 +121,7 @@ void* searchInEnvironment(List* exp, Environment* env){
 	}
 
 	clock_t end = clock(); environmentCounter_searchTimeSum += (double)(end - start) / CLOCKS_PER_SEC;
+	//printf("++not found value:\"\"\n");fflush(stdout);
 	return 0;
 }
 
