@@ -1,5 +1,6 @@
-(include "src/core.lisp")
-(include "src/simplex-noise.lisp")
+
+(include "src/core.gisp")
+(include "src/simplex-noise.gisp")
 
 
 (seed)
