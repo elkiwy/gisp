@@ -354,8 +354,13 @@ __attribute__((aligned(16))) List* fassoc(List* a){
 __attribute__((aligned(16))) List* fsvg_surface(List* a){
 	float w = numVal(second(a));
 	float h = numVal(third(a));
-	char* n = trim_quotes(first(a));
-	cairo_surface_t* surface = cairo_svg_surface_create(n, w, h);
+	char* filename = trim_quotes(first(a));
+
+	char fullPath[4096];
+	strcpy(fullPath, gispWorkingDir);
+	strcat(fullPath, filename);
+
+	cairo_surface_t* surface = cairo_svg_surface_create(fullPath, w, h);
 	cairo_svg_surface_restrict_to_version(surface, 1);
 	cairo_surface_set_fallback_resolution(surface, 72., 72.);
 	return (List*)surface;
@@ -408,6 +413,10 @@ __attribute__((aligned(16))) List* fsvg_line(List* a){
 __attribute__((aligned(16))) List* fsvg_to_png(List* a){
 	cairo_surface_t* surface = first(a);
 	char* filename = trim_quotes(second(a));
-	cairo_surface_write_to_png(surface, filename);
+	char fullPath[4096];
+	strcpy(fullPath, gispWorkingDir);
+	strcat(fullPath, filename);
+	printf("Saving image %s\n", fullPath);fflush(stdout);
+	cairo_surface_write_to_png(surface, fullPath);
 	return 0;
 }

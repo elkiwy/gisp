@@ -23,6 +23,7 @@
 #define RAD_TO_DEG 180.0/PI
 
 
+extern char gispWorkingDir[4096];
 
 // ------------------------------------------------------------------
 // Math

@@ -20,7 +20,7 @@ static int look;
 static int exitFlag = 0;
 static char token[SYMBOL_MAX]; /* token*/
 FILE* inputFile = 0;
-char* workingDir = "";
+char gispWorkingDir[4096];
 Environment* global_env = 0;
 
 
@@ -471,13 +471,16 @@ List* read_and_eval(){
 
 //Basics I/O operations
 __attribute__((aligned(16))) List* fincludefile(List* a){
-	char* path = (char*)trim_quotes(first(a));
+	char* path_rel = (char*)trim_quotes(first(a));
+	char path_abs[1024];
+	strcpy(path_abs, gispWorkingDir);
+	strcat(path_abs, path_rel);
 	FILE* originalFile = inputFile;
-	inputFile = fopen(path, "r");
-	//printf("\nincluding %s inputFile %p\n", path, (void*)inputFile);fflush(stdout);
+	inputFile = fopen(path_abs, "r");
+	printf("Including source file \"%s\"...", path_abs, (void*)inputFile);fflush(stdout);
 	read_and_eval();
 	inputFile = originalFile;
-	//printf("done including %s \n\n", path);fflush(stdout);
+	printf("Done.\n");fflush(stdout);
 	return 0;
 }
 __attribute__((aligned(16))) List* freadobj(List* a) {
@@ -506,11 +509,12 @@ int main(int argc, char* argv[]) {
 	if (argc>1){
 		printf("Reading from file \"%s\"\n", argv[1]);
 		inputFile = fopen(argv[1], "r");
-		workingDir = argv[1];
-		while (strlen(workingDir)>=1 && workingDir[strlen(workingDir)-1] != '/'){
-			workingDir[strlen(workingDir)-1] = '\0';
+		realpath(argv[1], gispWorkingDir);
+		//Remove the filename to get the working directory
+		while (strlen(gispWorkingDir)>=1 && gispWorkingDir[strlen(gispWorkingDir)-1] != '/'){
+			gispWorkingDir[strlen(gispWorkingDir)-1] = '\0';
 		}
-		printf("Working dir set on: \"%s\"\n", workingDir);
+		printf("Working dir set on: \"%s\"\n", gispWorkingDir);
 	}
 
 	//Setup the profiling
