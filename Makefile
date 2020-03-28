@@ -7,18 +7,19 @@ CC := gcc
 SOURCES := $(wildcard $(SRC)/*.c)
 OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 OBJECTSPROF := $(patsubst $(SRC)/%.c, $(OBJPROF)/%.o, $(SOURCES))
-
+FLAGS = -g -Og -Wpedantic -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion -fsanitize=address -fsanitize=undefined
 build/main: $(OBJECTS)
-	$(CC) $^ -Wall -L/usr/local/lib/ -lcairo -lm -ldl -o $@
+	$(CC) $^ $(FLAGS) -lcairo -lm -ldl -o $@
 
 $(OBJ)/%.o: $(SRC)/%.c
-	$(CC) -Wall -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
+	$(CC) $(FLAGS) -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
 
 run: build/main
 	./build/main
 
 test: build/main
 	./build/main src/test.gisp
+
 
 debug: rebuild
 	gdb build/main
