@@ -1,6 +1,6 @@
 
-(include "src/core.gisp")
-(include "src/simplex-noise.gisp")
+(include "core.gisp")
+(include "simplex-noise.gisp")
 
 
 (seed)
