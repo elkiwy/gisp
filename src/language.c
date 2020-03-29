@@ -348,7 +348,7 @@ __attribute__((aligned(16))) List* freverse(List* a) {
 
 
 
-__attribute__((aligned(16))) Vector* concatVec(Vector* v1, Vector* v2){
+Vector* concatVec(Vector* v1, Vector* v2){
 	int size1 = v1->size;
 	int size2 = v2->size;
 	int tot = size1+size2;
