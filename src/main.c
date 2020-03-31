@@ -493,13 +493,35 @@ int main(int argc, char* argv[]) {
 	if (argc>1){
 		//Read the input file
 		inputFile = fopen(argv[1], "r");
-		realpath(argv[1], gispWorkingDir);
+		if(realpath(argv[1], gispWorkingDir)==NULL){
+			printf("Couldn't find input file '%s'.", argv[1]);exit(1);
+		}
+		printf("Reading from file \"%s\"\n", gispWorkingDir);
 
 		//Remove the filename to get the working directory
 		while (strlen(gispWorkingDir)>=1 && gispWorkingDir[strlen(gispWorkingDir)-1] != '/'){
 			gispWorkingDir[strlen(gispWorkingDir)-1] = '\0';
 		}
 		printf("Working dir set on: \"%s\"\n", gispWorkingDir);
+	}else{
+		//Ask for input file
+		printf("Please provide a .gisp file to read.\n");
+		exit(1);
+	}
+
+	//Debug params
+	int profile = 0;
+	int memory = 0;
+	if (argc>2){
+		int i=2;
+		while(i<argc){
+			if (strcmp(argv[i], "--time")==0){
+				profile = 1;	
+			}else if (strcmp(argv[i], "--memory")==0){
+				memory = 1;
+			}
+			i++;
+		}
 	}
 
 	//Setup the profiling
@@ -589,23 +611,26 @@ int main(int argc, char* argv[]) {
 
 	//Print the profiling
 	clock_t end = clock();
-	printf("\n\n");
-	time += (double)(end_env - begin) / CLOCKS_PER_SEC;
-	printf("Time elpased for setup %f\n", time);
-	time += (double)(end - end_env) / CLOCKS_PER_SEC;
-	printf("Time elpased for eval %f\n\n", time);
+	if (profile){
+		printf("\n\nProfiling:\n");
+		time += (double)(end_env - begin) / CLOCKS_PER_SEC;
+		printf("Time elpased for setup %f\n", time);
+		time += (double)(end - end_env) / CLOCKS_PER_SEC;
+		printf("Time elpased for eval %f", time);
+	}
 
-
-	printf("Vector count: %d\n", vectorCount);
-	printf("Cons count: %d\n", consCount);
-	printf("Hashmap count: %d\n", hashmapCount);
-	printf("Number count: %d\n", numberCount);
-
-	printf("Environment insert count: %d\n", environmentCounter_insert);
-	printf("Environment search count: %d\n", environmentCounter_search);
-
-	printf("Environment search time: %f\n", environmentCounter_searchTimeSum);
-	printf("Environment search  avg: %f\n", environmentCounter_searchTimeSum/(double)environmentCounter_search);
+	//Print memory usage and operations
+	if (memory){
+		printf("\n\nMemory Usage:\n");
+		printf("Vector count: %d\n", vectorCount);
+		printf("Cons count: %d\n", consCount);
+		printf("Hashmap count: %d\n", hashmapCount);
+		printf("Number count: %d\n", numberCount);
+		printf("Environment insert count: %d\n", environmentCounter_insert);
+		printf("Environment search count: %d\n", environmentCounter_search);
+		printf("Environment search time: %f\n", environmentCounter_searchTimeSum);
+		printf("Environment search  avg: %f\n", environmentCounter_searchTimeSum/(double)environmentCounter_search);
+	}
 
 	return 0;
 }
