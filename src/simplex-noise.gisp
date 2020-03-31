@@ -40,12 +40,11 @@
 
 ;Creates an octave from a random seed
 (defn simplex-noise-octave (octave_seed)
-	(progn
     (seed (if (= octave_seed RANDOM-SEED) (rand 99999) octave_seed))
     (let (p (N-times NUMBER-OF-SWAPS swap-random P-SUPPLY)
           perm (concat p p)
           permMod12 (mapv #(mod % 12) perm))
-        { :perm perm :permMod12 permMod12 })))
+        { :perm perm :permMod12 permMod12 }))
 
 ;Dot product of gradient at x and y
 (defn dot (grad x y)
@@ -104,13 +103,12 @@
 ;;;!2Number
 ;;;!3Number
 (defn simplex-noise (largest-feature persistance starting-seed)
-	(progn
     (seed starting-seed)
     (let (octaves-count (ceil (/ (log10 largest-feature) (log10 2))))
         (map (lambda (i) (hashmap :octave (simplex-noise-octave (rand 9999))
                              :frequency (pow 2 i)
 						     :amplitude (pow persistance (- octaves-count i))))
-			 (range octaves-count)))))
+			 (range octaves-count))))
 
 ;;;~Extract a value from a previously defined generator at x and y
 ;;;#Number
