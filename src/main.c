@@ -3,12 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
 #include <time.h>
 
 #include "hashmap.h"
-
-
 #include "core.h"
 #include "language.h"
 
@@ -23,7 +20,7 @@ FILE* inputFile = 0;
 char gispWorkingDir[4096];
 Environment* global_env = 0;
 
-
+//Memory Profiling variables
 int vectorCount = 0;
 int hashmapCount = 0;
 int numberCount = 0;
@@ -33,6 +30,7 @@ int environmentCounter_search = 0;
 double environmentCounter_searchTimeSum = 0;
 double environmentCounter_searchTimeSum_hash = 0;
 
+//Intern costant symbols
 void* INTERN_quote	= 0;
 void* INTERN_if		= 0;
 void* INTERN_lambda	= 0;
@@ -59,7 +57,6 @@ void skipLine(FILE* inputFile){
 	while(c != EOF && c != '\n'){
 		c = fgetc(inputFile);
 	}
-	//if (c == '\n'){}
 }
 
 //Read char from input stream or from input file if provided
@@ -106,9 +103,13 @@ static void gettoken() {
 // getlist() returns an empty list or a cons with an object and a list
 List* getlist();
 void* getobj() {
+	//Parse list
 	if (token[0] == '(') return getlist();
+	//Parse vector
 	if (token[0] == '[') return cons(intern("vector"), getlist());
+	//Parse hashmap
 	if (token[0] == '{') return cons(intern("hashmap"), getlist());
+	//Parse lambda
 	if (token[0] == '#'){
 		if (look != '('){
 			printf("ERROR: \"#\" should always be followed by a list. \"%c\" was found instead.", look); fflush(stdout);	
@@ -130,16 +131,9 @@ List* getlist() {
 	return cons(tmp, getlist());
 }
 
-
-
-
+//Debug function to print the environment
 void debug_printEnv(List* a, char* prefix){
-	int i=0;
-	while(a){
-		printf("%s %d - %s\n", prefix, i, (char*)car(car(a)));
-		a = cdr(a);
-		i++;
-	}
+	int i=0; while(a){printf("%s %d - %s\n", prefix, i, (char*)car(car(a))); a = cdr(a); i++;}
 }
 
 
@@ -186,9 +180,7 @@ List* eval(List* exp, Environment* env) {
 
 		//Check if I have the symbol in the environment
 		List* symbolValue = searchInEnvironment(exp, env);
-		//printf(" symbol found symbol \"%p\"\n", (void*)symbolValue);
 		if (symbolValue != 0) return symbolValue;
-		//printf("symbol not found\n");
 		
 		//Check if it's a string
 		if (*((char*)exp) == '"'){
@@ -442,9 +434,7 @@ List* eval(List* exp, Environment* env) {
 		return apply_lambda(car(exp), cdr(exp), env);
 	}
 
-	printf("cannot evaluate exp: %s %s in %p\n", exp, (char*)first(exp), env);
-
-
+	printf("cannot evaluate exp: %s %s in %p\n", (char*)exp, (char*)first(exp), env);
 	return 0;
 }
 
@@ -477,7 +467,7 @@ __attribute__((aligned(16))) List* fincludefile(List* a){
 	strcat(path_abs, path_rel);
 	FILE* originalFile = inputFile;
 	inputFile = fopen(path_abs, "r");
-	printf("Including source file \"%s\"...", path_abs, (void*)inputFile);fflush(stdout);
+	printf("Including source file \"%s\"...", (char*)path_abs);fflush(stdout);
 	read_and_eval();
 	inputFile = originalFile;
 	printf("Done.\n");fflush(stdout);
@@ -504,12 +494,12 @@ __attribute__((aligned(16))) List* fwriteobj(List* a){
 
 //Main program entry
 int main(int argc, char* argv[]) {
-	//Check if I have a file to read
 	printf("\n");
 	if (argc>1){
-		printf("Reading from file \"%s\"\n", argv[1]);
+		//Read the input file
 		inputFile = fopen(argv[1], "r");
 		realpath(argv[1], gispWorkingDir);
+
 		//Remove the filename to get the working directory
 		while (strlen(gispWorkingDir)>=1 && gispWorkingDir[strlen(gispWorkingDir)-1] != '/'){
 			gispWorkingDir[strlen(gispWorkingDir)-1] = '\0';
@@ -529,67 +519,58 @@ int main(int argc, char* argv[]) {
 	extendEnv("hashmap", (void*)fhashmap, global_env);
 	extendEnv("count",   (void*)fcount, global_env);
 	extendEnv("assoc",   (void*)fassoc, global_env);
-
-	extendEnv("/", (void*)fdiv, global_env);
-	extendEnv("*", (void*)fmul, global_env);
-	extendEnv("+", (void*)fadd, global_env);
-	extendEnv("-", (void*)fsub, global_env);
+	extendEnv("/",       (void*)fdiv, global_env);
+	extendEnv("*",       (void*)fmul, global_env);
+	extendEnv("+",       (void*)fadd, global_env);
+	extendEnv("-",       (void*)fsub, global_env);
 	extendEnv("bit-and", (void*)fbitAnd, global_env);
-	extendEnv("mod",   (void*)fmodulo, global_env);
-	extendEnv("pow",   (void*)fpow, global_env);
-	extendEnv("sqrt",  (void*)fsqrt, global_env);
-	extendEnv("log",    (void*)flog, global_env);
-	extendEnv("log10",  (void*)flog10, global_env);
-	extendEnv("atan2", (void*)fatan2, global_env);
-	extendEnv("rand", (void*)frand, global_env);
-	extendEnv("seed", (void*)fseed, global_env);
-	extendEnv("=", (void*)feq, global_env);
-	extendEnv("<", (void*)flessThan, global_env);
-	extendEnv(">", (void*)fgreaterThan, global_env);
-
-	extendEnv("sin", (void*)fsin, global_env);
-	extendEnv("cos", (void*)fcos, global_env);
-	extendEnv("dsin", (void*)fdsin, global_env);
-	extendEnv("dcos", (void*)fdcos, global_env);
-	extendEnv("deg", (void*)fdeg, global_env);
-	extendEnv("rad", (void*)frad, global_env);
-	extendEnv("int", (void*)fint, global_env);
-	extendEnv("floor", (void*)ffloor, global_env);
-	extendEnv("ceil", (void*)fceil, global_env);
-
-	extendEnv("min", (void*)fminNum, global_env);
-	extendEnv("max", (void*)fmaxNum, global_env);
-
-	extendEnv("range", (void*)frange, global_env);
+	extendEnv("mod",     (void*)fmodulo, global_env);
+	extendEnv("pow",     (void*)fpow, global_env);
+	extendEnv("sqrt",    (void*)fsqrt, global_env);
+	extendEnv("log",     (void*)flog, global_env);
+	extendEnv("log10",   (void*)flog10, global_env);
+	extendEnv("atan2",   (void*)fatan2, global_env);
+	extendEnv("rand",    (void*)frand, global_env);
+	extendEnv("seed",    (void*)fseed, global_env);
+	extendEnv("=",       (void*)feq, global_env);
+	extendEnv("<",       (void*)flessThan, global_env);
+	extendEnv(">",       (void*)fgreaterThan, global_env);
+	extendEnv("sin",     (void*)fsin, global_env);
+	extendEnv("cos",     (void*)fcos, global_env);
+	extendEnv("dsin",    (void*)fdsin, global_env);
+	extendEnv("dcos",    (void*)fdcos, global_env);
+	extendEnv("deg",     (void*)fdeg, global_env);
+	extendEnv("rad",     (void*)frad, global_env);
+	extendEnv("int",     (void*)fint, global_env);
+	extendEnv("floor",   (void*)ffloor, global_env);
+	extendEnv("ceil",    (void*)fceil, global_env);
+	extendEnv("min",     (void*)fminNum, global_env);
+	extendEnv("max",     (void*)fmaxNum, global_env);
+	extendEnv("range",   (void*)frange, global_env);
 	extendEnv("reverse", (void*)freverse, global_env);
-	extendEnv("concat", (void*)fconcat, global_env);
-	extendEnv("first", (void*)ffirst, global_env);
-	extendEnv("last", (void*)flast, global_env);
-
+	extendEnv("concat",  (void*)fconcat, global_env);
+	extendEnv("first",   (void*)ffirst, global_env);
+	extendEnv("last",    (void*)flast, global_env);
 	extendEnv("make-surface",   (void*)fsvg_surface, global_env);
 	extendEnv("make-context",   (void*)fsvg_context, global_env);
 	extendEnv("surface-status", (void*)fsvg_status, global_env);
 	extendEnv("surface-clean",  (void*)fsvg_clean, global_env);
 	extendEnv("line",           (void*)fsvg_line, global_env);
 	extendEnv("surface-to-png", (void*)fsvg_to_png, global_env);
-
-	extendEnv("str",   (void*)fstr, global_env);
-
+	extendEnv("str",     (void*)fstr, global_env);
 	extendEnv("include", (void*)fincludefile, global_env);
 	extendEnv("read",    (void*)freadobj, global_env);
 	extendEnv("write",   (void*)fwriteobj, global_env);
-
 	extendEnv("null?",   (void*)fnull, global_env);
 	extendEnv("symbol?", (void*)fatom, global_env);
 	extendEnv("pair?",   (void*)fpair, global_env);
 	extendEnv("eq?",     (void*)feq, global_env);
-	extendEnv("cons", (void*)fcons, global_env);
+	extendEnv("cons",    (void*)fcons, global_env);
+	extendEnv("cdr",     (void*)fcdr, global_env);
+	extendEnv("car",     (void*)fcar, global_env);
+	extendEnv("get",     (void*)fget, global_env);
 
-	extendEnv("cdr", (void*)fcdr, global_env);
-	extendEnv("car", (void*)fcar, global_env);
-	extendEnv("get", (void*)fget, global_env);
-
-
+	//Intern all the macro strings
 	INTERN_quote	= intern("quote");
 	INTERN_if		= intern("if");
 	INTERN_lambda	= intern("lambda");
@@ -603,15 +584,11 @@ int main(int argc, char* argv[]) {
 	INTERN_mapv		= intern("mapv");
 	INTERN_doseq	= intern("doseq");
 	INTERN_profile	= intern("profile");
-
-
-
-	clock_t end_env = clock();
-
-
 	printf("\n");
+	
 
 	//Evaluate everything 
+	clock_t end_env = clock();
 	List* result = read_and_eval();
 	print_obj(result, 1);
 
