@@ -12,6 +12,15 @@
 //Handy debug method
 #define debug(m,e) printf("%s:%d: %s:",__FILE__,__LINE__,m); print_obj(e,1); puts("");
 
+//Prepare variables for binary linked files
+extern const char _binary_src_simplex_noise_gisp_start[];
+extern const char _binary_src_simplex_noise_gisp_end[];
+extern const char _binary_src_core_gisp_start[];
+extern const char _binary_src_core_gisp_end[];
+char* linkedFile = NULL;
+int linkedFileIndex = 0;
+int linkedFileSize = 0;
+
 //Global variables to handle environment and input to parse
 static int look; 
 static int exitFlag = 0;
@@ -51,28 +60,38 @@ int is_space(char x)  {
 int is_parens(char x) {
 	return x == '(' || x == ')' || x == '[' || x == ']' || x == '{' || x == '}';}
 
+//Generic function to get the next char
+char get_char(){
+	//Read from linked file if it's set
+	if (linkedFile){
+		linkedFileIndex++;
+		if (linkedFileIndex>=linkedFileSize) return EOF;
+		return linkedFile[linkedFileIndex];
+	//Read from input file
+	}else if (inputFile){
+		return fgetc(inputFile);		
+	}
 
-void skipLine(FILE* inputFile){
-	char c = fgetc(inputFile);
+	//Return end of file if nothing of above is set
+	return EOF;
+}
+
+//Read chars until the end of this line
+void skipLine(){
+	char c = get_char();
 	while(c != EOF && c != '\n'){
-		c = fgetc(inputFile);
+		c = get_char();
 	}
 }
 
 //Read char from input stream or from input file if provided
 char read_char(){
-	if (inputFile){
-		//Read from the input file
-		char c = fgetc(inputFile);
-		while(c == ';'){
-			skipLine(inputFile);
-			c = fgetc(inputFile);
-		}
-		return c;
-	}else{
-		//Or read from stdin
-		return getchar();
+	char c = get_char();
+	while(c==';'){
+		skipLine();
+		c = get_char();
 	}
+	return c;
 }
 
 //Get the next token from the input and store it into the token variable
@@ -117,17 +136,18 @@ void* getobj() {
 		}
 		look = read_char();
 		List* expr = getlist();
-		List* lam = cons(intern("lambda"), cons(cons(intern("%"), 0), cons(expr, 0)));
-		return lam;
+		List* lamda = cons(intern("lambda"), cons(cons(intern("%"), 0), cons(expr, 0)));
+		return lamda;
 	}
+	//Else just return the symbol
 	return intern(token);}
 List* getlist() {
-	List* tmp;
+	//Get next token
 	gettoken();
-	if (token[0] == ')' || token[0] == ']' || token[0] == '}'){
-		return 0;
-	}
-	tmp = getobj();
+	//Check If i'm done with this list
+	if (token[0] == ')' || token[0] == ']' || token[0] == '}') return 0;
+	//If I'm not done get the full object from the current token and concatenate it to the rest of the list	
+	List* tmp = getobj();
 	return cons(tmp, getlist());
 }
 
@@ -487,6 +507,19 @@ __attribute__((aligned(16))) List* fwriteobj(List* a){
 }
 
 
+
+void includeLinkedBinaryFile(char* start, char* end){
+	//Include gisp core
+	linkedFile = start;
+	linkedFileSize = end - start;
+	printf("Including linked core.gisp size %d...", linkedFileSize);fflush(stdout);
+	read_and_eval();
+	printf("Done!\n");fflush(stdout);
+	linkedFile = NULL;
+	linkedFileIndex = 0;
+}
+
+
 //Main program entry
 int main(int argc, char* argv[]) {
 	printf("\n");
@@ -603,6 +636,9 @@ int main(int argc, char* argv[]) {
 	INTERN_profile	= intern("profile");
 	printf("\n");
 	
+	//Include gisp core
+	includeLinkedBinaryFile((char*)_binary_src_core_gisp_start, (char*)_binary_src_core_gisp_end);
+	includeLinkedBinaryFile((char*)_binary_src_simplex_noise_gisp_start, (char*)_binary_src_simplex_noise_gisp_end);
 
 	//Evaluate everything 
 	clock_t end_env = clock();

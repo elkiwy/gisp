@@ -8,8 +8,13 @@ SOURCES := $(wildcard $(SRC)/*.c)
 OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 OBJECTSPROF := $(patsubst $(SRC)/%.c, $(OBJPROF)/%.o, $(SOURCES))
 FLAGS = -g -Og -Wpedantic -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion -fsanitize=address -fsanitize=undefined
+
+
+
 build/main: $(OBJECTS)
-	$(CC) $^ $(FLAGS) -lcairo -lm -ldl -o $@
+	ld -r -b binary -o obj/gisp_core.o src/core.gisp
+	ld -r -b binary -o obj/gisp_noise.o src/simplex-noise.gisp
+	$(CC) $^ obj/gisp_core.o obj/gisp_noise.o $(FLAGS) -lcairo -lm -ldl -o $@ 
 
 $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) $(FLAGS) -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
