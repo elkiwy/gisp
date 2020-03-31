@@ -183,12 +183,10 @@ List* eval(List* exp, Environment* env) {
 		if (symbolValue != 0) return symbolValue;
 		
 		//Check if it's a string
-		if (*((char*)exp) == '"'){
-			return exp;}
+		if (*((char*)exp) == '"'){return exp;}
 
 		//Check if it's a keyword
-		if (*((char*)exp) == ':'){
-			return exp;}
+		if (*((char*)exp) == ':'){return exp;}
 
 		//Check if it's a symbol representing a number (not tagged)
 		char* err;
@@ -202,8 +200,8 @@ List* eval(List* exp, Environment* env) {
 		//Else return it as an atom
 		return 0;
 	//Else if is a list with the first atom being an atom
+	//(At this point we should be sure that the exp is a list)
 	} else if (is_atom(first(exp))) { 
-		//printf("list with atom found %s\n", (char*) first(exp));
 		// (quote X)
 		if (first(exp) == INTERN_quote) {
 			//Return the quoted element as it is
@@ -450,11 +448,8 @@ List* read_and_eval(){
 		if (strlen(token)>0)
 			result = eval(getobj(), global_env);
 
-		if (exitFlag==0){
-			look = read_char();
-		}else{
-			look = EOF;
-		}
+		if (exitFlag==0){look = read_char();
+		}else{look = EOF;}
 	}
 	return result;
 }
