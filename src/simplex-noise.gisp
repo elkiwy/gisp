@@ -1,10 +1,15 @@
+;Seed
 (def RANDOM-SEED 0)
+
+;Number of swaps when building an octave
 (def NUMBER-OF-SWAPS 400)
 
+;All the 3d gradiens
 (def GRADIENS-3 [[ 1  1  0] [-1  1  0] [ 1 -1  0] [-1 -1  0] 
                  [ 1  0  1] [-1  0  1] [ 1  0 -1] [-1  0 -1] 
                  [ 0  1  1] [ 0 -1  1] [ 0  1 -1] [ 0 -1 -1]])
 
+;P supply
 (def P-SUPPLY [151 160 137 91 90 15 131 13 201 95 96 53 194 233 7 225 140 36
                103 30 69 142 8 99 37 240 21 10 23 190 6 148 247 120 234 75 0
                26 197 62 94 252 219 203 117 35 11 32 57 177 33 88 237 149 56
@@ -21,17 +26,19 @@
                4 150 254 138 236 205 93 222 114 67 29 24 72 243 141 128 195 78
                66 215 61 156 180])
 
-
+;Swap randomly two values in a collection
 (defn swap-random (coll)
     (let (a (rand (count coll))
           b (rand (count coll)))
         (assoc coll b (get coll a) a (get coll b))))
 
+;Iterate N times a function on a value
 (defn N-times (n f value)
 	(if (= n 0)
 		value
 		(N-times (- n 1) f (f value))))
 
+;Creates an octave from a random seed
 (defn simplex-noise-octave (octave_seed)
 	(progn
     (seed (if (= octave_seed RANDOM-SEED) (rand 99999) octave_seed))
@@ -40,17 +47,13 @@
           permMod12 (mapv #(mod % 12) perm))
         { :perm perm :permMod12 permMod12 })))
 
-(defn fast-floor (x)
-    (let (xi (int x))
-        (if (< x xi) (- xi 1) xi)))
-
+;Dot product of gradient at x and y
 (defn dot (grad x y)
     (+ (* (get grad 0) x)
        (* (get grad 1) y)))
 
-(def F2 (* 0.5 (- (sqrt 3.0) 1.0)))
-(def G2 (/ (- 3.0 (sqrt 3.0)) 6.0))
 
+;Calculate the contribution factor
 (defn contribution (grad-index x y)
     (let (val (- 0.5 (* x x) (* y y)))
         (if (< val 0)
@@ -58,11 +61,17 @@
             (let (val (* val val))
                 (* val val (dot (get GRADIENS-3 grad-index) x y))))))
 
+;Noise costant
+(def F2 (* 0.5 (- (sqrt 3.0) 1.0)))
 
+;Noise costant
+(def G2 (/ (- 3.0 (sqrt 3.0)) 6.0))
+
+;Get a noise value from an octave
 (defn noise (octave xin yin)
     (let (s (* (+ xin yin) F2)
-          i (fast-floor (+ xin s))
-          j (fast-floor (+ yin s))
+          i (floor (+ xin s))
+          j (floor (+ yin s))
           t (* (+ i j) G2)
           ;Unskew the cell origin back to x, y space
           X0 (- i t)
@@ -89,6 +98,11 @@
         (* 70 (+ n0 n1 n2))))
 
 
+;;;~Create e simplex noise generator
+;;;#Generator (List of HashMaps)
+;;;!1Number
+;;;!2Number
+;;;!3Number
 (defn simplex-noise (largest-feature persistance starting-seed)
 	(progn
     (seed starting-seed)
@@ -98,18 +112,20 @@
 						     :amplitude (pow persistance (- octaves-count i))))
 			 (range octaves-count)))))
 
-
-(defn simplex-noise-value (simplex-noise x y)
+;;;~Extract a value from a previously defined generator at x and y
+;;;#Number
+;;;!1Generator
+;;;!2Number
+;;;!3Number
+(defn simplex-noise-value (generator x y)
     (reduce (lambda (result simplex)
                 (let (octave (:octave simplex)
                       freq   (:frequency simplex)
                       ampl   (:amplitude simplex))
-
                     (+ result (* ampl (noise octave (/ x freq) (/ y freq))))
-
 					))
             0
-            simplex-noise))
+            generator))
 
 
 
