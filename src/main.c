@@ -169,7 +169,14 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 		List* val = eval(car(vars), innerEnv);
 		extendEnv(sym, val, innerEnv);
 	}
-	return eval(third(lambda), innerEnv);
+
+	//Eval every body sexp in an implicit progn
+	List *sexp = cdr(cdr(lambda)), *result = 0;	
+	while (sexp){
+		result = eval(car(sexp), innerEnv);
+		sexp = cdr(sexp);
+	}
+	return result;
 }
 
 //Eval functions
@@ -257,7 +264,7 @@ List* eval(List* exp, Environment* env) {
 		// (defn symbol (params) sexp)
 		}else if (first(exp) == INTERN_defn){
 			char* sym = second(exp);
-			List* lambda = cons(INTERN_lambda, cons(third(exp), cons(fourth(exp), 0)));
+			List* lambda = cons(INTERN_lambda, cons(third(exp), cdr(cdr(cdr(exp)))));
 			extendEnv(sym, lambda, env);
 			return lambda;
 
@@ -446,8 +453,6 @@ List* eval(List* exp, Environment* env) {
 		}
 	// ((lambda (params) body) args)
 	} else if (car(car(exp)) == INTERN_lambda) {
-		//printf("lambda found\n");
-
 		//bind names into env and eval body
 		return apply_lambda(car(exp), cdr(exp), env);
 	}
