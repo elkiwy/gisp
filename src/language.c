@@ -56,6 +56,12 @@ __attribute__((aligned(16))) List* fmul(List* a) {return applyOperationOnList('*
 ///!2Numbers
 __attribute__((aligned(16))) List* fdiv(List* a) {return applyOperationOnList('/', a);}
 
+///~Calculate the abs of a radiant value
+///&abs
+///#Number
+///@1n
+///!1Number
+__attribute__((aligned(16))) List* fabsval(List* a) {return (List*)value_to_number(abs(numVal(first(a))));}
 ///~Calculate the sin of a radiant value
 ///&sin
 ///#Number

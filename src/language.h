@@ -38,6 +38,7 @@ List* fbitAnd(List* a);
 
 // -----------------------------------------
 //Math - Trigonometry
+List* fabsval(List* a);
 List* fsin(List* a);
 List* fcos(List* a);
 List* fdsin(List* a);
