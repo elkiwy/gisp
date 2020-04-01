@@ -371,6 +371,17 @@ Vector* concatVec(Vector* v1, Vector* v2){
 }
 
 
+List* concatList(List* l1, List* l2){
+	List* copy1 = listCopy(l1);
+	List* copy2;
+	if(is_vector(l2)){copy2 = vecToList((Vector*)untag_vector(l2));
+	}else{copy2 = listCopy(l2);}
+	List* lastCons = listGetLastCons(copy1);
+	consSetNext(lastCons, copy2);
+	return copy1;
+}
+
+
 ///~Concatenate two structures together
 ///&concat
 ///#List/Vector
@@ -389,6 +400,17 @@ __attribute__((aligned(16))) List* fconcat(List* a) {
 			current = cdr(current);
 		}
 		return (List*)tag_vector(untagged_result);
+
+	}else if(is_pair(v1)){
+		List* current = cdr(a);
+		List* result = current;
+		while(current){
+			result = concatList(v1, car(current));
+			current = cdr(current);
+		}
+
+		return result;
+
 	}else{
 		printf("Concat not yet implemented with type: %p", v1);
 		return 0;

@@ -219,3 +219,55 @@ List* vecToList(Vector* vec){
 
 
 
+List* listCopy(List* l){
+	if(l==NULL){return 0;}
+	List* current = l;
+	List* newFirst = cons(0,0);
+	List* last = newFirst;
+	while(current){
+		//Copy current data and create a new next
+		List* untagged = (List*)untag(last);
+		untagged->data = car(current);
+		if(cdr(current)){untagged->next = cons(0, 0);}
+
+		//Save current last one and iterate
+		last = cdr(last);
+		current = cdr(current);
+	}
+	return newFirst;
+}
+
+List* listGetLastCons(List* l){
+	List* current = l;
+	while(cdr(current)){
+		current = cdr(current);
+	}
+	return current;
+}
+
+
+
+void consSetNext(List* l, List* _next){
+	List* untagged = (List*)untag(l);
+	untagged->next = _next;
+}
+
+void consSetData(List* l, void* _data){
+	List* untagged = (List*)untag(l);
+	untagged->data = _data;
+}
+
+
+
+
+
+
+
+
+
+void debugPrintObj(char* pre, List* obj){
+	printf("%s", pre);print_obj(obj, 1);printf("\n");fflush(stdout);
+}
+
+
+

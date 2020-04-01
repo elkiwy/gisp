@@ -77,6 +77,7 @@ typedef struct Vector {
 //Generic utility
 void print_obj(List* ob, int head_of_list);
 int randInt(int min, int max);
+void debugPrintObj(char* pre, List* obj);
 
 // ------------------------------------------------------------------
 //String utilities
@@ -92,6 +93,13 @@ Vector* newVec(int size);
 Vector* listToVec(List* l);
 Vector* copyVec(Vector* v);
 List* vecToList(Vector* vec);
+
+
+List* listCopy(List* l);
+List* listGetLastCons(List* l);
+
+void consSetNext(List* l, List* _next);
+void consSetData(List* l, void* _data);
 
 // ------------------------------------------------------------------
 //Numbers utilites
