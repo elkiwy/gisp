@@ -401,7 +401,20 @@ __attribute__((aligned(16))) List* fconcat(List* a) {
 ///@1a
 ///!1List
 __attribute__((aligned(16))) List* ffirst(List* a){
-	return first(first(a));
+	List* seq = first(a);
+	if (is_vector(seq)){
+		Vector* vec = (Vector*)untag_vector(seq);
+		int size = vec->size;
+		if(size>0){
+			void** data = vec->data;
+			return data[0];
+		}else{return 0;}
+	}else if(is_pair(seq)){
+		return first(first(a));
+	}else{
+		printf("first doesn't support this object.");fflush(stdout);
+		return 0;
+	}
 }
 
 ///~Get the last element of a list
@@ -410,14 +423,27 @@ __attribute__((aligned(16))) List* ffirst(List* a){
 ///@1a
 ///!1List
 __attribute__((aligned(16))) List* flast(List* a){
-	List* l = first(a);
-	List* current = l;
-	List* last = 0;
-	while(current){
-		last = car(current);
-		current = cdr(current);
+	List* seq = first(a);
+	if (is_vector(seq)){
+		Vector* vec = (Vector*)untag_vector(seq);
+		int size = vec->size;
+		if(size>0){
+			void** data = vec->data;
+			return data[size-1];
+		}else{ return 0;}
+	}else if (is_pair(seq)){
+		List* current = seq;
+		List* last = 0;
+		while(current){
+			last = car(current);
+			current = cdr(current);
+		}
+		return last;
+
+	}else{
+		printf("last doesn't support this object.");fflush(stdout);
+		return 0;
 	}
-	return last;
 }
 
 
@@ -541,9 +567,9 @@ __attribute__((aligned(16))) List* fhashmap(List* a){
 ///!2String/Keyword
 __attribute__((aligned(16))) List* fget(List* a){
 	List* seq = first(a);
-	if(is_pair(seq)){
-		seq = fvec(seq);
-	}
+	//if(is_pair(seq)){
+	//seq = fvec(seq);
+	//}
 
 	//Map
 	if (is_hashmap(seq)){	
@@ -563,6 +589,21 @@ __attribute__((aligned(16))) List* fget(List* a){
 			void** data = vec->data;
 			return data[pos];
 		}
+	//List
+	}else if (is_pair(seq)){
+		int size = listLength(seq);
+		int pos = (int)numVal(second(a));
+		if (pos >= size){
+			return 0;
+		}else{
+			List* data = seq;	
+			int i = 0;
+			while(i<pos){
+				data = cdr(data);
+				i++;
+			}
+			return car(data);
+		}
 	}else{
 		return 0;
 	}
@@ -580,6 +621,10 @@ __attribute__((aligned(16))) List* fcount(List* a){
 	if (is_vector(arg)){
 		Vector* vec = (Vector*)untag_vector(arg);
 		int size = vec->size;
+		return (List*)value_to_number(size);
+	}else if(is_pair(arg)){
+		List* l = (List*)untag(arg);
+		int size = listLength(l);
 		return (List*)value_to_number(size);
 	}else{
 		printf("%p not supported for count.", arg);
