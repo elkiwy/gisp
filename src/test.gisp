@@ -1,32 +1,67 @@
-(seed)
-(def simplex (simplex-noise 32 0.9 (rand 99999)))
 
 
-(def canvas-w 1024)
-(def canvas-h 1024)
-(def s (make-surface "test.svg" canvas-w canvas-h))
-(def c (make-context s))
+;;Test def
+;(def a (+ 1 3))
+;(write "30=" (* 5 (+ 2 a)))
+
+;;Test defn
+;(defn culo (a) (write a) (write 33333333)(write 2222))
+;(culo 33)
 
 
-(doseq (ts (list 128 256 512))
-	(let (scale    6
-		  plineMul 0.5
-		  nlineMul (* -1 plineMul)
-		  nx       (/ canvas-w ts)
-		  ny       (/ canvas-h ts))
-		(doseq (j (range 1 (- ny 1)))
-			(doseq (i (range 1 (- nx 1)))
-				(let (cx          (+ (* ts i) (* ts 0.5))
-					  cy          (+ (* ts j) (* ts 0.5))
-					  simplex-val (simplex-noise-value simplex (* (/ i nx) scale) (* (/ j ny) scale))
-					  n           (* 30 (+ 0.5 simplex-val)))
-					(doseq (k (range n))
-						(line c
-							(point (+ cx (rand (* nlineMul ts) (* plineMul ts))) (+ cy (rand (* nlineMul ts) (* plineMul ts))))
-							(point (+ cx (rand (* nlineMul ts) (* plineMul ts))) (+ cy (rand (* nlineMul ts) (* plineMul ts)))))))))))
+;;Test hashmap
+;(defn point (x y) (hashmap :x x :y y))
+;(write "Hashmap:" (point 100 200))
+
+;;Test vector
+;(defn array (x y z) (vector x y z))
+;(write "Vector:" (array 100 200 30))
+
+;;Test seed
+;(seed)
+
+;;Test doseq
+;(doseq (i (range 2)) (write i) (write i))
 
 
-(surface-to-png s "test.png")
-(surface-clean s c)
+(profile "coso"
+	(list 64))
+
+
+
+
+
+
+
+
+
+
+
+
+;(def canvas-w 1024)
+;(def canvas-h 1024)
+;(def s (make-surface "test.svg" canvas-w canvas-h))
+;(def c (make-context s))
+;(def simplex (simplex-noise 32 0.9 (rand 99999)))
+;(doseq (ts (list 128 256 512))
+;	(let (scale    6
+;		  plineMul 0.5
+;		  nlineMul (* -1 plineMul)
+;		  nx       (/ canvas-w ts)
+;		  ny       (/ canvas-h ts))
+;		(doseq (j (range 1 (- ny 1)))
+;			(doseq (i (range 1 (- nx 1)))
+;				(let (cx          (+ (* ts i) (* ts 0.5))
+;					  cy          (+ (* ts j) (* ts 0.5))
+;					  simplex-val (simplex-noise-value simplex (* (/ i nx) scale) (* (/ j ny) scale))
+;					  n           (* 30 (+ 0.5 simplex-val)))
+;					(doseq (k (range n))
+;						(line c
+;							(point (+ cx (rand (* nlineMul ts) (* plineMul ts))) (+ cy (rand (* nlineMul ts) (* plineMul ts))))
+;							(point (+ cx (rand (* nlineMul ts) (* plineMul ts))) (+ cy (rand (* nlineMul ts) (* plineMul ts)))))))))))
+;
+;
+;(surface-to-png s "test.png")
+;(surface-clean s c)
 
 

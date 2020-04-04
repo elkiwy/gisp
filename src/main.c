@@ -28,6 +28,7 @@ static char token[SYMBOL_MAX]; /* token*/
 FILE* inputFile = 0;
 char gispWorkingDir[4096];
 Environment* global_env = 0;
+int debugPrint = 0;
 
 //Memory Profiling variables
 int vectorCount = 0;
@@ -38,6 +39,8 @@ int environmentCounter_insert = 0;
 int environmentCounter_search = 0;
 double environmentCounter_searchTimeSum = 0;
 double environmentCounter_searchTimeSum_hash = 0;
+void* allocations[1024*1024];
+
 
 //Intern costant symbols
 void* INTERN_quote	= 0;
@@ -151,9 +154,11 @@ List* getlist() {
 	return cons(tmp, getlist());
 }
 
+
 //Debug function to print the environment
-void debug_printEnv(List* a, char* prefix){
-	int i=0; while(a){printf("%s %d - %s\n", prefix, i, (char*)car(car(a))); a = cdr(a); i++;}
+void debug_printEnv(Environment* a){
+	printf("\n\nEnvironament %p\n", a);fflush(stdout);
+	debug_printMap(a->hashData);
 }
 
 
@@ -161,30 +166,53 @@ void debug_printEnv(List* a, char* prefix){
 
 List* eval(List* exp, Environment* env);
 List* apply_lambda(List* lambda, List* args, Environment* env){
+	printf("::===>Applying lambda ");fflush(stdout);
+	print_obj(lambda, 1);fflush(stdout);
+	printf(" with args ");fflush(stdout);
+	print_obj(args, 1);fflush(stdout);
+	printf(" \n");fflush(stdout);
+
+
 	//bind names into env and eval body
 	Environment* innerEnv = makeEnvironment(env);
+	printf("::===>binding names\n ");fflush(stdout);
 	List *names = second(lambda), *vars = args;
 	for (  ; names ; names = cdr(names), vars = cdr(vars) ){
 		char* sym = car(names);
 		List* val = eval(car(vars), innerEnv);
 		extendEnv(sym, val, innerEnv);
+		objFree(val);
 	}
 
 	//Eval every body sexp in an implicit progn
+	printf("::===>evaluating lambda in own environemnt\n ");fflush(stdout);
 	List *sexp = cdr(cdr(lambda)), *result = 0;	
 	while (sexp){
+		debugPrintObj("   Evaluating lambda sexp : ", car(sexp));
+		if (result){objFree(result);}
 		result = eval(car(sexp), innerEnv);
 		sexp = cdr(sexp);
 	}
+
+
+	environmentFree(innerEnv);
+
 	return result;
 }
 
 //Eval functions
 List* evlist(List* list, Environment* env) {
-	List* head = 0,**args = &head;
+	if(debugPrint){debugPrintObj("===> Evaluating arg list ", list);}
+	//printf("{%p}\n", (void*)list);fflush(stdout);
+	List* head = 0;
+	List** args = &head;
 	for ( ; list ; list = cdr(list)) {
+		//debugPrintObj("->Evaluating arg ", car(list));
 		*args = cons(eval(car(list), env), 0);
-		args = &((List*)untag(*args))->next;}
+		args = &((List*)untag(*args))->next;
+	}
+	//debugPrintObj("->returning head ", head);
+	//printf("\e[39m");
 	return head;}
 List* eval(List* exp, Environment* env) {
 	//printf("Eval %p in %p\n", (void*)exp, (void*)env);fflush(stdout);
@@ -229,6 +257,8 @@ List* eval(List* exp, Environment* env) {
 	//Else if is a list with the first atom being an atom
 	//(At this point we should be sure that the exp is a list)
 	} else if (is_atom(first(exp))) { 
+		//printf("=== Eval on list with atom '%s' as first\n", (char*)first(exp));fflush(stdout);
+
 		// (quote X)
 		if (first(exp) == INTERN_quote) {
 			//Return the quoted element as it is
@@ -254,19 +284,35 @@ List* eval(List* exp, Environment* env) {
 
 		// (def symbol sexp)
 		}else if (first(exp) == INTERN_def){
-			//printf("\n---found def expression \n");fflush(stdout);
+			if(debugPrint){printf("\n===> found def expression \n");fflush(stdout);}
 			char* sym = second(exp);
 			List* val = eval(third(exp), env);
 			extendEnv(sym, val, env);
-			//printf("== Done Defining %s ", second(exp)); print_obj(val, 1); printf("\n"); fflush(stdout);
-			return val;
+			//printf("== Done Defining %s ", sym); print_obj(val, 1); printf("\n"); fflush(stdout);
+			consFree(cdr(cdr(exp)));
+			consSetNext(cdr(exp), 0);
+			objFree(exp);
+			objFree(val);
+			return 0;
 
 		// (defn symbol (params) sexp)
 		}else if (first(exp) == INTERN_defn){
+			if(debugPrint){debugPrintObj("\n===> found defn expression ", exp);}
+			//Get function name
 			char* sym = second(exp);
+
+			//Expand defn macro
 			List* lambda = cons(INTERN_lambda, cons(third(exp), cdr(cdr(cdr(exp)))));
+			if(debugPrint){debugPrintObj("===> lambda: ", lambda);}
+
+			//Export the function into the environment
 			extendEnv(sym, lambda, env);
-			return lambda;
+
+			//Cleanup memory and return
+			consFree(cdr(lambda));
+			consFree(lambda);
+			objFree(exp);
+			return 0;
 
 		// (progn exp1 exp2 ...)
 		}else if (first(exp) == INTERN_progn){
@@ -384,23 +430,38 @@ List* eval(List* exp, Environment* env) {
 
 		/// (doseq (bind seq) body)
 		}else if (first(exp) == INTERN_doseq){
+			if(debugPrint){debugPrintObj("===>Expanding doseq macro  ", exp);}
 			Environment* innerEnv = makeEnvironment(env);
 			char* sym = first(second(exp));
-			List* seq = eval(second(second(exp)), env);
+
+			//Create a copy of the seq expression and evaluate the copy so it free itself in eval
+			List* seqCopy = objCopy(second(second(exp)));
+			List* evaluatedSeq = eval(seqCopy, env);
+			List* seqCurrent = evaluatedSeq;
+
 			List* body = cdr(cdr(exp));
 			List* ret = 0;
-			while(seq){
+			while(seqCurrent){
 				//Update the symbol value
-				extendEnv(sym, car(seq), innerEnv);
+				extendEnv(sym, car(seqCurrent), innerEnv);
+
 				//Eval the body and go to the next
-				List* current = body;
+				List* bodyCopy = objCopy(body);
+				List* current = bodyCopy;
 				while(current){
 					//Eval the body and go to the next
+					if (ret) objFree(ret);
 					ret = eval(car(current), innerEnv);
+					consSetData(current, 0);
 					current = cdr(current);
 				}
-				seq = cdr(seq);
+				objFree(bodyCopy);
+				seqCurrent = cdr(seqCurrent);
 			}
+
+			objFree(evaluatedSeq);
+			objFree(exp);
+			environmentFree(innerEnv);
 			return ret;
 
 		}else if (first(exp)== intern("exit")){
@@ -419,13 +480,18 @@ List* eval(List* exp, Environment* env) {
 			List* ret = 0;
 			List* seq = cdr(cdr(exp));
 			while(seq){
+				if(ret){objFree(ret);}
 				ret = eval(car(seq), env);
+				consSetData(seq, 0);
 				seq = cdr(seq);
 			}
 			clock_t end = clock();
 
 			//Print the result
 			printf("PROFILE for %s : %f seconds\n", (char*)tag, (double)(end - begin) / CLOCKS_PER_SEC);
+			objFree(tag);
+			consSetData(cdr(exp), 0);
+			objFree(exp);
 
 			//Return the value
 			return ret;
@@ -437,22 +503,68 @@ List* eval(List* exp, Environment* env) {
 
 		// (function args)
 		} else { 
-			//printf("-----Searching for symbol %s\n", (char*)first(exp));
 			List* primop = eval(first(exp), env);
 
 			//user defined lambda, arg list eval happens in binding  below
 			if (is_pair(primop)) { 
-				//printf("-----found lambda %s\n", (char*)first(exp));
-				return eval( cons(primop, cdr(exp)), env );
+				if(debugPrint){printf("===>Evaluating lambda"); debugPrintObj(" ", exp); printf("====> %p ", primop);fflush(stdout); debugPrintObj("Primop ", primop);}
+
+				List* lambda = cons(primop, cdr(exp));
+				List* result = eval( lambda, env );
+				consFree(lambda);
+				objFree(exp);
+
+				//Truncate primop body cons since already free in their eval
+				listFreeOnlyCons(cdr(cdr(primop)));
+				consSetNext(cdr(primop), 0);
+				//consSetData(cdr(primop), 0);
+
+				if(debugPrint){debugPrintObj("Freeing primop after user defined function (defn): ", primop);}
+				objFree(primop);
+
+				if(debugPrint){debugPrintObj("Returning result after defn evaluation: ", result);}
+				return result;
 			//Built-in primitive
 			} else if (primop) { 
-				//printf("-----found primitive %s\n", (char*)first(exp));
-				List* result = ((List* (*) (List*))primop) (evlist(cdr(exp), env));
+				if(debugPrint){printf("====> %p", exp);fflush(stdout); debugPrintObj(" Evaluating ", exp);}
+
+				//Evaluate arguments
+				List* args = evlist(cdr(exp), env);
+
+				//Replace data of current cons in exp with the new evaluated data
+				List* curr = cdr(exp);
+				List* new = args;
+				while(curr){
+					//printf("==> Setting car of %p to the car of %p [", curr, new);fflush(stdout); print_obj(car(new), 1); fflush(stdout); printf("] and clearing\n");fflush(stdout);
+
+					//Replace with the new one
+					consSetData(curr, car(new));
+					curr = cdr(curr);
+					new = cdr(new);
+				}
+
+				//Remove all the cons generated with evalList
+				listFreeOnlyCons(args);
+
+				//printf("Freeing old args\n");fflush(stdout);
+				//objFree(oldArgs);
+
+				//Evaluate expression with evaluated arguments
+				if(debugPrint){debugPrintObj("==> Evaluating after evlist ", exp);}
+				List* result = ((List* (*) (List*))primop) (cdr(exp));
+
+				//Free the current expression
+				if(debugPrint){debugPrintObj("Freeing exp after built-in primitive function: ", exp);}
+				objFree(exp);
+				if(debugPrint){printf("==> DONE evaluating %p\n", exp);fflush(stdout);}
 				return result;
 			}
 		}
 	// ((lambda (params) body) args)
 	} else if (car(car(exp)) == INTERN_lambda) {
+		printf("===>Evaluating expanded lambda");
+		debugPrintObj(" ", exp);
+
 		//bind names into env and eval body
 		return apply_lambda(car(exp), cdr(exp), env);
 	}
@@ -470,12 +582,20 @@ List* read_and_eval(){
 	while(look != EOF){
 		gettoken();
 		//Evaluate only if valid tokens
-		if (strlen(token)>0)
-			result = eval(getobj(), global_env);
+		if (strlen(token)>0){
+			debug_printAllocations();
+			if(debugPrint){printf("\n\e[36m***> Reading\n");fflush(stdout);}
+			List* obj = getobj();
+			if(debugPrint){printf("\e[39m");fflush(stdout);}
+			if(result){objFree(result);result=0;}
+			result = eval(obj, global_env);
+		}
 
 		if (exitFlag==0){look = read_char();
 		}else{look = EOF;}
 	}
+
+	if(debugPrint){printf("\nEvaluation completed.\n\n");fflush(stdout);}
 	return result;
 }
 
@@ -488,7 +608,8 @@ __attribute__((aligned(16))) List* fincludefile(List* a){
 	FILE* originalFile = inputFile;
 	inputFile = fopen(path_abs, "r");
 	printf("Including source file \"%s\"...", (char*)path_abs);fflush(stdout);
-	read_and_eval();
+	List* result = read_and_eval();
+	objFree(result);
 	inputFile = originalFile;
 	printf("Done.\n");fflush(stdout);
 	return 0;
@@ -506,7 +627,7 @@ __attribute__((aligned(16))) List* fwriteobj(List* a){
 		print_obj(car(current), 1);
 		current = cdr(current);
 	}
-
+	fflush(stdout);
 	puts("");
 	return e_true;
 }
@@ -518,7 +639,8 @@ void includeLinkedBinaryFile(char* start, char* end){
 	linkedFile = start;
 	linkedFileSize = end - start;
 	printf("Including linked core.gisp size %d...", linkedFileSize);fflush(stdout);
-	read_and_eval();
+	List* result = read_and_eval();
+	objFree(result);
 	printf("Done!\n");fflush(stdout);
 	linkedFile = NULL;
 	linkedFileIndex = 0;
@@ -642,19 +764,28 @@ int main(int argc, char* argv[]) {
 	INTERN_profile	= intern("profile");
 	printf("\n");
 	
+	debugPrint = 1;
 	//Include gisp core
-	includeLinkedBinaryFile((char*)_binary_src_core_gisp_start, (char*)_binary_src_core_gisp_end);
-	includeLinkedBinaryFile((char*)_binary_src_simplex_noise_gisp_start, (char*)_binary_src_simplex_noise_gisp_end);
+	//includeLinkedBinaryFile((char*)_binary_src_core_gisp_start, (char*)_binary_src_core_gisp_end);
+	//includeLinkedBinaryFile((char*)_binary_src_simplex_noise_gisp_start, (char*)_binary_src_simplex_noise_gisp_end);
 
 	//Evaluate everything 
 	clock_t end_env = clock();
 	List* result = read_and_eval();
-	print_obj(result, 1);
+	print_obj(result, 1);printf("\n");fflush(stdout);
+	objFree(result);
+
+
+	environmentFree(global_env);
+
+	//debug_printEnv(global_env);
+	debug_printAllocations();
+
 
 	//Print the profiling
 	clock_t end = clock();
 	if (profile){
-		printf("\n\nProfiling:\n");
+		printf("\nProfiling:\n");
 		time += (double)(end_env - begin) / CLOCKS_PER_SEC;
 		printf("Time elpased for setup %f\n", time);
 		time += (double)(end - end_env) / CLOCKS_PER_SEC;

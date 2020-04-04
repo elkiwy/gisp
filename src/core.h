@@ -11,6 +11,7 @@
 
 #define SYMBOL_MAX  32
 
+extern int debugPrint;
 
 extern int vectorCount;
 extern int hashmapCount;
@@ -21,6 +22,8 @@ extern int environmentCounter_insert;
 extern int environmentCounter_search;
 extern double environmentCounter_searchTimeSum;
 extern double environmentCounter_searchTimeSum_hash;
+
+extern void* allocations[1024*1024];
 
 //This is the main List structure
 typedef struct List {
@@ -91,15 +94,32 @@ map_t newHashmap();
 //Vector utilities
 Vector* newVec(int size);
 Vector* listToVec(List* l);
-Vector* copyVec(Vector* v);
 List* vecToList(Vector* vec);
 
 
-List* listCopy(List* l);
 List* listGetLastCons(List* l);
-
 void consSetNext(List* l, List* _next);
 void consSetData(List* l, void* _data);
+
+List* objCopy(List* obj);
+List* numberCopy(List* num);
+List* listCopy(List* l);
+Vector* copyVec(Vector* v);
+List* hashmapCopy(List* hashmap);
+List* vectorCopy(List* v);
+
+void consFree(List* c);
+void listFree(List* l);
+void listFreeOnlyCons(List* l);
+void objFree(List* obj);
+void numberFree(List* number);
+void environmentFree(Environment* env);
+void hashmapFree(List* hashmap);
+void vectorFree(List* v);
+
+void debug_addAllocation(void* p);
+void debug_removeAllocation(void* p);
+void debug_printAllocations();
 
 // ------------------------------------------------------------------
 //Numbers utilites

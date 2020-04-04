@@ -324,7 +324,7 @@ __attribute__((aligned(16))) List* fcons(List* a) { return cons(first(a), second
 ///!1Any
 ///@2...
 ///!2Any
-__attribute__((aligned(16))) List* flist(List* a) { return a;}
+__attribute__((aligned(16))) List* flist(List* a) {return objCopy(a);}
 ///~Get the first element of a list
 ///&car
 ///#Any
@@ -571,8 +571,8 @@ __attribute__((aligned(16))) List* fhashmap(List* a){
 	map_t map = newHashmap();
 	List* current = a;
 	while(current){
-		char* key = first(current);
-		List* val = second(current);
+		char* key = strdup(first(current));
+		List* val = objCopy(second(current));
 		hashmap_put(map, key, val);
 		current = cdr(cdr(current));
 	}
