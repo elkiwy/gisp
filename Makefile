@@ -25,6 +25,9 @@ run: build/main
 test: build/main
 	./build/main src/test.gisp
 
+fulltest: build/main
+	./build/main ~/Documents/artworks/sketch-simplex.gisp
+
 install: build/main
 	sudo cp build/main /usr/local/bin/gisp
 
