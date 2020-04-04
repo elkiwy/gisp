@@ -83,6 +83,10 @@ extern int hashmap_length(map_t in);
 
 extern int hashmap_keys_and_values(map_t in, char** keys, any_t* values);
 
+extern int hashmap_get_cell_data(map_t in, char* key, char** cellKey, any_t* cellData, int* cellIndex);
+
+extern void debug_printMap(map_t* in);
+
 
 #endif //__HASHMAP_H__
 

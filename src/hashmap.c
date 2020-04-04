@@ -261,10 +261,12 @@ int hashmap_put(map_t in, char* key, any_t value){
 	}
 
 	/* Set the data */
+	if(m->data[index].in_use==0){
+		m->size++; 
+	}
 	m->data[index].data = value;
 	m->data[index].key = key;
 	m->data[index].in_use = 1;
-	m->size++; 
 
 	return MAP_OK;
 }
@@ -283,7 +285,6 @@ int hashmap_get(map_t in, char* key, any_t *arg){
 
 	/* Linear probing, if necessary */
 	for(i = 0; i<MAX_CHAIN_LENGTH; i++){
-
         int in_use = m->data[curr].in_use;
         if (in_use == 1){
             if (strcmp(m->data[curr].key,key)==0){
@@ -291,15 +292,50 @@ int hashmap_get(map_t in, char* key, any_t *arg){
                 return MAP_OK;
             }
 		}
-
 		curr = (curr + 1) % m->table_size;
 	}
-
 	*arg = NULL;
 
 	/* Not found */
 	return MAP_MISSING;
 }
+
+
+/* Get your pointer out of the hashmap with a key */
+int hashmap_get_cell_data(map_t in, char* key, char** cellKey, any_t* cellData, int* cellIndex){
+	int curr;
+	int i;
+	hashmap_map* m;
+
+	/* Cast the hashmap */
+	m = (hashmap_map *) in;
+
+	/* Find data location */
+	curr = hashmap_hash_int(m, key);
+
+	/* Linear probing, if necessary */
+	for(i = 0; i<MAX_CHAIN_LENGTH; i++){
+        int in_use = m->data[curr].in_use;
+        if (in_use == 1){
+            if (strcmp(m->data[curr].key,key)==0){
+                *cellData = (m->data[curr].data);
+				*cellKey = m->data[curr].key;
+				*cellIndex = curr;
+                return 1;
+            }
+		}
+		curr = (curr + 1) % m->table_size;
+	}
+	*cellData = NULL;
+	*cellKey = NULL;
+	*cellIndex = 0;
+
+	/* Not found */
+	return 0;
+}
+
+
+
 
 /*
  * Iterate the function parameter over each element in the hashmap.  The
@@ -317,7 +353,7 @@ int hashmap_iterate(map_t in, PFany f, any_t item) {
 		return MAP_MISSING;	
 
 	/* Linear probing */
-	for(i = 0; i< m->table_size; i++)
+	for(i = 0; i< m->table_size; i++){
 		if(m->data[i].in_use != 0) {
 			any_t data = (any_t) (m->data[i].data);
 			int status = f(item, data);
@@ -325,6 +361,7 @@ int hashmap_iterate(map_t in, PFany f, any_t item) {
 				return status;
 			}
 		}
+	}
 
     return MAP_OK;
 }
@@ -401,3 +438,21 @@ int hashmap_keys_and_values(map_t in, char** keys, any_t* values) {
 
     return MAP_OK;
 }
+
+
+
+
+void debug_printMap(map_t* in){
+	/* Cast the hashmap */
+	hashmap_map* m = (hashmap_map*) in;
+
+	/* Linear probing */
+	for(int i = 0; i< m->table_size; i++){
+		if(m->data[i].in_use != 0) {
+			void* data = (void*)(m->data[i].data);
+			printf(" %p - %p (key: %s)\n", data, m->data[i].key, m->data[i].key);
+		}
+	}
+}
+
+
