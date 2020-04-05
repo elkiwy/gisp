@@ -164,9 +164,10 @@ void* searchInEnvironment(List* name, Environment* env){
 double* newNumber(){
 	numberCount++;
 	double* ptr = malloc(sizeof(double));
-	if(debugPrint){printf("\e[31m+++ number %p\n\e[39m", (void*)tag_number(ptr));fflush(stdout);}
-
-	debug_addAllocation((void*)tag_number(ptr));
+	if(debugPrint){
+		printf("\e[31m+++ number %p\n\e[39m", (void*)tag_number(ptr));fflush(stdout);
+		debug_addAllocation((void*)tag_number(ptr));
+	}
 
 	return ptr;
 }
@@ -325,7 +326,7 @@ void objFree(List* obj){
 }
 
 void numberFree(List* number){
-	debug_removeAllocation(number);
+	if(debugPrint){debug_removeAllocation(number);}
 	free((double*)untag_number(number));	
 }
 
@@ -339,7 +340,7 @@ void listFree(List* l){
 	objFree(data);
 
 	//Free this cons
-	debug_removeAllocation(l);
+	if(debugPrint){debug_removeAllocation(l);}
 	free((List*)untag(l));
 }
 
@@ -351,8 +352,10 @@ void listFreeOnlyCons(List* l){
 
 
 void consFree(List* c){
-	if(debugPrint){printf("\e[31m--- Freeing single cons: %p\n\e[39m", c);}
-	debug_removeAllocation(c);
+	if(debugPrint){
+		printf("\e[31m--- Freeing single cons: %p\n\e[39m", c);
+		debug_removeAllocation(c);
+	}
 	free((List*)untag(c));
 }
 
