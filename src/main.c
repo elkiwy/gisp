@@ -343,7 +343,9 @@ List* eval(List* exp, Environment* env) {
 			while(bindings){
 				char* sym = first(bindings);
 				List* val = eval(second(bindings), innerEnv);
+				consSetData(cdr(bindings), 0);
 				extendEnv(sym, val, innerEnv);
+				objFree(val);
 				bindings = cdr(cdr(bindings));
 				//printf("== Binded %s to ", (char*)sym); print_obj(val, 1); printf("\n");
 			}
@@ -352,10 +354,16 @@ List* eval(List* exp, Environment* env) {
 			List* body = cdr(cdr(exp));
 			List* result = 0;
 			while(body){
+				if(result)objFree(result);
 				result = eval(car(body), innerEnv);
-				body = cdr(body);}
-			return result;
+				consSetData(body, 0);
+				body = cdr(body);
+			}
 
+			objFree(exp);
+
+			environmentFree(innerEnv);
+			return result;
 
 		/// (reduce function start list)
 		}else if (first(exp) == INTERN_reduce){
