@@ -83,7 +83,7 @@ List* cons(void* _car, void* _cdr) {
 	_pair->data = _car;
 	_pair->next = _cdr;
 
-	if (debugPrint){
+	if (debugPrintAllocs){
 		printf("\e[31m+++ cons %p", (void*)tag(_pair));
 		printf(" (%p ", _car);
 		printf(". %p) ", _cdr);
@@ -99,7 +99,7 @@ Environment* makeEnvironment(Environment* _outer) {
 	Environment* env = malloc( sizeof(Environment) );
 	env->hashData = hashmap_new();
 	env->outer = (void*)_outer;
-	if (debugPrint){printf("\e[31m+++ environemnt %p\n\e[39m", env);}
+	if (debugPrintAllocs){printf("\e[31m+++ environemnt %p\n\e[39m", env);}
 	return env;
 }
 
@@ -115,19 +115,19 @@ void extendEnv(char* name, void* value, Environment* env){
 	if(found){
 		objFree(cellData);
 		void* hashmap_obj = objCopy(value);
-		if(debugPrint){printf("replacing \"%s\" (%p) with %p (original: %p)\n", cellKey, cellKey, hashmap_obj, value);fflush(stdout);}
+		if(debugPrintInfo){printf("replacing \"%s\" (%p) with %p (original: %p)\n", cellKey, cellKey, hashmap_obj, value);fflush(stdout);}
 		hashmap_put(env->hashData, cellKey, hashmap_obj);
 		
 	}else{
 		char* hashmap_key = strdup(name);
 		void* hashmap_obj = objCopy(value);
-		if(debugPrint){printf("adding \"%s\" (%p) as %p (original: %p)\n", hashmap_key, hashmap_key, hashmap_obj, value);fflush(stdout);}
+		if(debugPrintInfo){printf("adding \"%s\" (%p) as %p (original: %p)\n", hashmap_key, hashmap_key, hashmap_obj, value);fflush(stdout);}
 		hashmap_put(env->hashData, hashmap_key, hashmap_obj);
 	}
 }
 
 void* searchInEnvironment(List* name, Environment* env){
-	if(debugPrint){printf("==> Search in environment \"%s\"\n", (char*)name);fflush(stdout);}
+	if(debugPrintInfo){printf("==> Search in environment \"%s\"\n", (char*)name);fflush(stdout);}
 	
 	environmentCounter_search++;
 	clock_t start = clock();
@@ -141,7 +141,7 @@ void* searchInEnvironment(List* name, Environment* env){
 			clock_t end = clock(); environmentCounter_searchTimeSum += (double)(end - start) / CLOCKS_PER_SEC;
 			List* copy = objCopy(value);
 
-			if (debugPrint){
+			if (debugPrintInfo){
 				printf("==> Found, returning copy %p of value:%p ", copy, value);fflush(stdout);
 				debugPrintObj("", value);
 			}
@@ -164,7 +164,7 @@ void* searchInEnvironment(List* name, Environment* env){
 double* newNumber(){
 	numberCount++;
 	double* ptr = malloc(sizeof(double));
-	if(debugPrint){
+	if(debugPrintAllocs){
 		printf("\e[31m+++ number %p\n\e[39m", (void*)tag_number(ptr));fflush(stdout);
 		debug_addAllocation((void*)tag_number(ptr));
 	}
@@ -309,24 +309,24 @@ void debugPrintObj(char* pre, List* obj){
 
 void objFree(List* obj){
 	if(is_hashmap(obj)){
-		if(debugPrint){printf("\e[31m--- Freeing hashmap: %p ", (void*)obj);fflush(stdout); print_obj(obj, 1); printf("\n\e[39m");fflush(stdout);}
+		if(debugPrintFrees){printf("\e[31m--- Freeing hashmap: %p ", (void*)obj);fflush(stdout); print_obj(obj, 1); printf("\n\e[39m");fflush(stdout);}
 		hashmapFree(obj);
 	}else if (is_vector(obj)){
-		if(debugPrint){printf("\e[31m--- Freeing vector: %p ", (void*)obj);fflush(stdout); print_obj(obj, 1); printf("\n\e[39m");fflush(stdout);}
+		if(debugPrintFrees){printf("\e[31m--- Freeing vector: %p ", (void*)obj);fflush(stdout); print_obj(obj, 1); printf("\n\e[39m");fflush(stdout);}
 		vectorFree(obj);
 
 	}else if(is_number(obj)){
-		if(debugPrint){printf("\e[31m--- Freeing number: %p\n\e[39m", (void*)obj);fflush(stdout);}
+		if(debugPrintFrees){printf("\e[31m--- Freeing number: %p\n\e[39m", (void*)obj);fflush(stdout);}
 		numberFree(obj);	
 
 	}else if (is_pair(obj)){
-		if(debugPrint){printf("\e[31m--- Freeing cons: %p", (void*)obj);fflush(stdout); printf(" (next: %p)\n\e[39m", (void*)cdr(obj));fflush(stdout);}
+		if(debugPrintFrees){printf("\e[31m--- Freeing cons: %p", (void*)obj);fflush(stdout); printf(" (next: %p)\n\e[39m", (void*)cdr(obj));fflush(stdout);}
 		listFree(obj);
 	}
 }
 
 void numberFree(List* number){
-	if(debugPrint){debug_removeAllocation(number);}
+	if(debugPrintFrees){debug_removeAllocation(number);}
 	free((double*)untag_number(number));	
 }
 
@@ -340,7 +340,7 @@ void listFree(List* l){
 	objFree(data);
 
 	//Free this cons
-	if(debugPrint){debug_removeAllocation(l);}
+	if(debugPrintFrees){debug_removeAllocation(l);}
 	free((List*)untag(l));
 }
 
@@ -352,7 +352,7 @@ void listFreeOnlyCons(List* l){
 
 
 void consFree(List* c){
-	if(debugPrint){
+	if(debugPrintFrees){
 		printf("\e[31m--- Freeing single cons: %p\n\e[39m", c);
 		debug_removeAllocation(c);
 	}
@@ -386,7 +386,7 @@ void vectorFree(List* v){
 }
 
 void environmentFree(Environment* env){
-	if(debugPrint){printf("\e[31m--- Freeing environemtn : %p\n\e[39m", env);}
+	if(debugPrintFrees){printf("\e[31m--- Freeing environemtn : %p\n\e[39m", env);}
 	map_t m = env->hashData;
 	int size = hashmap_length(m);
 	char* keys[size];
@@ -417,7 +417,7 @@ List* objCopy(List* obj){
 }
 
 List* vectorCopy(List* v){
-	if(debugPrint){printf("\e[35m--- Copying vector: %p\n\e[39m", v);}
+	if(debugPrintCopy){printf("\e[35m--- Copying vector: %p\n\e[39m", v);}
 	Vector* old = (Vector*)untag_vector(v);
 	int s = old->size;
 	Vector* new = newVec(s);
@@ -427,12 +427,12 @@ List* vectorCopy(List* v){
 		data[i] = objCopy(oldd[i]);
 	}
 	data[s] = 0;
-	if(debugPrint){printf("\e[35m===> Copied vector %p", new); debugPrintObj(" : \e[39m", (List*)tag_vector(new));}
+	if(debugPrintCopy){printf("\e[35m===> Copied vector %p", new); debugPrintObj(" : \e[39m", (List*)tag_vector(new));}
 	return (List*)tag_vector(new);
 }
 
 List* hashmapCopy(List* hashmap){
-	if(debugPrint){printf("\e[35m--- Copying hashmap: %p\n\e[39m", hashmap);}
+	if(debugPrintCopy){printf("\e[35m--- Copying hashmap: %p\n\e[39m", hashmap);}
 
 	//Extract old hashmap information
 	map_t old = (map_t)untag_hashmap(hashmap);
@@ -449,7 +449,7 @@ List* hashmapCopy(List* hashmap){
 		hashmap_put(new, key, val);
 	}
 
-	if(debugPrint){printf("\e[35m===> Copied hashmap %p", new); debugPrintObj(" : \e[39m", (List*)tag_hashmap(new));}
+	if(debugPrintCopy){printf("\e[35m===> Copied hashmap %p", new); debugPrintObj(" : \e[39m", (List*)tag_hashmap(new));}
 	return (List*)tag_hashmap(new);
 }
 
@@ -495,13 +495,13 @@ List* listCopy(List* l){
 		untagged->data = objCopy(car(current));
 		if(cdr(current)){untagged->next = cons(0, 0);}
 
-		if(debugPrint){printf("+++ listCopy %p", last); printf(" (%p ", car(last)); printf(". %p) ", cdr(last)); debugPrintObj("", last);}
+		if(debugPrintCopy){printf("+++ listCopy %p", last); printf(" (%p ", car(last)); printf(". %p) ", cdr(last)); debugPrintObj("", last);}
 
 		//Save current last one and iterate
 		last = cdr(last);
 		current = cdr(current);
 	}
-	if(debugPrint){printf("\e[35m===> Copied list %p", newFirst); debugPrintObj(" : ", newFirst); List* c = newFirst; while(c){printf("%p, ", c);c=cdr(c);} printf("\n\e[39m");}
+	if(debugPrintCopy){printf("\e[35m===> Copied list %p", newFirst); debugPrintObj(" : ", newFirst); List* c = newFirst; while(c){printf("%p, ", c);c=cdr(c);} printf("\n\e[39m");}
 	return newFirst;
 }
 
@@ -531,7 +531,7 @@ void debug_removeAllocation(void* p){
 }
 
 void debug_printAllocations(){
-	if(debugPrint){
+	if(debugPrintAllocs){
 		printf("\n\n!!!!Allocations:\n");
 		for(int i=0;i<1024*1024; i++){
 			if (allocations[i]!=NULL){

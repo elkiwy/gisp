@@ -28,7 +28,10 @@ static char token[SYMBOL_MAX]; /* token*/
 FILE* inputFile = 0;
 char gispWorkingDir[4096];
 Environment* global_env = 0;
-int debugPrint = 0;
+int debugPrintInfo = 0;
+int debugPrintFrees = 0;
+int debugPrintCopy = 0;
+int debugPrintAllocs = 0;
 
 //Memory Profiling variables
 int vectorCount = 0;
@@ -202,7 +205,7 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 
 //Eval functions
 List* evlist(List* list, Environment* env) {
-	if(debugPrint){debugPrintObj("===> Evaluating arg list ", list);}
+	if(debugPrintInfo){debugPrintObj("===> Evaluating arg list ", list);}
 	//printf("{%p}\n", (void*)list);fflush(stdout);
 	List* head = 0;
 	List** args = &head;
@@ -257,7 +260,7 @@ List* eval(List* exp, Environment* env) {
 	//Else if is a list with the first atom being an atom
 	//(At this point we should be sure that the exp is a list)
 	} else if (is_atom(first(exp))) { 
-		//printf("=== Eval on list with atom '%s' as first\n", (char*)first(exp));fflush(stdout);
+		if(debugPrintInfo){printf("\e[95m%p : ", exp); debugPrintObj("\e[95mEvaluating expression:" , exp); printf("\e[39m");fflush(stdout);}
 
 		// (quote X)
 		if (first(exp) == INTERN_quote) {
@@ -274,6 +277,7 @@ List* eval(List* exp, Environment* env) {
 
 		// (lambda (params) body)
 		} else if (first(exp) == INTERN_lambda) {
+			if(debugPrintInfo){debugPrintObj("\e[96mEvaluated to:" , exp); printf("\e[39m");fflush(stdout);}
 			return exp;
 
 		// (apply func args)
@@ -284,7 +288,7 @@ List* eval(List* exp, Environment* env) {
 
 		// (def symbol sexp)
 		}else if (first(exp) == INTERN_def){
-			if(debugPrint){printf("\n===> found def expression \n");fflush(stdout);}
+			if(debugPrintInfo){printf("\n===> found def expression \n");fflush(stdout);}
 			char* sym = second(exp);
 			List* val = eval(third(exp), env);
 			extendEnv(sym, val, env);
@@ -297,13 +301,13 @@ List* eval(List* exp, Environment* env) {
 
 		// (defn symbol (params) sexp)
 		}else if (first(exp) == INTERN_defn){
-			if(debugPrint){debugPrintObj("\n===> found defn expression ", exp);}
+			if(debugPrintInfo){debugPrintObj("\n===> found defn expression ", exp);}
 			//Get function name
 			char* sym = second(exp);
 
 			//Expand defn macro
 			List* lambda = cons(INTERN_lambda, cons(third(exp), cdr(cdr(cdr(exp)))));
-			if(debugPrint){debugPrintObj("===> lambda: ", lambda);}
+			if(debugPrintInfo){debugPrintObj("===> lambda: ", lambda);}
 
 			//Export the function into the environment
 			extendEnv(sym, lambda, env);
@@ -430,7 +434,7 @@ List* eval(List* exp, Environment* env) {
 
 		/// (doseq (bind seq) body)
 		}else if (first(exp) == INTERN_doseq){
-			if(debugPrint){debugPrintObj("===>Expanding doseq macro  ", exp);}
+			if(debugPrintInfo){debugPrintObj("===>Expanding doseq macro  ", exp);}
 			Environment* innerEnv = makeEnvironment(env);
 			char* sym = first(second(exp));
 
@@ -462,6 +466,7 @@ List* eval(List* exp, Environment* env) {
 			objFree(evaluatedSeq);
 			objFree(exp);
 			environmentFree(innerEnv);
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mEvaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 			return ret;
 
 		}else if (first(exp)== intern("exit")){
@@ -507,7 +512,7 @@ List* eval(List* exp, Environment* env) {
 
 			//user defined lambda, arg list eval happens in binding  below
 			if (is_pair(primop)) { 
-				if(debugPrint){printf("===>Evaluating lambda"); debugPrintObj(" ", exp); printf("====> %p ", primop);fflush(stdout); debugPrintObj("Primop ", primop);}
+				if(debugPrintInfo){printf("===>Evaluating lambda"); debugPrintObj(" ", exp); printf("====> %p ", primop);fflush(stdout); debugPrintObj("Primop ", primop);}
 
 				List* lambda = cons(primop, cdr(exp));
 				List* result = eval( lambda, env );
@@ -519,14 +524,14 @@ List* eval(List* exp, Environment* env) {
 				consSetNext(cdr(primop), 0);
 				//consSetData(cdr(primop), 0);
 
-				if(debugPrint){debugPrintObj("Freeing primop after user defined function (defn): ", primop);}
+				if(debugPrintInfo){debugPrintObj("Freeing primop after user defined function (defn): ", primop);}
 				objFree(primop);
 
-				if(debugPrint){debugPrintObj("Returning result after defn evaluation: ", result);}
+				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mEvaluated to:" , result); printf("\e[39m");fflush(stdout);}
 				return result;
 			//Built-in primitive
 			} else if (primop) { 
-				if(debugPrint){printf("====> %p", exp);fflush(stdout); debugPrintObj(" Evaluating ", exp);}
+				if(debugPrintInfo){printf("====> %p", exp);fflush(stdout); debugPrintObj(" Evaluating ", exp);}
 
 				//Evaluate arguments
 				List* args = evlist(cdr(exp), env);
@@ -550,13 +555,14 @@ List* eval(List* exp, Environment* env) {
 				//objFree(oldArgs);
 
 				//Evaluate expression with evaluated arguments
-				if(debugPrint){debugPrintObj("==> Evaluating after evlist ", exp);}
+				if(debugPrintInfo){debugPrintObj("==> Evaluating after evlist ", exp);}
 				List* result = ((List* (*) (List*))primop) (cdr(exp));
 
 				//Free the current expression
-				if(debugPrint){debugPrintObj("Freeing exp after built-in primitive function: ", exp);}
+				if(debugPrintInfo){debugPrintObj("Freeing exp after built-in primitive function: ", exp);}
 				objFree(exp);
-				if(debugPrint){printf("==> DONE evaluating %p\n", exp);fflush(stdout);}
+				//if(debugPrintInfo){printf("==> DONE evaluating %p\n", exp);fflush(stdout);}
+				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("Evaluated to:" , result); printf("\e[39m");fflush(stdout);}
 				return result;
 			}
 		}
@@ -584,9 +590,11 @@ List* read_and_eval(){
 		//Evaluate only if valid tokens
 		if (strlen(token)>0){
 			debug_printAllocations();
-			if(debugPrint){printf("\n\e[36m***> Reading\n");fflush(stdout);}
+			if(debugPrintInfo){printf("\n\e[36m***> Reading\n");fflush(stdout);}
 			List* obj = getobj();
-			if(debugPrint){printf("\e[39m");fflush(stdout);}
+			if(debugPrintInfo){
+				debugPrintObj("Read: ", obj);
+				printf("\e[39m"); fflush(stdout);}
 			if(result){objFree(result);result=0;}
 			result = eval(obj, global_env);
 		}
@@ -595,7 +603,7 @@ List* read_and_eval(){
 		}else{look = EOF;}
 	}
 
-	if(debugPrint){printf("\nEvaluation completed.\n\n");fflush(stdout);}
+	if(debugPrintInfo){printf("\nEvaluation completed.\n\n");fflush(stdout);}
 	return result;
 }
 
@@ -764,12 +772,20 @@ int main(int argc, char* argv[]) {
 	INTERN_profile	= intern("profile");
 	printf("\n");
 	
-	debugPrint = 1;
+
 	//Include gisp core
-	//includeLinkedBinaryFile((char*)_binary_src_core_gisp_start, (char*)_binary_src_core_gisp_end);
-	//includeLinkedBinaryFile((char*)_binary_src_simplex_noise_gisp_start, (char*)_binary_src_simplex_noise_gisp_end);
+	debugPrintInfo = 0;
+	debugPrintFrees = 0;
+	debugPrintCopy = 0;
+	debugPrintAllocs = 0;
+	includeLinkedBinaryFile((char*)_binary_src_core_gisp_start, (char*)_binary_src_core_gisp_end);
+	includeLinkedBinaryFile((char*)_binary_src_simplex_noise_gisp_start, (char*)_binary_src_simplex_noise_gisp_end);
 
 	//Evaluate everything 
+	debugPrintInfo = 1;
+	debugPrintFrees = 0;
+	debugPrintCopy = 0;
+	debugPrintAllocs = 0;
 	clock_t end_env = clock();
 	List* result = read_and_eval();
 	print_obj(result, 1);printf("\n");fflush(stdout);

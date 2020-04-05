@@ -11,7 +11,10 @@
 
 #define SYMBOL_MAX  32
 
-extern int debugPrint;
+extern int debugPrintInfo;
+extern int debugPrintFrees;
+extern int debugPrintCopy;
+extern int debugPrintAllocs;
 
 extern int vectorCount;
 extern int hashmapCount;
