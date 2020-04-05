@@ -266,10 +266,20 @@ List* eval(List* exp, Environment* env) {
 
 		// (if (cond) (success) (fail))
 		} else if (first(exp) == INTERN_if) {
-			if (eval(second(exp), env) != 0)
-				return eval(third(exp), env);
-			else
-				return eval(fourth(exp), env);
+			List* condition = eval(second(exp), env);
+			consSetData(cdr(exp), 0);
+			List* ret;
+			if (condition != 0){
+				ret = eval(third(exp), env);
+				consSetData(cdr(cdr(exp)), 0);
+			}else{
+				ret = eval(fourth(exp), env);
+				consSetData(cdr(cdr(cdr(exp))), 0);
+			}
+			objFree(condition);
+			objFree(exp);
+			if(debugPrintInfo){debugPrintObj("\e[96mEvaluated to:" , ret); printf("\e[39m");fflush(stdout);}
+			return ret;
 
 		// (lambda (params) body)
 		} else if (first(exp) == INTERN_lambda) {
