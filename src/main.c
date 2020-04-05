@@ -169,16 +169,12 @@ void debug_printEnv(Environment* a){
 
 List* eval(List* exp, Environment* env);
 List* apply_lambda(List* lambda, List* args, Environment* env){
-	printf("::===>Applying lambda ");fflush(stdout);
-	print_obj(lambda, 1);fflush(stdout);
-	printf(" with args ");fflush(stdout);
-	print_obj(args, 1);fflush(stdout);
-	printf(" \n");fflush(stdout);
+	if(debugPrintInfo){printf("===>Applying lambda ");fflush(stdout); print_obj(lambda, 1);fflush(stdout); printf(" with args ");fflush(stdout); print_obj(args, 1);fflush(stdout); printf(" \n");fflush(stdout);}
 
 
 	//bind names into env and eval body
 	Environment* innerEnv = makeEnvironment(env);
-	printf("::===>binding names\n ");fflush(stdout);
+	if(debugPrintInfo){printf("===>binding names\n ");fflush(stdout);}
 	List *names = second(lambda), *vars = args;
 	for (  ; names ; names = cdr(names), vars = cdr(vars) ){
 		char* sym = car(names);
@@ -188,18 +184,16 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 	}
 
 	//Eval every body sexp in an implicit progn
-	printf("::===>evaluating lambda in own environemnt\n ");fflush(stdout);
+	if(debugPrintInfo){printf("===>evaluating lambda in own environemnt\n ");fflush(stdout);}
 	List *sexp = cdr(cdr(lambda)), *result = 0;	
 	while (sexp){
-		debugPrintObj("   Evaluating lambda sexp : ", car(sexp));
+		if(debugPrintInfo){debugPrintObj("   Evaluating lambda sexp : ", car(sexp));}
 		if (result){objFree(result);}
 		result = eval(car(sexp), innerEnv);
 		sexp = cdr(sexp);
 	}
 
-
 	environmentFree(innerEnv);
-
 	return result;
 }
 
@@ -379,6 +373,7 @@ List* eval(List* exp, Environment* env) {
 
 		/// (map function list)
 		}else if (first(exp) == INTERN_map){
+			if(debugPrintInfo){debugPrintObj("===>Evaluating map ", exp);}
 			List* ret = 0;
 			List* l = eval(third(exp), env);
 
@@ -575,7 +570,9 @@ List* eval(List* exp, Environment* env) {
 		return apply_lambda(car(exp), cdr(exp), env);
 	}
 
-	printf("cannot evaluate exp: %s %s in %p\n", (char*)exp, (char*)first(exp), env);
+
+	printf("ERROR: cannot evaluate exp: %p \"%s\" in %p\n", (char*)exp, (char*)first(exp), env);
+	exit(1);
 	return 0;
 }
 
