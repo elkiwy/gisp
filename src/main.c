@@ -278,21 +278,26 @@ List* eval(List* exp, Environment* env) {
 			}
 			objFree(condition);
 			objFree(exp);
-			if(debugPrintInfo){debugPrintObj("\e[96mEvaluated to:" , ret); printf("\e[39m");fflush(stdout);}
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mEvaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 			return ret;
 
 		// (lambda (params) body)
 		} else if (first(exp) == INTERN_lambda) {
 			List* ret = objCopy(exp);
-			if(debugPrintInfo){debugPrintObj("\e[96mEvaluated to:" , ret); printf("\e[39m");fflush(stdout);}
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mEvaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 			objFree(exp);
 			return ret;
 
 		// (apply func args)
 		} else if (first(exp) == INTERN_apply) { 
-			List* args = evlist(cdr(cdr(exp)), env);
-			args = car(args);
-			return ((List* (*) (List*))eval(second(exp), env)) (args);
+			List* args = eval(car(cdr(cdr(exp))), env);
+			consSetData(cdr(cdr(exp)), args);
+			List* function = eval(second(exp), env);
+			consSetData(cdr(exp), function);
+			List* ret = ((List* (*) (List*))function) (args);
+			objFree(exp);
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mEvaluated to:" , ret); printf("\e[39m");fflush(stdout);}
+			return ret;
 
 		// (def symbol sexp)
 		}else if (first(exp) == INTERN_def){
