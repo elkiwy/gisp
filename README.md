@@ -40,16 +40,16 @@ I'm working to get an automatic documentation system with doc strings and it wil
 
 
 ## Todo
-- REPL
-- advanced string functions
-- Error messages
 - Garbage collection
+- Handle String as Gisp Objects
+- Error messages
+- REPL
 
 
 ## Credits
 Gisp is *heavily influenced* by:
  - [Lisp in less than 200 lines of C](https://carld.github.io/2017/06/20/lisp-in-less-than-200-lines-of-c.html) for its core system.
- - [Clojure](https://clojure.org) for the language syntax.
+ - [Clojure](https://clojure.org) for the language syntax and core functions.
  - [Generative-toolbelt](https://github.com/elkiwy/generative-toolbelt) for the set of function for primitive shapes.
    
 

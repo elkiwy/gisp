@@ -23,18 +23,38 @@
 ;;Test doseq
 ;(doseq (i (range 2)) (write i) (write i))
 
+;;Test profile
+;(profile "coso" (list 64))
 
-(profile "coso"
-	(list 64))
+;;Test let
+;(let (a 5
+;      b (+ 37 5))
+;	(write a)
+;	(write b)
+;	(write (+ a b)))
+
+;;Test map with lambda
+;(map (lambda (i) (+ i 1)) (range 3))
+;(map write (range 3))
+;(defn testmap (i) (+ i 1))
+;(map testmap (range 3))
 
 
+;;Test if
+;(if (= 1 2) (write "equals") (write "not equals"))
+;(if (= 2 2) (write "equals") (write "not equals"))
 
+;;Test apply
+;(write (apply str (list "a" "b" "c" "d" "e")))
 
+;;Test progn
+;(progn (write "a") (write "b") (write "c") (+ 1 2))
 
-
-
-
-
+;;Test reduce
+;(reduce (lambda (curr next) (+ curr next)) 0 (range 5))
+;(defn testreduce (curr next) (+ curr next))
+;(reduce testreduce 0 (range 5))
+;(reduce + 0 (range 5))
 
 
 
