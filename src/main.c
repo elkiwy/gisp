@@ -377,29 +377,43 @@ List* eval(List* exp, Environment* env) {
 		/// (reduce function start list)
 		}else if (first(exp) == INTERN_reduce){
 			List* ret = eval(third(exp), env);
-			List* l = eval(fourth(exp), env);
+			consSetData(cdr(cdr(exp)), 0);
+			List* seqFirst = eval(fourth(exp), env);
+			List* seq = seqFirst;
+			consSetData(cdr(cdr(cdr(exp))), 0);
 
 			//If I got a vector convert it into a list
-			if (is_vector(l)){l = vecToList((Vector*)untag_vector(l));}
+			if (is_vector(seq)){seq = vecToList((Vector*)untag_vector(seq));}
 
-			if (is_pair(second(exp))){
+			List* function = eval(second(exp), env);
+			consSetData(cdr(exp), env);
+			if (is_pair(function)){
 				//Lambda
-				while (l){
-					List* args = cons(ret, cons(car(l), 0));
-					List* r = apply_lambda(second(exp), args, env);
+				List* lambda = function;
+				while (seq){
+					List* lambdaCopy = objCopy(lambda);
+					List* lambdaArgs = cons(ret, cons(objCopy(car(seq)), 0));
+					List* r = apply_lambda(lambdaCopy, lambdaArgs, env);
+					objFree(lambdaCopy);
+					objFree(lambdaArgs);
 					ret = r;
-					l = cdr(l);
+					seq = cdr(seq);
 				}
 			}else{
 				//Known function name
-				void* f = eval(second(exp), env);
-				while (l){
-					List* args = cons(ret, cons(car(l), 0));
+				void* f = function;
+				while (seq){
+					List* args = cons(ret, cons(objCopy(car(seq)), 0));
 					List* r = ((List* (*) (List*))f)(args);
+					objFree(args);
 					ret = r;
-					l = cdr(l);
+					seq = cdr(seq);
 				}
 			}
+			objFree(function);
+			objFree(seqFirst);
+			objFree(exp);
+
 			return ret;
 
 		/// (map function list)
@@ -415,12 +429,8 @@ List* eval(List* exp, Environment* env) {
 			//If I got a vector convert it into a list
 			if (is_vector(seq)){seq = vecToList((Vector*)untag_vector(seq));}
 
-
 			List* function = eval(second(exp), env);
 			consSetData(cdr(exp), env);
-
-
-
 			if (is_pair(function)){
 				//Lambda
 				List* lambda = function;
