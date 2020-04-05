@@ -283,8 +283,10 @@ List* eval(List* exp, Environment* env) {
 
 		// (lambda (params) body)
 		} else if (first(exp) == INTERN_lambda) {
-			if(debugPrintInfo){debugPrintObj("\e[96mEvaluated to:" , exp); printf("\e[39m");fflush(stdout);}
-			return exp;
+			List* ret = objCopy(exp);
+			if(debugPrintInfo){debugPrintObj("\e[96mEvaluated to:" , ret); printf("\e[39m");fflush(stdout);}
+			objFree(exp);
+			return ret;
 
 		// (apply func args)
 		} else if (first(exp) == INTERN_apply) { 
