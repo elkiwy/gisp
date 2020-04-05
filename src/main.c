@@ -333,12 +333,16 @@ List* eval(List* exp, Environment* env) {
 
 		// (progn exp1 exp2 ...)
 		}else if (first(exp) == INTERN_progn){
-			List *sexp = cdr(exp), *result = 0;	
+			List* sexp = cdr(exp);
+			List* ret = 0;	
 			while (sexp){
-				result = eval(first(sexp), env);
+				if(ret){objFree(ret);}
+				ret = eval(first(sexp), env);
+				consSetData(sexp, 0);
 				sexp = cdr(sexp);
 			}
-			return result;
+			objFree(exp);
+			return ret;
 
 		// (let (binds) body)
 		} else if (first(exp) == INTERN_let) {
