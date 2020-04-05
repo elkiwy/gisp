@@ -346,7 +346,7 @@ __attribute__((aligned(16))) List* freverse(List* a) {
 	List* ret = 0;
 	List* l = first(a);
 	while(l){
-		ret = cons(car(l), ret);
+		ret = cons(objCopy(car(l)), ret);
 		l = cdr(l);
 	}
 	return ret;	
