@@ -179,6 +179,7 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 	for (  ; names ; names = cdr(names), vars = cdr(vars) ){
 		char* sym = car(names);
 		List* val = eval(car(vars), innerEnv);
+		consSetData(vars, 0);
 		extendEnv(sym, val, innerEnv);
 		objFree(val);
 	}
@@ -190,6 +191,7 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 		if(debugPrintInfo){debugPrintObj("   Evaluating lambda sexp : ", car(sexp));}
 		if (result){objFree(result);}
 		result = eval(car(sexp), innerEnv);
+		consSetData(sexp, 0);
 		sexp = cdr(sexp);
 	}
 
