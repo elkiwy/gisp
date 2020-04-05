@@ -389,28 +389,55 @@ List* eval(List* exp, Environment* env) {
 		}else if (first(exp) == INTERN_map){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating map ", exp);}
 			List* ret = 0;
-			List* l = eval(third(exp), env);
+
+			//Get the sequence
+			List* seqFirst = eval(third(exp), env);
+			List* seq = seqFirst;
+			consSetData(cdr(cdr(exp)), 0);
 
 			//If I got a vector convert it into a list
-			if (is_vector(l)){l = vecToList((Vector*)untag_vector(l));}
+			if (is_vector(seq)){seq = vecToList((Vector*)untag_vector(seq));}
 
-			if (is_pair(second(exp))){
+
+			List* function = eval(second(exp), env);
+			consSetData(cdr(exp), env);
+
+
+
+			if (is_pair(function)){
 				//Lambda
-				while (l){
-					List* r = apply_lambda(second(exp), cons(car(l), 0), env);
+				List* lambda = function;
+				while (seq){
+					List* lambdaCopy = objCopy(lambda);
+					List* lambdaArg = cons(objCopy(car(seq)), 0);
+					List* r = apply_lambda(lambdaCopy, lambdaArg, env);
+					objFree(lambdaCopy);
+					objFree(lambdaArg);
 					ret = cons(r, ret);
-					l = cdr(l);
+					seq = cdr(seq);
 				}
+
 			}else{
 				//Known function name
-				void* f = eval(second(exp), env);
-				while (l){
-					List* r = ((List* (*) (List*))f)(cons(car(l), 0));
+				void* f = function;
+				if(f==NULL){printf("\nERROR: \"%s\" is not a valid function for map. Exiting.\n\n", second(exp));fflush(stdout);exit(1);}
+				while (seq){
+					List* functionArg = cons(objCopy(car(seq)), 0);
+					List* r = ((List* (*) (List*))f)(functionArg);
+					objFree(functionArg);
 					ret = cons(r, ret);
-					l = cdr(l);
+					seq = cdr(seq);
 				}
 			}
-			return freverse(cons(ret, 0));
+
+			objFree(function);
+			objFree(seqFirst);
+			objFree(exp);
+			List* reversed = cons(ret, 0);
+			List* correct = freverse(reversed);
+			objFree(reversed);
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mEvaluated to:" , correct); printf("\e[39m");fflush(stdout);}
+			return correct;
 
 		/// (mapv function list)
 		}else if (first(exp) == INTERN_mapv){
