@@ -391,7 +391,16 @@ List* concatList(List* l1, List* l2){
 ///!2List/Vector
 __attribute__((aligned(16))) List* fconcat(List* a) {
 	List* v1 = first(a);
-	if(is_vector(v1)){
+	if(is_string(v1)){
+		char* s1 = (char*)untag_string(v1);
+		char* s2 = (char*)untag_string(second(a));
+		int size = strlen(s1)+strlen(s2)+1;
+		char* new = newStringFromSize(size);
+		strcpy(new, s1);
+		strcat(new, s2);
+		return (List*)tag_string(new);
+
+	}else if(is_vector(v1)){
 		//Get the total size of the new vector to create
 		List* current = a;
 		int newSize = 0;
