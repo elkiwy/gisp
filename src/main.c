@@ -834,7 +834,7 @@ int main(int argc, char* argv[]) {
 	includeLinkedBinaryFile((char*)_binary_src_simplex_noise_gisp_start, (char*)_binary_src_simplex_noise_gisp_end);
 
 	//Evaluate everything 
-	debugPrintInfo = 1;
+	debugPrintInfo = 0;
 	debugPrintFrees = 0;
 	debugPrintCopy = 0;
 	debugPrintAllocs = 0;
