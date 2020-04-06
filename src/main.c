@@ -521,6 +521,7 @@ List* eval(List* exp, Environment* env) {
 			printf("exiting \n");fflush(stdout);
 			look = EOF;
 			exitFlag = 1;
+			objFree(exp);
 			return 0;
 
 		/// (profile tag body)
@@ -552,7 +553,14 @@ List* eval(List* exp, Environment* env) {
 		//Keyword map member accessing
 		}else if (*((char*)first(exp)) == ':'){
 			List* obj = eval(second(exp), env);
-			return fget(cons(obj, cons(first(exp), 0)));
+			consSetData(cdr(exp), 0);
+
+			//Equivalent to (get hashmap keyword)
+			List* expandedExp = cons(obj, cons(objCopy(first(exp)), 0));
+			List* ret = fget(expandedExp);
+			objFree(expandedExp);
+			objFree(exp);
+			return ret;
 
 		// (function args)
 		} else { 
