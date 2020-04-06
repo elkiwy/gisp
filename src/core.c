@@ -2,9 +2,18 @@
 
 // ------------------------------------------------------------------
 //Generic utilities
-void print_obj(List* ob, int head_of_list) {
+char* objToString(List* ob, int head_of_list){
+	int bufferSize = 1024*1024; 
+	char* buffer = malloc(sizeof(char)*bufferSize);
+	buffer[0] = '\0';
+	char* target = buffer;
 	//printf("\e[100m%p\e[49m", ob);fflush(stdout);
-	if(is_hashmap(ob)){
+	if(is_string(ob)){
+		char* untagged = (char*)untag_string(ob);
+		target += sprintf(target, "\"%s\"", untagged);
+		printf("printing string %p, target:'%s', untagged:'%s'\n", ob, buffer, untagged);fflush(stdout);
+
+	}else if(is_hashmap(ob)){
 		//printf("printing hashmap\n");fflush(stdout);
 		map_t map = (map_t)untag_hashmap(ob);
 		int size = hashmap_length(map);
@@ -12,13 +21,15 @@ void print_obj(List* ob, int head_of_list) {
 		void** values = malloc(sizeof(void*)*size);
 		hashmap_keys_and_values(map, keys, values);
 
-		printf("{ ");fflush(stdout);
+		target += sprintf(target, "{ ");
 		for (int i=0; i<size; i++){
-			printf("%s ", (char*)keys[i]);fflush(stdout);
-			print_obj((List*)values[i], 0);
-			printf(" ");fflush(stdout);
+			target += sprintf(target, "%s ", (char*)keys[i]);
+			char* str = objToString((List*)values[i], 0);
+			target += sprintf(target, "%s", str);
+			free(str);
+			target += sprintf(target, " ");
 		}
-		printf("}");fflush(stdout);
+		target += sprintf(target, "}");
 		free(keys);
 		free(values);
 
@@ -28,31 +39,107 @@ void print_obj(List* ob, int head_of_list) {
 		void** data = vec->data;
 		int size = vec->size;
 
-		printf("[ ");fflush(stdout);
+		target += sprintf(target, "[ ");
 		for(int i = 0; i<size; i++){
-			print_obj(data[i], 0); printf(" ");
+			char* str = objToString(data[i], 0);
+			target += sprintf(target, "%s", str);
+			free(str);
+			target += sprintf(target, " ");
 		}
-		printf("]");fflush(stdout);
+		target += sprintf(target, "]");
 
 	}else if(is_number(ob)){
 		//printf("printing number %p\n", (void*)ob);fflush(stdout);
 		double num = numVal(ob);
-		if ((num - (int)num) == 0){printf("%i", (int)num);fflush(stdout);
-		}else{printf("%f", num);fflush(stdout);}
+		if ((num - (int)num) == 0){
+			target += sprintf(target, "%i", (int)num);
+		}else{
+			target += sprintf(target, "%f", num);
+		}
 
 	} else if (is_pair(ob)){
 		//printf("printing pair\n");fflush(stdout);
-		if (head_of_list) printf("(");fflush(stdout);
-		print_obj(car(ob), 1);
-		if (cdr(ob) != 0) {
-			printf(" ");fflush(stdout);
-			print_obj(cdr(ob), 0); //Change to 1 to enable the cons cells view
+		if (head_of_list){
+			target += sprintf(target, "(");
 		}
-		if (head_of_list) printf(")");fflush(stdout);
+		char* str = objToString(car(ob), 1);
+		target += sprintf(target, "%s", str);
+		free(str);
+		if (cdr(ob) != 0) {
+			target += sprintf(target, " ");
+			char* str2 = objToString(cdr(ob), 0);
+			target += sprintf(target, "%s", str2); //Change to 1 to enable the cons cells view
+			free(str2);
+		}
+		if (head_of_list){
+			target += sprintf(target, ")");
+		}
 
 	}else{
-		printf("%s", ob ? (char*) ob : "null" );fflush(stdout);
+		//printf("printing atom\n");fflush(stdout);
+		target += sprintf(target, "%s", ob ? (char*) ob : "null" );
 	}
+	return buffer;
+}
+
+void print_obj(List* ob, int head_of_list) {
+	//printf("\e[100m%p\e[49m", ob);fflush(stdout);
+	char* str = objToString(ob, head_of_list);
+	printf("%s\n", str);
+	free(str);
+	//if(is_string(ob)){
+	//	char* untagged = (char*)untag_string(ob);
+	//	printf("\"%s\"", untagged);
+
+	//}else if(is_hashmap(ob)){
+	//	//printf("printing hashmap\n");fflush(stdout);
+	//	map_t map = (map_t)untag_hashmap(ob);
+	//	int size = hashmap_length(map);
+	//	char** keys = malloc(sizeof(void*)*size);
+	//	void** values = malloc(sizeof(void*)*size);
+	//	hashmap_keys_and_values(map, keys, values);
+
+	//	printf("{ ");fflush(stdout);
+	//	for (int i=0; i<size; i++){
+	//		printf("%s ", (char*)keys[i]);fflush(stdout);
+	//		print_obj((List*)values[i], 0);
+	//		printf(" ");fflush(stdout);
+	//	}
+	//	printf("}");fflush(stdout);
+	//	free(keys);
+	//	free(values);
+
+	//}else if(is_vector(ob)){
+	//	//printf("printing vector\n");fflush(stdout);
+	//	Vector* vec = (void*)untag_vector(ob);
+	//	void** data = vec->data;
+	//	int size = vec->size;
+
+	//	printf("[ ");fflush(stdout);
+	//	for(int i = 0; i<size; i++){
+	//		print_obj(data[i], 0); printf(" ");
+	//	}
+	//	printf("]");fflush(stdout);
+
+	//}else if(is_number(ob)){
+	//	//printf("printing number %p\n", (void*)ob);fflush(stdout);
+	//	double num = numVal(ob);
+	//	if ((num - (int)num) == 0){printf("%i", (int)num);fflush(stdout);
+	//	}else{printf("%f", num);fflush(stdout);}
+
+	//} else if (is_pair(ob)){
+	//	//printf("printing pair\n");fflush(stdout);
+	//	if (head_of_list) printf("(");fflush(stdout);
+	//	print_obj(car(ob), 1);
+	//	if (cdr(ob) != 0) {
+	//		printf(" ");fflush(stdout);
+	//		print_obj(cdr(ob), 0); //Change to 1 to enable the cons cells view
+	//	}
+	//	if (head_of_list) printf(")");fflush(stdout);
+
+	//}else{
+	//	printf("%s", ob ? (char*) ob : "null" );fflush(stdout);
+	//}
 }
 
 int randInt(int min, int max){
