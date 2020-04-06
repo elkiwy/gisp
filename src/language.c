@@ -545,17 +545,34 @@ __attribute__((aligned(16))) List* fnull(List* a) { return first(a) == 0        
 ///@2...
 ///!2Any
 __attribute__((aligned(16))) List* fstr(List* a) {
-	char* str1 = (char*)first(a);
-	char* str2 = (char*)second(a);
-	str1 = trim_quotes(str1);
-	str2 = trim_quotes(str2);
+	//Get all the strings
+	char* strings[100];
+	int stringsCount = 0;
+	int totalSize = 0;
+	List* tmp = a;
+	while(tmp){
+		List* obj = car(tmp);
+		char* objStr = objToString(obj, 1);
+		if(objStr[0]=='"'){objStr = trim_quotes(objStr);}
+		strings[stringsCount] = objStr;
+		stringsCount++;
+		totalSize += strlen(objStr);
+		tmp = cdr(tmp);
+	}
 
-	char* str_res;
-	str_res = malloc(strlen(str1)+strlen(str2)+1); 
-	strcpy(str_res, str1); 
-	strcat(str_res, str2); 
+	//Join all the stirngs
+	char* final = newStringFromSize(totalSize);
+	strcpy(final, strings[0]);
+	for(int i=1;i<stringsCount;++i){
+		strcat(final, strings[i]);
+	}
 
-	return (List*)str_res;
+	for(int i=0;i<stringsCount;++i){
+		free(strings[i]);
+	}
+
+	List* ret = (List*)tag_string(final);
+	return ret;
 }
 
 
