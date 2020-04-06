@@ -95,5 +95,24 @@
 ;(write (take 6 2 [1 2 3 4 5]))
 ;(write (take 6 2 (list 1 2 3 4 5)))
 
-(write (drop 2 [1 2 3 4 5]))
-(write (drop 2 (list 1 2 3 4 5)))
+;(write (drop 2 [1 2 3 4 5]))
+;(write (drop 2 (list 1 2 3 4 5)))
+
+
+;(write (empty? [1 2 3 4]))
+;(write (empty? []))
+;(write (empty? (list 1 2 3 4)))
+;(write (empty? (list )))
+;(write (empty? {:a 1}))
+;(write (empty? {}))
+;(write (empty? "ciao"))
+;(write (empty? ""))
+
+
+(defn partition (n step coll)
+    (if (< (count coll) n)
+        nil
+        (concat (take n 0 coll) (partition n step (drop step coll)))))
+    
+(write (partition 2 1 [1 2 3 4 5 6 7 8]))
+(write (partition 2 1 (list 1 2 3 4 5 6 7 8)))

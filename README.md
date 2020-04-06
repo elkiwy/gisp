@@ -40,11 +40,17 @@ I'm working to get an automatic documentation system with doc strings and it wil
 
 
 ## Todo
-- Garbage collection
-- Handle String as Gisp Objects
-- Error messages
-- REPL
+- [x] Garbage collection
+- [x] Handle String as Gisp Objects
+- [ ] Error messages
+- [ ] REPL
 
+### Functions
+- [ ] partition 
+- [ ] conj 
+- [ ] filter 
+- [ ] empty? 
+- [ ] not
 
 ## Credits
 Gisp is *heavily influenced* by:
