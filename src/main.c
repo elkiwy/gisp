@@ -200,19 +200,20 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 }
 
 //Eval functions
-List* evlist(List* list, Environment* env) {
-	if(debugPrintInfo){debugPrintObj("===> Evaluating arg list ", list);}
-	//printf("{%p}\n", (void*)list);fflush(stdout);
-	List* head = 0;
-	List** args = &head;
-	for ( ; list ; list = cdr(list)) {
-		//debugPrintObj("->Evaluating arg ", car(list));
-		*args = cons(eval(car(list), env), 0);
-		args = &((List*)untag(*args))->next;
-	}
-	//debugPrintObj("->returning head ", head);
-	//printf("\e[39m");
-	return head;}
+//List* evlist(List* list, Environment* env) {
+//	if(debugPrintInfo){debugPrintObj("===> Evaluating arg list ", list);}
+//	//printf("{%p}\n", (void*)list);fflush(stdout);
+//	List* head = 0;
+//	List** args = &head;
+//	for ( ; list ; list = cdr(list)) {
+//		//debugPrintObj("->Evaluating arg ", car(list));
+//		*args = cons(eval(car(list), env), 0);
+//		args = &((List*)untag(*args))->next;
+//	}
+//	//debugPrintObj("->returning head ", head);
+//	//printf("\e[39m");
+//	return head;
+//}
 List* eval(List* exp, Environment* env) {
 	//printf("Eval %p in %p\n", (void*)exp, (void*)env);fflush(stdout);
 	//If is a tagged hashmap...
@@ -589,35 +590,22 @@ List* eval(List* exp, Environment* env) {
 			} else if (primop) { 
 				if(debugPrintInfo){printf("====> %p", exp);fflush(stdout); debugPrintObj(" Evaluating ", exp);}
 
-				//Evaluate arguments
-				List* args = evlist(cdr(exp), env);
-
-				//Replace data of current cons in exp with the new evaluated data
-				List* curr = cdr(exp);
-				List* new = args;
-				while(curr){
-					//printf("==> Setting car of %p to the car of %p [", curr, new);fflush(stdout); print_obj(car(new), 1); fflush(stdout); printf("] and clearing\n");fflush(stdout);
-
-					//Replace with the new one
-					consSetData(curr, car(new));
-					curr = cdr(curr);
-					new = cdr(new);
+				//Evaluate arguments and remove them from exp list
+				List* argsToEval = cdr(exp);
+				List* args = 0;
+				List** tmp = &args;
+				for ( ; argsToEval ; argsToEval = cdr(argsToEval)) {
+					*tmp = cons(eval(car(argsToEval), env), 0);
+					consSetData(argsToEval, 0);
+					tmp = &((List*)untag(*tmp))->next;
 				}
 
-				//Remove all the cons generated with evalList
-				listFreeOnlyCons(args);
-
-				//printf("Freeing old args\n");fflush(stdout);
-				//objFree(oldArgs);
-
 				//Evaluate expression with evaluated arguments
-				if(debugPrintInfo){debugPrintObj("==> Evaluating after evlist ", exp);}
-				List* result = ((List* (*) (List*))primop) (cdr(exp));
+				List* result = ((List* (*) (List*))primop) (args);
 
 				//Free the current expression
-				if(debugPrintInfo){debugPrintObj("Freeing exp after built-in primitive function: ", exp);}
+				objFree(args);
 				objFree(exp);
-				//if(debugPrintInfo){printf("==> DONE evaluating %p\n", exp);fflush(stdout);}
 				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("primitive Evaluated to:" , result); printf("\e[39m");fflush(stdout);}
 				return result;
 			}
