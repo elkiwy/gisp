@@ -11,7 +11,6 @@ char* objToString(List* ob, int head_of_list){
 	if(is_string(ob)){
 		char* untagged = (char*)untag_string(ob);
 		target += sprintf(target, "\"%s\"", untagged);
-		printf("printing string %p, target:'%s', untagged:'%s'\n", ob, buffer, untagged);fflush(stdout);
 
 	}else if(is_hashmap(ob)){
 		//printf("printing hashmap\n");fflush(stdout);
@@ -340,20 +339,6 @@ Vector* listToVec(List* l){
 	return vec;
 }
 
-Vector* copyVec(Vector* v){
-	int s = v->size;
-	Vector* new = newVec(s);
-	void** data = new->data;
-	void** oldd = v->data;
-	//memcpy(new->data, v->data, s*8);
-
-	for(int i=0;i<s;++i){
-		data[i] = objCopy(oldd[i]);
-	}
-
-	data[s] = 0;
-	return new;
-}
 
 List* vecToList(Vector* vec){
 	int size = vec->size;

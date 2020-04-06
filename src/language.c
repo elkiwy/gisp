@@ -316,7 +316,7 @@ __attribute__((aligned(16))) List* frand(List* a){
 ///!1Atom
 ///@2b
 ///!2Atom
-__attribute__((aligned(16))) List* fcons(List* a) { return cons(first(a), second(a)); }
+__attribute__((aligned(16))) List* fcons(List* a) { return cons(objCopy(first(a)), objCopy(second(a))); }
 ///~Create a list structure
 ///&list
 ///#List
@@ -330,13 +330,13 @@ __attribute__((aligned(16))) List* flist(List* a) {return objCopy(a);}
 ///#Any
 ///@1list
 ///!1List
-__attribute__((aligned(16))) List* fcar(List* a)  { return car(first(a)); }
+__attribute__((aligned(16))) List* fcar(List* a)  { return objCopy(car(first(a))); }
 ///~Get all but the first element of a list
 ///&cdr
 ///#List
 ///@1list
 ///!1List
-__attribute__((aligned(16))) List* fcdr(List* a)  { return cdr(first(a)); }
+__attribute__((aligned(16))) List* fcdr(List* a)  { return objCopy(cdr(first(a))); }
 ///~Reverse a list structure
 ///&reverse
 ///#List
@@ -354,32 +354,8 @@ __attribute__((aligned(16))) List* freverse(List* a) {
 
 
 
-Vector* concatVec(Vector* v1, Vector* v2){
-	int size1 = v1->size;
-	int size2 = v2->size;
-	int tot = size1+size2;
-	Vector* vecObj = newVec(tot);
-	void** data1 = v1->data;
-	void** data2 = v2->data;
-	void** data = vecObj->data;
-
-	int i = 0;
-	while(i<size1){ data[i] = data1[i]; i++;}
-	while(i<tot){   data[i] = data2[i-size1]; i++;}
-	data[tot] = 0;
-	return vecObj;
-}
 
 
-List* concatList(List* l1, List* l2){
-	List* copy1 = listCopy(l1);
-	List* copy2;
-	if(is_vector(l2)){copy2 = vecToList((Vector*)untag_vector(l2));
-	}else{copy2 = listCopy(l2);}
-	List* lastCons = listGetLastCons(copy1);
-	consSetNext(lastCons, copy2);
-	return copy1;
-}
 
 
 ///~Concatenate two structures together
@@ -426,18 +402,9 @@ __attribute__((aligned(16))) List* fconcat(List* a) {
 		}
 		return (List*)tag_vector(newvec);
 
-	}else if(is_pair(v1)){
-		List* current = cdr(a);
-		List* result = current;
-		while(current){
-			result = concatList(v1, car(current));
-			current = cdr(current);
-		}
-
-		return result;
-
 	}else{
 		printf("Concat not yet implemented with type: %p", v1);
+		exit(1);
 		return 0;
 	}
 }
@@ -454,10 +421,10 @@ __attribute__((aligned(16))) List* ffirst(List* a){
 		int size = vec->size;
 		if(size>0){
 			void** data = vec->data;
-			return data[0];
+			return objCopy(data[0]);
 		}else{return 0;}
 	}else if(is_pair(seq)){
-		return first(first(a));
+		return objCopy(first(first(a)));
 	}else{
 		printf("first doesn't support this object.");fflush(stdout);
 		return 0;
@@ -476,7 +443,7 @@ __attribute__((aligned(16))) List* flast(List* a){
 		int size = vec->size;
 		if(size>0){
 			void** data = vec->data;
-			return data[size-1];
+			return objCopy(data[size-1]);
 		}else{ return 0;}
 	}else if (is_pair(seq)){
 		List* current = seq;
@@ -485,7 +452,7 @@ __attribute__((aligned(16))) List* flast(List* a){
 			last = car(current);
 			current = cdr(current);
 		}
-		return last;
+		return objCopy(last);
 
 	}else{
 		printf("last doesn't support this object.");fflush(stdout);
@@ -713,13 +680,14 @@ __attribute__((aligned(16))) List* fassoc(List* a){
 
 	if (is_vector(coll)){
 		Vector* old = (Vector*)untag_vector(coll);
-		Vector* new = copyVec(old);
+		Vector* new = (Vector*)untag_vector(objCopy(coll));
 
 		int size = old->size;
 		while(key_val){
 			int pos = (int)numVal(first(key_val));
 			if (pos<size){
 				void** data = new->data;
+				objFree(data[pos]);
 				data[pos] = objCopy(second(key_val));
 			}
 			key_val = cdr(cdr(key_val));
