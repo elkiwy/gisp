@@ -212,6 +212,10 @@ Vector* newVec(int _size){
 	Vector* _vec = malloc(sizeof(Vector));
 	_vec->data = calloc(_size + 1, sizeof(void*));
 	_vec->size = _size;
+	if(debugPrintAllocs){
+		printf("\e[31m+++ vector %p\n\e[39m", (void*)tag_vector(_vec));fflush(stdout);
+		debug_addAllocation((void*)tag_vector(_vec));
+	}
 	return (Vector*)_vec;
 }
 
@@ -375,6 +379,11 @@ void hashmapFree(List* hashmap){
 }
 
 void vectorFree(List* v){
+	if(debugPrintFrees){
+		printf("\e[31m--- Freeing vector : %p\n\e[39m", v);
+		debug_removeAllocation(v);
+	}
+
 	Vector* vec = (Vector*)untag_vector(v);
 	int s = vec->size;
 	void** data = vec->data;
