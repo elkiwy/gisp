@@ -158,7 +158,7 @@ void* searchInEnvironment(List* exp, Environment* env);
 
 // ------------------------------------------------------------------
 //Define what is true and what is false
-#define e_true     cons( intern("quote"), cons( intern("t"), 0))
+#define e_true     intern("true")
 #define e_false    0
 
 
