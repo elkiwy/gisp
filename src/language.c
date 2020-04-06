@@ -316,7 +316,7 @@ __attribute__((aligned(16))) List* frand(List* a){
 ///!1Atom
 ///@2b
 ///!2Atom
-__attribute__((aligned(16))) List* fcons(List* a) { return cons(first(a), second(a)); }
+__attribute__((aligned(16))) List* fcons(List* a) { return cons(objCopy(first(a)), objCopy(second(a))); }
 ///~Create a list structure
 ///&list
 ///#List
@@ -324,19 +324,19 @@ __attribute__((aligned(16))) List* fcons(List* a) { return cons(first(a), second
 ///!1Any
 ///@2...
 ///!2Any
-__attribute__((aligned(16))) List* flist(List* a) { return a;}
+__attribute__((aligned(16))) List* flist(List* a) {return objCopy(a);}
 ///~Get the first element of a list
 ///&car
 ///#Any
 ///@1list
 ///!1List
-__attribute__((aligned(16))) List* fcar(List* a)  { return car(first(a)); }
+__attribute__((aligned(16))) List* fcar(List* a)  { return objCopy(car(first(a))); }
 ///~Get all but the first element of a list
 ///&cdr
 ///#List
 ///@1list
 ///!1List
-__attribute__((aligned(16))) List* fcdr(List* a)  { return cdr(first(a)); }
+__attribute__((aligned(16))) List* fcdr(List* a)  { return objCopy(cdr(first(a))); }
 ///~Reverse a list structure
 ///&reverse
 ///#List
@@ -346,7 +346,7 @@ __attribute__((aligned(16))) List* freverse(List* a) {
 	List* ret = 0;
 	List* l = first(a);
 	while(l){
-		ret = cons(car(l), ret);
+		ret = cons(objCopy(car(l)), ret);
 		l = cdr(l);
 	}
 	return ret;	
@@ -354,32 +354,8 @@ __attribute__((aligned(16))) List* freverse(List* a) {
 
 
 
-Vector* concatVec(Vector* v1, Vector* v2){
-	int size1 = v1->size;
-	int size2 = v2->size;
-	int tot = size1+size2;
-	Vector* vecObj = newVec(tot);
-	void** data1 = v1->data;
-	void** data2 = v2->data;
-	void** data = vecObj->data;
-
-	int i = 0;
-	while(i<size1){ data[i] = data1[i]; i++;}
-	while(i<tot){   data[i] = data2[i-size1]; i++;}
-	data[tot] = 0;
-	return vecObj;
-}
 
 
-List* concatList(List* l1, List* l2){
-	List* copy1 = listCopy(l1);
-	List* copy2;
-	if(is_vector(l2)){copy2 = vecToList((Vector*)untag_vector(l2));
-	}else{copy2 = listCopy(l2);}
-	List* lastCons = listGetLastCons(copy1);
-	consSetNext(lastCons, copy2);
-	return copy1;
-}
 
 
 ///~Concatenate two structures together
@@ -391,28 +367,52 @@ List* concatList(List* l1, List* l2){
 ///!2List/Vector
 __attribute__((aligned(16))) List* fconcat(List* a) {
 	List* v1 = first(a);
-	if(is_vector(v1)){
-		Vector* untagged_result = (Vector*)untag_vector(v1);
-		List* current = cdr(a);
+	if(second(a)==0){return objCopy(v1);}
+	
+	if(is_string(v1)){
+		char* s1 = (char*)untag_string(v1);
+		char* s2 = (char*)untag_string(second(a));
+		int size = strlen(s1)+strlen(s2)+1;
+		char* new = newStringFromSize(size);
+		strcpy(new, s1);
+		strcat(new, s2);
+		return (List*)tag_string(new);
+
+	}else if(is_vector(v1)){
+		//Get the total size of the new vector to create
+		List* current = a;
+		int newSize = 0;
 		while(current){
 			Vector* untagged_item = (Vector*)untag_vector(car(current));
-			untagged_result = concatVec(untagged_result, untagged_item);
+			newSize += untagged_item->size;
 			current = cdr(current);
 		}
-		return (List*)tag_vector(untagged_result);
+
+		//Fill all the data
+		Vector* newvec = newVec(newSize);
+		void** newdata = newvec->data;
+		current = a;
+		int index = 0;
+		while(current){
+			Vector* untagged_item = (Vector*)untag_vector(car(current));
+			void** olddata = untagged_item->data;
+			for(int i=0; i<untagged_item->size; ++i){
+				newdata[index] = objCopy(olddata[i]);
+				index++;
+			}
+			current=cdr(current);
+		}
+		return (List*)tag_vector(newvec);
 
 	}else if(is_pair(v1)){
-		List* current = cdr(a);
-		List* result = current;
-		while(current){
-			result = concatList(v1, car(current));
-			current = cdr(current);
-		}
-
-		return result;
+		List* ret = objCopy(v1);
+		List* last = listGetLastCons(ret);
+		consSetNext(last, objCopy(second(a)));
+		return ret;
 
 	}else{
 		printf("Concat not yet implemented with type: %p", v1);
+		exit(1);
 		return 0;
 	}
 }
@@ -429,10 +429,10 @@ __attribute__((aligned(16))) List* ffirst(List* a){
 		int size = vec->size;
 		if(size>0){
 			void** data = vec->data;
-			return data[0];
+			return objCopy(data[0]);
 		}else{return 0;}
 	}else if(is_pair(seq)){
-		return first(first(a));
+		return objCopy(first(first(a)));
 	}else{
 		printf("first doesn't support this object.");fflush(stdout);
 		return 0;
@@ -451,7 +451,7 @@ __attribute__((aligned(16))) List* flast(List* a){
 		int size = vec->size;
 		if(size>0){
 			void** data = vec->data;
-			return data[size-1];
+			return objCopy(data[size-1]);
 		}else{ return 0;}
 	}else if (is_pair(seq)){
 		List* current = seq;
@@ -460,7 +460,7 @@ __attribute__((aligned(16))) List* flast(List* a){
 			last = car(current);
 			current = cdr(current);
 		}
-		return last;
+		return objCopy(last);
 
 	}else{
 		printf("last doesn't support this object.");fflush(stdout);
@@ -507,6 +507,33 @@ __attribute__((aligned(16))) List* fatom(List* a) { return is_atom(first(a))    
 ///@1a
 ///!1Any
 __attribute__((aligned(16))) List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
+///~Checks if the first argument is an empty collection
+///&empty?
+///#Bool
+///@1a
+///!1Any
+__attribute__((aligned(16))) List* fempty(List* a) {
+	List* coll = first(a);
+	
+	if(is_string(coll)){
+		char* s = (char*)untag_string(coll);
+		return strlen(s)==0 ? e_true : e_false;
+	}else if(is_hashmap(coll)){
+		map_t map = (map_t)untag_hashmap(coll);
+		return hashmap_length(map)==0 ? e_true : e_false;
+	}else if(is_vector(coll)){
+		Vector* vec = (Vector*)untag_vector(coll);
+		return vec->size == 0 ? e_true : e_false;
+	}else if(is_pair(coll)){
+		return (car(coll)==0 && cdr(coll)==0) ? e_true : e_false;
+	}else if(coll==0){
+		return e_true;
+	}else{
+		printf("empty? doesn't currently support object %p.\n", coll);
+		exit(1);
+		return 0;
+	}
+}
 
 
 
@@ -520,17 +547,34 @@ __attribute__((aligned(16))) List* fnull(List* a) { return first(a) == 0        
 ///@2...
 ///!2Any
 __attribute__((aligned(16))) List* fstr(List* a) {
-	char* str1 = (char*)first(a);
-	char* str2 = (char*)second(a);
-	str1 = trim_quotes(str1);
-	str2 = trim_quotes(str2);
+	//Get all the strings
+	char* strings[100];
+	int stringsCount = 0;
+	int totalSize = 0;
+	List* tmp = a;
+	while(tmp){
+		List* obj = car(tmp);
+		char* objStr = objToString(obj, 1);
+		if(objStr[0]=='"'){objStr = trim_quotes(objStr);}
+		strings[stringsCount] = objStr;
+		stringsCount++;
+		totalSize += strlen(objStr);
+		tmp = cdr(tmp);
+	}
 
-	char* str_res;
-	str_res = malloc(strlen(str1)+strlen(str2)+1); 
-	strcpy(str_res, str1); 
-	strcat(str_res, str2); 
+	//Join all the stirngs
+	char* final = newStringFromSize(totalSize);
+	strcpy(final, strings[0]);
+	for(int i=1;i<stringsCount;++i){
+		strcat(final, strings[i]);
+	}
 
-	return (List*)str_res;
+	for(int i=0;i<stringsCount;++i){
+		free(strings[i]);
+	}
+
+	List* ret = (List*)tag_string(final);
+	return ret;
 }
 
 
@@ -571,8 +615,8 @@ __attribute__((aligned(16))) List* fhashmap(List* a){
 	map_t map = newHashmap();
 	List* current = a;
 	while(current){
-		char* key = first(current);
-		List* val = second(current);
+		char* key = strdup(first(current));
+		List* val = objCopy(second(current));
 		hashmap_put(map, key, val);
 		current = cdr(cdr(current));
 	}
@@ -599,7 +643,7 @@ __attribute__((aligned(16))) List* fget(List* a){
 		char* key = (char*)second(a);
 		List* value = 0;
 		hashmap_get(map, key, (any_t)&value);
-		return value;
+		return objCopy(value);
 	//Vector
 	}else if (is_vector(seq)){
 		Vector* vec = (Vector*)untag_vector(seq);
@@ -609,7 +653,7 @@ __attribute__((aligned(16))) List* fget(List* a){
 			return 0;
 		}else{
 			void** data = vec->data;
-			return data[pos];
+			return objCopy(data[pos]);
 		}
 	//List
 	}else if (is_pair(seq)){
@@ -624,12 +668,119 @@ __attribute__((aligned(16))) List* fget(List* a){
 				data = cdr(data);
 				i++;
 			}
-			return car(data);
+			return objCopy(car(data));
 		}
 	}else{
 		return 0;
 	}
 }
+
+/// (take n start coll)
+///~Take n elements from a collection coll starting from start
+///&take
+///#List/Vector
+///@1n
+///!1Number
+///@2start
+///!2Number
+///@3coll
+///!3List/Vector
+__attribute__((aligned(16))) List* ftake(List* a){
+	List* coll = third(a);
+	int n = (int)numVal(first(a)); 
+	int start = (int)numVal(second(a)); 
+
+	if(is_vector(coll)){
+		Vector* vec = (Vector*)untag_vector(coll);
+		void** data = vec->data;
+		int size = vec->size;
+
+		Vector* new = newVec(n);
+		void** newdata = new->data;
+		for (int i=0; i<n; ++i) {
+			if(i+start >= size){
+				newdata[i] = 0;
+			}else{
+				newdata[i] = objCopy(data[i+start]);
+			}
+		}
+
+		return (List*)tag_vector(new);
+
+	}else if(is_pair(coll)){
+		List* ret = 0;
+		List** tmp = &ret;
+
+		List* current = coll;
+		int index = 0;
+		while(current){
+			if(index>=start && index<start+n){
+				*tmp = cons(objCopy(first(current)), 0);
+				tmp = &((List*)untag(*tmp))->next;
+			}
+			index++;
+			current = cdr(current);
+		}
+		return ret;
+
+	}else{
+		printf("Take doesn't support currenct collection %p.\n", coll);
+		exit(1);
+		return 0;
+	}
+}
+
+/// (drop n coll)
+///~Drop n elements from a collection coll
+///&take
+///#List/Vector
+///@1n
+///!1Number
+///@2coll
+///!2List/Vector
+__attribute__((aligned(16))) List* fdrop(List* a){
+	List* coll = second(a);
+	int n = (int)numVal(first(a)); 
+
+	if(is_vector(coll)){
+		Vector* vec = (Vector*)untag_vector(coll);
+		void** data = vec->data;
+		int size = vec->size;
+
+		Vector* new = newVec(size - n);
+		void** newdata = new->data;
+		for (int i=n; i<size; ++i) {
+			newdata[i-n] = objCopy(data[i]);
+		}
+
+		return (List*)tag_vector(new);
+
+	}else if(is_pair(coll)){
+		List* ret = 0;
+		List** tmp = &ret;
+
+		List* current = coll;
+		int index = 0;
+		while(current){
+			if(index>=n){
+				*tmp = cons(objCopy(first(current)), 0);
+				tmp = &((List*)untag(*tmp))->next;
+			}
+			index++;
+			current = cdr(current);
+		}
+		return ret;
+
+	}else{
+		printf("Take doesn't support currenct collection %p.\n", coll);
+		exit(1);
+		return 0;
+	}
+}
+
+
+
+
 
 
 /// (count vec)
@@ -671,14 +822,15 @@ __attribute__((aligned(16))) List* fassoc(List* a){
 
 	if (is_vector(coll)){
 		Vector* old = (Vector*)untag_vector(coll);
-		Vector* new = copyVec(old);
+		Vector* new = (Vector*)untag_vector(objCopy(coll));
 
 		int size = old->size;
 		while(key_val){
 			int pos = (int)numVal(first(key_val));
 			if (pos<size){
 				void** data = new->data;
-				data[pos] = second(key_val);
+				objFree(data[pos]);
+				data[pos] = objCopy(second(key_val));
 			}
 			key_val = cdr(cdr(key_val));
 		}
@@ -707,7 +859,7 @@ __attribute__((aligned(16))) List* fassoc(List* a){
 __attribute__((aligned(16))) List* fsvg_surface(List* a){
 	float w = numVal(second(a));
 	float h = numVal(third(a));
-	char* filename = trim_quotes(first(a));
+	char* filename = (char*)untag_string(first(a));
 
 	char fullPath[4096];
 	strcpy(fullPath, gispWorkingDir);
@@ -796,7 +948,7 @@ __attribute__((aligned(16))) List* fsvg_line(List* a){
 ///!2string
 __attribute__((aligned(16))) List* fsvg_to_png(List* a){
 	cairo_surface_t* surface = first(a);
-	char* filename = trim_quotes(second(a));
+	char* filename = (char*)untag_string(second(a));//trim_quotes(second(a));
 	char fullPath[4096];
 	strcpy(fullPath, gispWorkingDir);
 	strcat(fullPath, filename);
