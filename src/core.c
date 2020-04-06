@@ -259,7 +259,7 @@ List* vecToList(Vector* vec){
 	void** data = vec->data;
 	List* l = 0;
 	for(int i=size-1; i>=0; i--){
-		l = cons(data[i], l);
+		l = cons(objCopy(data[i]), l);
 	}
 	return l;
 }
