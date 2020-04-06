@@ -392,14 +392,30 @@ List* concatList(List* l1, List* l2){
 __attribute__((aligned(16))) List* fconcat(List* a) {
 	List* v1 = first(a);
 	if(is_vector(v1)){
-		Vector* untagged_result = (Vector*)untag_vector(v1);
-		List* current = cdr(a);
+		//Get the total size of the new vector to create
+		List* current = a;
+		int newSize = 0;
 		while(current){
 			Vector* untagged_item = (Vector*)untag_vector(car(current));
-			untagged_result = concatVec(untagged_result, untagged_item);
+			newSize += untagged_item->size;
 			current = cdr(current);
 		}
-		return (List*)tag_vector(untagged_result);
+
+		//Fill all the data
+		Vector* newvec = newVec(newSize);
+		void** newdata = newvec->data;
+		current = a;
+		int index = 0;
+		while(current){
+			Vector* untagged_item = (Vector*)untag_vector(car(current));
+			void** olddata = untagged_item->data;
+			for(int i=0; i<untagged_item->size; ++i){
+				newdata[index] = objCopy(olddata[i]);
+				index++;
+			}
+			current=cdr(current);
+		}
+		return (List*)tag_vector(newvec);
 
 	}else if(is_pair(v1)){
 		List* current = cdr(a);
@@ -678,7 +694,7 @@ __attribute__((aligned(16))) List* fassoc(List* a){
 			int pos = (int)numVal(first(key_val));
 			if (pos<size){
 				void** data = new->data;
-				data[pos] = second(key_val);
+				data[pos] = objCopy(second(key_val));
 			}
 			key_val = cdr(cdr(key_val));
 		}
