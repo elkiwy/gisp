@@ -695,6 +695,54 @@ __attribute__((aligned(16))) List* ftake(List* a){
 	}
 }
 
+/// (drop n coll)
+///~Drop n elements from a collection coll
+///&take
+///#List/Vector
+///@1n
+///!1Number
+///@2coll
+///!2List/Vector
+__attribute__((aligned(16))) List* fdrop(List* a){
+	List* coll = second(a);
+	int n = (int)numVal(first(a)); 
+
+	if(is_vector(coll)){
+		Vector* vec = (Vector*)untag_vector(coll);
+		void** data = vec->data;
+		int size = vec->size;
+
+		Vector* new = newVec(size - n);
+		void** newdata = new->data;
+		for (int i=n; i<size; ++i) {
+			newdata[i-n] = objCopy(data[i]);
+		}
+
+		return (List*)tag_vector(new);
+
+	}else if(is_pair(coll)){
+		List* ret = 0;
+		List** tmp = &ret;
+
+		List* current = coll;
+		int index = 0;
+		while(current){
+			if(index>=n){
+				*tmp = cons(objCopy(first(current)), 0);
+				tmp = &((List*)untag(*tmp))->next;
+			}
+			index++;
+			current = cdr(current);
+		}
+		return ret;
+
+	}else{
+		printf("Take doesn't support currenct collection %p.\n", coll);
+		exit(1);
+		return 0;
+	}
+}
+
 
 
 

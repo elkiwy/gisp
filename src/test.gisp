@@ -89,5 +89,11 @@
 ;(write "coso")
 ;(str "ciao")
 
-(str "test:" (map (lambda (i) (* 2 i)) [1 2 3 4]))
+;(str "test:" (map (lambda (i) (* 2 i)) [1 2 3 4]))
 
+
+;(write (take 6 2 [1 2 3 4 5]))
+;(write (take 6 2 (list 1 2 3 4 5)))
+
+(write (drop 2 [1 2 3 4 5]))
+(write (drop 2 (list 1 2 3 4 5)))

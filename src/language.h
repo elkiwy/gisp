@@ -88,6 +88,7 @@ List* ffirst(List* a);
 List* flast(List* a);
 List* fget(List* a);
 List* ftake(List* a);
+List* fdrop(List* a);
 
 // -----------------------------------------
 //Sequences - Manipulations

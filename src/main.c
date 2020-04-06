@@ -808,6 +808,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("car",     (void*)fcar, global_env);
 	extendEnv("get",     (void*)fget, global_env);
 	extendEnv("take",    (void*)ftake, global_env);
+	extendEnv("drop",    (void*)fdrop, global_env);
 
 	//Intern all the macro strings
 	INTERN_quote	= intern("quote");
