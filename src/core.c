@@ -464,12 +464,14 @@ void consFree(List* c){
 void hashmapFree(List* hashmap){
 	map_t m = (map_t)untag_hashmap(hashmap);
 	int size = hashmap_length(m);
-	char* keys[size];
-	void* data[size];
-	hashmap_keys_and_values(m, keys, data);
-	for (int i=0; i<size; ++i){
-		free(keys[i]);
-		objFree(data[i]);	
+	if(size>0){
+		char* keys[size];
+		void* data[size];
+		hashmap_keys_and_values(m, keys, data);
+		for (int i=0; i<size; ++i){
+			free(keys[i]);
+			objFree(data[i]);	
+		}
 	}
 	hashmap_free(m);
 }
