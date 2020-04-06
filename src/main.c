@@ -803,6 +803,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("symbol?", (void*)fatom, global_env);
 	extendEnv("pair?",   (void*)fpair, global_env);
 	extendEnv("eq?",     (void*)feq, global_env);
+	extendEnv("empty?",  (void*)fempty, global_env);
 	extendEnv("cons",    (void*)fcons, global_env);
 	extendEnv("cdr",     (void*)fcdr, global_env);
 	extendEnv("car",     (void*)fcar, global_env);

@@ -507,6 +507,33 @@ __attribute__((aligned(16))) List* fatom(List* a) { return is_atom(first(a))    
 ///@1a
 ///!1Any
 __attribute__((aligned(16))) List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
+///~Checks if the first argument is an empty collection
+///&empty?
+///#Bool
+///@1a
+///!1Any
+__attribute__((aligned(16))) List* fempty(List* a) {
+	List* coll = first(a);
+	
+	if(is_string(coll)){
+		char* s = (char*)untag_string(coll);
+		return strlen(s)==0 ? e_true : e_false;
+	}else if(is_hashmap(coll)){
+		map_t map = (map_t)untag_hashmap(coll);
+		return hashmap_length(map)==0 ? e_true : e_false;
+	}else if(is_vector(coll)){
+		Vector* vec = (Vector*)untag_vector(coll);
+		return vec->size == 0 ? e_true : e_false;
+	}else if(is_pair(coll)){
+		return (car(coll)==0 && cdr(coll)==0) ? e_true : e_false;
+	}else if(coll==0){
+		return e_true;
+	}else{
+		printf("empty? doesn't currently support object %p.\n", coll);
+		exit(1);
+		return 0;
+	}
+}
 
 
 

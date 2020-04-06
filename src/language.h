@@ -117,6 +117,7 @@ List* fgreaterThan(List* a);
 List* fpair(List* a);
 List* fatom(List* a);
 List* fnull(List* a);
+List* fempty(List* a);
 
 
 
