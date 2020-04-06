@@ -599,7 +599,7 @@ __attribute__((aligned(16))) List* fget(List* a){
 		char* key = (char*)second(a);
 		List* value = 0;
 		hashmap_get(map, key, (any_t)&value);
-		return value;
+		return objCopy(value);
 	//Vector
 	}else if (is_vector(seq)){
 		Vector* vec = (Vector*)untag_vector(seq);
@@ -609,7 +609,7 @@ __attribute__((aligned(16))) List* fget(List* a){
 			return 0;
 		}else{
 			void** data = vec->data;
-			return data[pos];
+			return objCopy(data[pos]);
 		}
 	//List
 	}else if (is_pair(seq)){
@@ -624,7 +624,7 @@ __attribute__((aligned(16))) List* fget(List* a){
 				data = cdr(data);
 				i++;
 			}
-			return car(data);
+			return objCopy(car(data));
 		}
 	}else{
 		return 0;
