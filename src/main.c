@@ -238,7 +238,11 @@ List* eval(List* exp, Environment* env) {
 		if (symbolValue != 0) return symbolValue;
 		
 		//Check if it's a string
-		if (*((char*)exp) == '"'){return exp;}
+		if (*((char*)exp) == '"'){
+			char* str = newStringFromText((char*)exp);
+			return (List*)tag_string(str);
+			//return exp;
+		}
 
 		//Check if it's a keyword
 		if (*((char*)exp) == ':'){return exp;}
