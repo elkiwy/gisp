@@ -286,9 +286,11 @@ double numVal(List* tagged_number){
 // ------------------------------------------------------------------
 //String utilities
 char* trim_quotes(char* s){
-	if (s[0] == '"'){s++;}
-	if (s[strlen(s)-1] == '"'){
-		s[strlen(s)-1] = '\0';
+	if (s[0] == '"'){
+		for(uint i=0;i<strlen(s)-2;++i){
+			s[i] = s[i+1];
+		}
+		s[strlen(s)-2] = '\0';
 	}
 	return s;
 }
