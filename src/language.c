@@ -717,7 +717,7 @@ __attribute__((aligned(16))) List* fassoc(List* a){
 __attribute__((aligned(16))) List* fsvg_surface(List* a){
 	float w = numVal(second(a));
 	float h = numVal(third(a));
-	char* filename = trim_quotes(first(a));
+	char* filename = (char*)untag_string(first(a));
 
 	char fullPath[4096];
 	strcpy(fullPath, gispWorkingDir);
@@ -806,7 +806,7 @@ __attribute__((aligned(16))) List* fsvg_line(List* a){
 ///!2string
 __attribute__((aligned(16))) List* fsvg_to_png(List* a){
 	cairo_surface_t* surface = first(a);
-	char* filename = trim_quotes(second(a));
+	char* filename = (char*)untag_string(second(a));//trim_quotes(second(a));
 	char fullPath[4096];
 	strcpy(fullPath, gispWorkingDir);
 	strcat(fullPath, filename);
