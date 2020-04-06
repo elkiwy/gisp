@@ -114,7 +114,6 @@ void consSetData(List* l, void* _data);
 List* objCopy(List* obj);
 List* numberCopy(List* num);
 List* listCopy(List* l);
-Vector* copyVec(Vector* v);
 List* hashmapCopy(List* hashmap);
 List* vectorCopy(List* v);
 List* stringCopy(List* s);
