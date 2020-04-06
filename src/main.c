@@ -787,6 +787,8 @@ int main(int argc, char* argv[]) {
 	extendEnv("range",   (void*)frange, global_env);
 	extendEnv("reverse", (void*)freverse, global_env);
 	extendEnv("concat",  (void*)fconcat, global_env);
+	extendEnv("append",  (void*)fappend, global_env);
+	extendEnv("insert",  (void*)finsert, global_env);
 	extendEnv("first",   (void*)ffirst, global_env);
 	extendEnv("last",    (void*)flast, global_env);
 	extendEnv("make-surface",   (void*)fsvg_surface, global_env);

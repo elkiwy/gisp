@@ -94,6 +94,8 @@ List* fdrop(List* a);
 //Sequences - Manipulations
 List* freverse(List* a);
 List* fconcat(List* a);
+List* fappend(List* a);
+List* finsert(List* a);
 List* fassoc(List* a);
 
 // -----------------------------------------

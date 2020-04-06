@@ -417,6 +417,85 @@ __attribute__((aligned(16))) List* fconcat(List* a) {
 	}
 }
 
+///~Appends an item at the end of an existing collection
+///&append
+///#List/Vector
+///@1a
+///!1List/Vector
+///@2b
+///!2Any
+__attribute__((aligned(16))) List* fappend(List* a) {
+	List* v1 = first(a);
+	if(v1==0){return cons(objCopy(second(a)), 0);}
+	if(second(a)==0){return objCopy(v1);}
+	
+	if(is_vector(v1)){
+		Vector* vec = (Vector*)untag_vector(v1);
+		void** data = vec->data;
+		int size = vec->size;
+
+		Vector* newvec = newVec(size+1);
+		void** newdata = newvec->data;
+		for(int i=0;i<size;++i){
+			newdata[i] = objCopy(data[i]);
+		}
+		newdata[size] = objCopy(second(a));
+		return (List*)tag_vector(newvec);
+
+	}else if(is_pair(v1)){
+		List* ret = objCopy(v1);
+		List* prevlast = listGetLastCons(ret);
+		List* newlast = cons(objCopy(second(a)),0);
+		consSetNext(prevlast, newlast);
+		return ret;
+
+	}else{
+		printf("Concat not yet implemented with type: %p", v1);
+		exit(1);
+		return 0;
+	}
+}
+
+
+///~Insert an item at the front of an existing collection 
+///&insert
+///#List/Vector
+///@1a
+///!1List/Vector
+///@2b
+///!2Any
+__attribute__((aligned(16))) List* finsert(List* a) {
+	List* v1 = first(a);
+	if(v1==0){return cons(objCopy(second(a)), 0);}
+	if(second(a)==0){return objCopy(v1);}
+	
+	if(is_vector(v1)){
+		Vector* vec = (Vector*)untag_vector(v1);
+		void** data = vec->data;
+		int size = vec->size;
+
+		Vector* newvec = newVec(size+1);
+		void** newdata = newvec->data;
+		for(int i=0;i<size;++i){
+			newdata[i+1] = objCopy(data[i]);
+		}
+		newdata[0] = objCopy(second(a));
+		return (List*)tag_vector(newvec);
+
+	}else if(is_pair(v1)){
+		List* ret = cons(objCopy(second(a)), objCopy(v1));
+		return ret;
+
+	}else{
+		printf("Concat not yet implemented with type: %p", v1);
+		exit(1);
+		return 0;
+	}
+}
+
+
+
+
 ///~Get the first element of a list
 ///&first
 ///#Any
