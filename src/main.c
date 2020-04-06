@@ -634,7 +634,10 @@ List* eval(List* exp, Environment* env) {
 		if(debugPrintInfo){printf("\e[95m%p : ", exp); debugPrintObj("\e[95mEvaluating lambda expression:" , exp); printf("\e[39m");fflush(stdout);}
 
 		//bind names into env and eval body
-		return apply_lambda(car(exp), cdr(exp), env);
+		List* ret = apply_lambda(car(exp), cdr(exp), env);
+		objFree(exp);
+		if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("lambda Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
+		return ret;
 	}
 
 
