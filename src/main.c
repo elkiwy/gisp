@@ -417,7 +417,7 @@ List* eval(List* exp, Environment* env) {
 			return ret;
 
 		/// (map function list)
-		}else if (first(exp) == INTERN_map){
+		}else if (first(exp) == INTERN_map || first(exp) == INTERN_mapv){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating map ", exp);}
 			List* ret = 0;
 
@@ -427,7 +427,13 @@ List* eval(List* exp, Environment* env) {
 			consSetData(cdr(cdr(exp)), 0);
 
 			//If I got a vector convert it into a list
-			if (is_vector(seq)){seq = vecToList((Vector*)untag_vector(seq));}
+			if (is_vector(seqFirst)){
+				Vector* vec = (Vector*)untag_vector(seqFirst);
+				List* list = vecToList(vec);
+				objFree((List*)seqFirst);
+				seqFirst = list;
+				seq = list;
+			}
 
 			List* function = eval(second(exp), env);
 			consSetData(cdr(exp), env);
@@ -443,7 +449,6 @@ List* eval(List* exp, Environment* env) {
 					ret = cons(r, ret);
 					seq = cdr(seq);
 				}
-
 			}else{
 				//Known function name
 				void* f = function;
@@ -457,43 +462,23 @@ List* eval(List* exp, Environment* env) {
 				}
 			}
 
-			objFree(function);
-			objFree(seqFirst);
-			objFree(exp);
 			List* reversed = cons(ret, 0);
 			List* correct = freverse(reversed);
 			objFree(reversed);
-			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mEvaluated to:" , correct); printf("\e[39m");fflush(stdout);}
-			return correct;
 
-		/// (mapv function list)
-		}else if (first(exp) == INTERN_mapv){
-			List* ret = 0;
-			List* l = eval(third(exp), env);
-
-			//If I got a vector convert it into a list
-			if (is_vector(l)){l = vecToList((Vector*)untag_vector(l));}
-
-			if (is_pair(second(exp))){
-				//Lambda
-				while (l){
-					List* r = apply_lambda(second(exp), cons(car(l), 0), env);
-					ret = cons(r, ret);
-					l = cdr(l);
-				}
-			}else{
-				//Known function name
-				void* f = eval(second(exp), env);
-				while (l){
-					List* r = ((List* (*) (List*))f)(cons(car(l), 0));
-					ret = cons(r, ret);
-					l = cdr(l);
-				}
+			//Convert into vector if necessary
+			if(first(exp) == INTERN_mapv){
+				Vector* untagged_vec = listToVec(correct);
+				objFree(correct);
+				correct = (List*)tag_vector(untagged_vec);
 			}
 
-			List* reversedList = freverse(cons(ret, 0)); 
-			Vector* untagged_vec = listToVec(reversedList);
-			return (List*)tag_vector(untagged_vec);
+			objFree(function);
+			objFree(seqFirst);
+			objFree(exp);
+
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mEvaluated to:" , correct); printf("\e[39m");fflush(stdout);}
+			return correct;
 
 		/// (doseq (bind seq) body)
 		}else if (first(exp) == INTERN_doseq){
