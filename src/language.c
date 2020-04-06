@@ -640,6 +640,65 @@ __attribute__((aligned(16))) List* fget(List* a){
 	}
 }
 
+/// (take n start coll)
+///~Take n elements from a collection coll starting from start
+///&take
+///#List/Vector
+///@1n
+///!1Number
+///@2start
+///!2Number
+///@3coll
+///!3List/Vector
+__attribute__((aligned(16))) List* ftake(List* a){
+	List* coll = third(a);
+	int n = (int)numVal(first(a)); 
+	int start = (int)numVal(second(a)); 
+
+	if(is_vector(coll)){
+		Vector* vec = (Vector*)untag_vector(coll);
+		void** data = vec->data;
+		int size = vec->size;
+
+		Vector* new = newVec(n);
+		void** newdata = new->data;
+		for (int i=0; i<n; ++i) {
+			if(i+start >= size){
+				newdata[i] = 0;
+			}else{
+				newdata[i] = objCopy(data[i+start]);
+			}
+		}
+
+		return (List*)tag_vector(new);
+
+	}else if(is_pair(coll)){
+		List* ret = 0;
+		List** tmp = &ret;
+
+		List* current = coll;
+		int index = 0;
+		while(current){
+			if(index>=start && index<start+n){
+				*tmp = cons(objCopy(first(current)), 0);
+				tmp = &((List*)untag(*tmp))->next;
+			}
+			index++;
+			current = cdr(current);
+		}
+		return ret;
+
+	}else{
+		printf("Take doesn't support currenct collection %p.\n", coll);
+		exit(1);
+		return 0;
+	}
+}
+
+
+
+
+
 
 /// (count vec)
 ///~Counts the elements of a structure m
