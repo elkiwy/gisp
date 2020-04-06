@@ -577,21 +577,14 @@ List* eval(List* exp, Environment* env) {
 			if (is_pair(primop)) { 
 				if(debugPrintInfo){printf("===>Evaluating lambda"); debugPrintObj(" ", exp); printf("====> %p ", primop);fflush(stdout); debugPrintObj("Primop ", primop);}
 
-				List* lambda = cons(primop, cdr(exp));
-				List* result = eval( lambda, env );
-				consFree(lambda);
+				List* lambda = cons(primop, objCopy(cdr(exp)));
+				List* result = eval(lambda, env); //Lambda and primop automatically cleared by eval
+
+				//objFree(lambda);
 				objFree(exp);
-
-				//Truncate primop body cons since already free in their eval
-				listFreeOnlyCons(cdr(cdr(primop)));
-				consSetNext(cdr(primop), 0);
-				//consSetData(cdr(primop), 0);
-
-				if(debugPrintInfo){debugPrintObj("Freeing primop after user defined function (defn): ", primop);}
-				objFree(primop);
-
-				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mEvaluated to:" , result); printf("\e[39m");fflush(stdout);}
+				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96muser defined function Evaluated to:" , result); printf("\e[39m");fflush(stdout);}
 				return result;
+
 			//Built-in primitive
 			} else if (primop) { 
 				if(debugPrintInfo){printf("====> %p", exp);fflush(stdout); debugPrintObj(" Evaluating ", exp);}
