@@ -245,6 +245,18 @@ void* searchInEnvironment(List* name, Environment* env){
 }
 
 
+// ------------------------------------------------------------------
+// String utilities
+char* newStringFromText(char* text){
+	if (text[0]=='"'){text=trim_quotes(text);}
+	char* ptr = strdup(text);
+	return ptr;
+}
+
+char* newStringFromSize(int n){
+	char* ptr = malloc(sizeof(char)*(n+1));
+	return ptr;
+}
 
 // ------------------------------------------------------------------
 //Number utilities
@@ -399,9 +411,14 @@ void debugPrintObj(char* pre, List* obj){
 
 
 void objFree(List* obj){
-	if(is_hashmap(obj)){
+	if(is_string(obj)){
+		if(debugPrintFrees){printf("\e[31m--- Freeing string: %p ", (void*)obj);fflush(stdout); print_obj(obj, 1); printf("\n\e[39m");fflush(stdout);}
+		stringFree(obj);
+
+	}else if(is_hashmap(obj)){
 		if(debugPrintFrees){printf("\e[31m--- Freeing hashmap: %p ", (void*)obj);fflush(stdout); print_obj(obj, 1); printf("\n\e[39m");fflush(stdout);}
 		hashmapFree(obj);
+
 	}else if (is_vector(obj)){
 		if(debugPrintFrees){printf("\e[31m--- Freeing vector: %p ", (void*)obj);fflush(stdout); print_obj(obj, 1); printf("\n\e[39m");fflush(stdout);}
 		vectorFree(obj);
@@ -414,6 +431,11 @@ void objFree(List* obj){
 		if(debugPrintFrees){printf("\e[31m--- Freeing cons: %p", (void*)obj);fflush(stdout); printf(" (next: %p)\n\e[39m", (void*)cdr(obj));fflush(stdout);}
 		listFree(obj);
 	}
+}
+
+void stringFree(List* string){
+	if(debugPrintFrees){debug_removeAllocation(string);}
+	free((char*)untag_string(string));	
 }
 
 void numberFree(List* number){
@@ -505,11 +527,18 @@ void environmentFree(Environment* env){
 
 List* objCopy(List* obj){
 	//printf("\e[35m--- Copying obj: %p\n\e[39m", obj);
+	if(is_string(obj)){return stringCopy(obj);}
 	if(is_hashmap(obj)){return hashmapCopy(obj);}
 	if(is_vector(obj)){return vectorCopy(obj);}
 	if(is_number(obj)){return numberCopy(obj);}
 	if(is_pair(obj)){return listCopy(obj);}
 	return obj;
+}
+
+List* stringCopy(List* s){
+	char* untagged = (char*)untag_string(s);
+	char* new = strdup(untagged);
+	return (List*)tag_string(new);
 }
 
 List* vectorCopy(List* v){

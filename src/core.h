@@ -55,11 +55,14 @@ typedef struct Vector {
 //Each cons shell is tagged with the lowest pointer bit set to 1, everything else is set to 0
 //Before accessing cons car and cdr we need to untag the pointer to read from memory correctly
 //This tecnique is used to tag numbers, vectors, and hashmaps too.
+#define is_string(x)     (((uintptr_t)x & 0x5) == 0x5)
 #define is_hashmap(x)    (((uintptr_t)x & 0x4) == 0x4)
 #define is_vector(x)     (((uintptr_t)x & 0x3) == 0x3)
 #define is_number(x)     (((uintptr_t)x & 0x2) == 0x2)
 #define is_pair(x)       (((uintptr_t)x & 0x2) != 0x2) && (((uintptr_t)x & 0x1) == 0x1)
 #define is_atom(x)       (((uintptr_t)x & 0x1) == 0x0)
+#define untag_string(x)  ((uintptr_t) x & ~0x5)
+#define tag_string(x)    ((uintptr_t) x | 0x5)
 #define untag_hashmap(x) ((uintptr_t) x & ~0x4)
 #define tag_hashmap(x)   ((uintptr_t) x | 0x4)
 #define untag_vector(x)  ((uintptr_t) x & ~0x3)
@@ -84,6 +87,7 @@ typedef struct Vector {
 void print_obj(List* ob, int head_of_list);
 int randInt(int min, int max);
 void debugPrintObj(char* pre, List* obj);
+char* objToString(List* ob, int head_of_list);
 
 // ------------------------------------------------------------------
 //String utilities
@@ -99,18 +103,24 @@ Vector* newVec(int size);
 Vector* listToVec(List* l);
 List* vecToList(Vector* vec);
 
-
+// ------------------------------------------------------------------
+//Cons utilities
 List* listGetLastCons(List* l);
 void consSetNext(List* l, List* _next);
 void consSetData(List* l, void* _data);
 
+// ------------------------------------------------------------------
+//Copy functions
 List* objCopy(List* obj);
 List* numberCopy(List* num);
 List* listCopy(List* l);
 Vector* copyVec(Vector* v);
 List* hashmapCopy(List* hashmap);
 List* vectorCopy(List* v);
+List* stringCopy(List* s);
 
+// ------------------------------------------------------------------
+//Free functions
 void consFree(List* c);
 void listFree(List* l);
 void listFreeOnlyCons(List* l);
@@ -119,7 +129,10 @@ void numberFree(List* number);
 void environmentFree(Environment* env);
 void hashmapFree(List* hashmap);
 void vectorFree(List* v);
+void stringFree(List* s);
 
+// ------------------------------------------------------------------
+//debug utility
 void debug_addAllocation(void* p);
 void debug_removeAllocation(void* p);
 void debug_printAllocations();
@@ -130,6 +143,11 @@ double* newNumber();
 double* symbol_to_number(char* sym);
 double* value_to_number(double value);
 double numVal(List* tagged_number);
+
+// ------------------------------------------------------------------
+//String utilites
+char* newStringFromText(char* t);
+char* newStringFromSize(int n);
 
 // ------------------------------------------------------------------
 //Lisp core functions
