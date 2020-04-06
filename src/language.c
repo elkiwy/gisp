@@ -367,6 +367,8 @@ __attribute__((aligned(16))) List* freverse(List* a) {
 ///!2List/Vector
 __attribute__((aligned(16))) List* fconcat(List* a) {
 	List* v1 = first(a);
+	if(second(a)==0){return objCopy(v1);}
+	
 	if(is_string(v1)){
 		char* s1 = (char*)untag_string(v1);
 		char* s2 = (char*)untag_string(second(a));
@@ -401,6 +403,12 @@ __attribute__((aligned(16))) List* fconcat(List* a) {
 			current=cdr(current);
 		}
 		return (List*)tag_vector(newvec);
+
+	}else if(is_pair(v1)){
+		List* ret = objCopy(v1);
+		List* last = listGetLastCons(ret);
+		consSetNext(last, objCopy(second(a)));
+		return ret;
 
 	}else{
 		printf("Concat not yet implemented with type: %p", v1);
