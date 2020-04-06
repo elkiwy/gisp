@@ -494,13 +494,15 @@ void environmentFree(Environment* env){
 	if(debugPrintFrees){printf("\e[31m--- Freeing environemtn : %p\n\e[39m", env);}
 	map_t m = env->hashData;
 	int size = hashmap_length(m);
-	char* keys[size];
-	void* data[size];
-	hashmap_keys_and_values(m, keys, data);
-	for (int i=0; i<size; ++i){
-		//printf("Freeing key %p size:%d\n", keys[i], size);
-		free(keys[i]);
-		objFree(data[i]);	
+	if(size>0){
+		char* keys[size];
+		void* data[size];
+		hashmap_keys_and_values(m, keys, data);
+		for (int i=0; i<size; ++i){
+			//printf("Freeing key %p size:%d\n", keys[i], size);
+			free(keys[i]);
+			objFree(data[i]);	
+		}
 	}
 	hashmap_free(m);
 	free(env);
