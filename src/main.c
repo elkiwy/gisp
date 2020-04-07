@@ -700,7 +700,7 @@ List* eval(List* exp, Environment* env) {
 			}
 		}
 	// ((lambda (params) body) args)
-	} else if (car(car(exp)) == INTERN_lambda) {
+	} else if (is_pair(car(exp)) && car(car(exp)) == INTERN_lambda) {
 		if(debugPrintInfo){printf("\e[95m%p : ", exp); debugPrintObj("\e[95mEvaluating lambda expression:" , exp); printf("\e[39m");fflush(stdout);}
 
 		//bind names into env and eval body
