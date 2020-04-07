@@ -796,6 +796,8 @@ int main(int argc, char* argv[]) {
 	extendEnv("=",       (void*)feq, global_env);
 	extendEnv("<",       (void*)flessThan, global_env);
 	extendEnv(">",       (void*)fgreaterThan, global_env);
+	extendEnv("<=",      (void*)flessOrEqThan, global_env);
+	extendEnv(">=",      (void*)fgreaterOrEqThan, global_env);
 	extendEnv("abs",     (void*)fabsval, global_env);
 	extendEnv("sin",     (void*)fsin, global_env);
 	extendEnv("cos",     (void*)fcos, global_env);

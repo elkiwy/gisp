@@ -239,6 +239,22 @@ __attribute__((aligned(16))) List* flessThan(List* a)    {return numVal(first(a)
 ///@2b
 ///!2Number
 __attribute__((aligned(16))) List* fgreaterThan(List* a) {return numVal(first(a)) > numVal(second(a)) ? e_true : e_false;}
+///~Compare to number
+///&<=
+///#Bool
+///@1a
+///!1Number
+///@2b
+///!2Number
+__attribute__((aligned(16))) List* flessOrEqThan(List* a) {return numVal(first(a)) <= numVal(second(a)) ? e_true : e_false;}
+///~Compare to number
+///&>=
+///#Bool
+///@1a
+///!1Number
+///@2b
+///!2Number
+__attribute__((aligned(16))) List* fgreaterOrEqThan(List* a) {return numVal(first(a)) >= numVal(second(a)) ? e_true : e_false;}
 
 
 ///~Create a range list with all the number between min (default 0 if omitted) and a max
