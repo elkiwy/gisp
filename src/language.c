@@ -1028,6 +1028,31 @@ __attribute__((aligned(16))) List* fsvg_line(List* a){
 	return 0;
 }
 
+// (circle context center radius)
+///~Draw a circle to a context
+///&circle
+///#void
+///@1c
+///!1Context
+///@2center
+///!2Point
+///@3radius
+///!3Number
+__attribute__((aligned(16))) List* fsvg_circle(List* a){
+	cairo_t* context = first(a);
+	map_t c = (map_t)untag_hashmap(second(a));
+	List *cx, *cy;
+	hashmap_get(c, ":x", (any_t)&cx);
+	hashmap_get(c, ":y", (any_t)&cy);
+	double r = numVal(third(a));
+	double x = numVal(cx);
+	double y = numVal(cy);
+	cairo_move_to(context, x+r, y);
+	cairo_arc(context, x, y, r, 0, M_PI*2);
+	cairo_stroke(context);
+	return 0;
+}
+
 
 
 ///~Export a surface to a png file

@@ -138,6 +138,7 @@ List* fsvg_status(List* a);
 List* fsvg_context(List* a);
 List* fsvg_clean(List* a);
 List* fsvg_line(List* a);
+List* fsvg_circle(List* a);
 List* fsvg_to_png(List* a);
 
 

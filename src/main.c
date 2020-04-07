@@ -820,6 +820,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("surface-status", (void*)fsvg_status, global_env);
 	extendEnv("surface-clean",  (void*)fsvg_clean, global_env);
 	extendEnv("draw-line",      (void*)fsvg_line, global_env);
+	extendEnv("draw-circle",    (void*)fsvg_circle, global_env);
 	extendEnv("surface-to-png", (void*)fsvg_to_png, global_env);
 	extendEnv("str",     (void*)fstr, global_env);
 	extendEnv("include", (void*)fincludefile, global_env);
