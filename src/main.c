@@ -708,6 +708,13 @@ List* eval(List* exp, Environment* env) {
 		objFree(exp);
 		if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("lambda Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 		return ret;
+
+	// Else should be just a normal list
+	} else if (is_pair(exp)){
+		List* ret = objCopy(exp);
+		objFree(exp);
+		if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("list Evaluated to itself:" , ret); printf("\e[39m");fflush(stdout);}
+		return ret;
 	}
 
 
