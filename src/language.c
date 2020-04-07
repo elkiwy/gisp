@@ -614,6 +614,14 @@ __attribute__((aligned(16))) List* fnotnull(List* a) { return first(a) == 0     
 ///@1a
 ///!1Any
 __attribute__((aligned(16))) List* fnot(List* a) { return first(a) == e_false    ? e_true : e_false; }
+///~Apply AND between two booleans
+///&and
+///#Bool
+///@1a
+///!1Boolean
+///@2b
+///!2Boolean
+__attribute__((aligned(16))) List* fand(List* a) { return (first(a) == e_true && second(a) == e_true) ? e_true : e_false; }
 ///~Checks if the first argument is an empty collection
 ///&empty?
 ///#Bool

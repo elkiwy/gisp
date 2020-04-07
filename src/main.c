@@ -831,6 +831,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("nil?",    (void*)fnull, global_env);
 	extendEnv("not-nil?",(void*)fnotnull, global_env);
 	extendEnv("not",     (void*)fnot, global_env);
+	extendEnv("and",     (void*)fand, global_env);
 	extendEnv("symbol?", (void*)fatom, global_env);
 	extendEnv("pair?",   (void*)fpair, global_env);
 	extendEnv("eq?",     (void*)feq, global_env);
