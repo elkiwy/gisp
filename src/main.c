@@ -56,6 +56,7 @@ void* INTERN_defn	= 0;
 void* INTERN_progn	= 0;
 void* INTERN_let	= 0;
 void* INTERN_reduce	= 0;
+void* INTERN_filter	= 0;
 void* INTERN_map	= 0;
 void* INTERN_mapv	= 0;
 void* INTERN_doseq	= 0;
@@ -514,6 +515,66 @@ List* eval(List* exp, Environment* env) {
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mmap Evaluated to:" , correct); printf("\e[39m");fflush(stdout);}
 			return correct;
 
+		/// (filter function list)
+		}else if (first(exp) == INTERN_filter){
+			if(debugPrintInfo){debugPrintObj("===>Evaluating filter ", exp);}
+			List* ret = 0;
+
+			//Get the sequence
+			List* seqFirst = eval(third(exp), env);
+			List* seq = seqFirst;
+			consSetData(cdr(cdr(exp)), 0);
+
+			//If I got a vector convert it into a list
+			if (is_vector(seqFirst)){
+				Vector* vec = (Vector*)untag_vector(seqFirst);
+				List* list = vecToList(vec);
+				objFree((List*)seqFirst);
+				seqFirst = list;
+				seq = list;
+			}
+
+			List* function = eval(second(exp), env);
+			consSetData(cdr(exp), env);
+			if (is_pair(function)){
+				//Lambda
+				List* lambda = function;
+				while (seq){
+					List* lambdaCopy = objCopy(lambda);
+					List* lambdaArg = cons(objCopy(car(seq)), 0);
+					List* r = apply_lambda(lambdaCopy, lambdaArg, env);
+					objFree(lambdaCopy);
+					objFree(lambdaArg);
+					if(r==e_true){
+						ret = cons(objCopy(car(seq)), ret);
+					}
+					seq = cdr(seq);
+				}
+			}else{
+				//Known function name
+				void* f = function;
+				if(f==NULL){printf("\nERROR: \"%s\" is not a valid function for map. Exiting.\n\n", (char*)second(exp));fflush(stdout);exit(1);}
+				while (seq){
+					List* functionArg = cons(objCopy(car(seq)), 0);
+					List* r = ((List* (*) (List*))f)(functionArg);
+					objFree(functionArg);
+					if(r==e_true){
+						ret = cons(objCopy(car(seq)), ret);
+					}
+					seq = cdr(seq);
+				}
+			}
+
+			List* reversed = cons(ret, 0);
+			List* correct = freverse(reversed);
+			objFree(reversed);
+			objFree(function);
+			objFree(seqFirst);
+			objFree(exp);
+
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mfilter Evaluated to:" , correct); printf("\e[39m");fflush(stdout);}
+			return correct;
+
 		/// (doseq (bind seq) body)
 		}else if (first(exp) == INTERN_doseq){
 			if(debugPrintInfo){debugPrintObj("===>Expanding doseq macro  ", exp);}
@@ -854,6 +915,7 @@ int main(int argc, char* argv[]) {
 	INTERN_progn	= intern("progn");
 	INTERN_let		= intern("let");
 	INTERN_reduce	= intern("reduce");
+	INTERN_filter	= intern("filter");
 	INTERN_map		= intern("map");
 	INTERN_mapv		= intern("mapv");
 	INTERN_doseq	= intern("doseq");
