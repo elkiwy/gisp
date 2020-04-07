@@ -38,12 +38,12 @@ char* objToString(List* ob, int head_of_list){
 		void** data = vec->data;
 		int size = vec->size;
 
-		target += sprintf(target, "[ ");
+		target += sprintf(target, "[");
 		for(int i = 0; i<size; i++){
 			char* str = objToString(data[i], 0);
 			target += sprintf(target, "%s", str);
 			free(str);
-			target += sprintf(target, " ");
+			if(i<size-1){target += sprintf(target, " ");}
 		}
 		target += sprintf(target, "]");
 
