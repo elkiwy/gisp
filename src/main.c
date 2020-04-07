@@ -48,6 +48,7 @@ void* allocations[1024*1024];
 //Intern costant symbols
 void* INTERN_quote	= 0;
 void* INTERN_if		= 0;
+void* INTERN_cond	= 0;
 void* INTERN_lambda	= 0;
 void* INTERN_apply	= 0;
 void* INTERN_def	= 0;
@@ -284,6 +285,29 @@ List* eval(List* exp, Environment* env) {
 			objFree(condition);
 			objFree(exp);
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mIf macro Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
+			return ret;
+
+		// (cond (cond1) (body1) ...)
+		} else if (first(exp) == INTERN_cond) {
+			List* ret = 0;
+			int done = 0;
+			List* condToEval = cdr(exp);
+			while(done==0 && condToEval){
+				List* condition = eval(car(condToEval), env);
+				consSetData(condToEval, 0);
+
+				if (condition != 0){
+					List* expToEval = cdr(condToEval);
+					ret = eval(car(expToEval), env);
+					consSetData(expToEval, 0);
+					done = 1;
+				}else{
+					condToEval = cdr(cdr(condToEval));
+				}
+			}
+
+			objFree(exp);
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mcond macro Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 			return ret;
 
 		// (lambda (params) body)
@@ -816,6 +840,7 @@ int main(int argc, char* argv[]) {
 	//Intern all the macro strings
 	INTERN_quote	= intern("quote");
 	INTERN_if		= intern("if");
+	INTERN_cond		= intern("cond");
 	INTERN_lambda	= intern("lambda");
 	INTERN_apply	= intern("apply");
 	INTERN_def		= intern("def");
