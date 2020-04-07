@@ -172,6 +172,18 @@ __attribute__((aligned(16))) List* fpow(List* a)   {return (List*)value_to_numbe
 ///@2div
 ///!2Number
 __attribute__((aligned(16))) List* fmodulo(List* a){return (List*)value_to_number((int)numVal(first(a)) % (int)numVal(second(a)));}
+///~Get the sign of a number
+///&sign
+///#Number
+///@1n
+///!1Number
+__attribute__((aligned(16))) List* fsign(List* a){
+	double n = numVal(first(a));
+	if (n>0){return (List*)value_to_number(1);}
+	if (n<0){return (List*)value_to_number(-1);}
+	if (n==0){return (List*)value_to_number(0);}
+	return 0;
+}
 ///~Calculate the square root of a number
 ///&sqrt
 ///#Number

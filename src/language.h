@@ -57,6 +57,7 @@ List* fceil(List* a);
 //Math - Advanced operations
 List* fpow(List* a);
 List* fmodulo(List* a);
+List* fsign(List* a);
 List* fsqrt(List* a);
 List* flog(List* a);
 List* flog10(List* a);

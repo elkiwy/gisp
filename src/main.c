@@ -847,6 +847,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("-",       (void*)fsub, global_env);
 	extendEnv("bit-and", (void*)fbitAnd, global_env);
 	extendEnv("mod",     (void*)fmodulo, global_env);
+	extendEnv("sign",    (void*)fsign, global_env);
 	extendEnv("pow",     (void*)fpow, global_env);
 	extendEnv("sqrt",    (void*)fsqrt, global_env);
 	extendEnv("log",     (void*)flog, global_env);
