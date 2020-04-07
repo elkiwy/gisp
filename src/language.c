@@ -126,23 +126,15 @@ __attribute__((aligned(16))) List* fceil(List* a)  {return (List*)value_to_numbe
 ///@2...
 ///!2Numbers
 __attribute__((aligned(16))) List* fminNum(List* a)  {
-	List* arg = car(a);
-
-	if(is_pair(arg)){
-		List* l = arg;
-		double n1 = numVal(first(l));
-		double min = n1;
-		while(l){
-			n1 = numVal(first(l));
-			if(n1 < min){min = n1;}
-			l = cdr(l);
-		}
-		return (List*)value_to_number(min);
-
-	}else if(is_vector(arg)){
-		//TODO
+	double min = numVal(first(a));
+	List* current = cdr(a);
+	while(current){
+		double val = numVal(car(current));
+		if (val<min){min = val;}
+		current=cdr(current);
 	}
-	return 0;
+
+	return (List*)value_to_number(min);
 }
 
 ///~Get the maximum value of all the arguments
@@ -153,23 +145,14 @@ __attribute__((aligned(16))) List* fminNum(List* a)  {
 ///@2...
 ///!2Numbers
 __attribute__((aligned(16))) List* fmaxNum(List* a)  {
-	List* arg = car(a);
-
-	if(is_pair(arg)){
-		List* l = arg;
-		double n1 = numVal(first(l));
-		double max = n1;
-		while(l){
-			n1 = numVal(first(l));
-			if(n1 > max){max = n1;}
-			l = cdr(l);
-		}
-		return (List*)value_to_number(max);
-
-	}else if(is_vector(arg)){
-		//TODO
+	double max = numVal(first(a));
+	List* current = cdr(a);
+	while(current){
+		double val = numVal(car(current));
+		if (val>max){max = val;}
+		current=cdr(current);
 	}
-	return 0;
+	return (List*)value_to_number(max);
 }
 
 
