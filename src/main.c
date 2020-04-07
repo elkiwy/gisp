@@ -174,16 +174,17 @@ List* eval(List* exp, Environment* env);
 List* apply_lambda(List* lambda, List* args, Environment* env){
 	if(debugPrintInfo){printf("===>Applying lambda ");fflush(stdout); print_obj(lambda, 1);fflush(stdout); printf(" with args ");fflush(stdout); print_obj(args, 1);fflush(stdout); printf(" \n");fflush(stdout);}
 
-
 	//bind names into env and eval body
 	Environment* innerEnv = makeEnvironment(env);
 	if(debugPrintInfo){printf("===>binding names\n ");fflush(stdout);}
 	List *names = second(lambda), *vars = args;
 	for (  ; names ; names = cdr(names), vars = cdr(vars) ){
 		char* sym = car(names);
+		if(debugPrintInfo){printf("==> binding %s to value %s\n", sym, objToString(car(vars), 1));fflush(stdout);}
 		List* val = eval(car(vars), innerEnv);
 		consSetData(vars, 0);
 		extendEnv(sym, val, innerEnv);
+		if(debugPrintInfo){printf("==> binded %s to value %s\n", sym, objToString(val, 1));fflush(stdout);}
 		objFree(val);
 	}
 
