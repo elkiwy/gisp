@@ -79,6 +79,20 @@
 ;((lambda (i) (+ i 1)) 3)
 
 
+;;Test cond
+;(def testcond 4)
+;(cond 
+;	(= testcond 1)
+;		(write "uno!")
+;	(= testcond 2)
+;		(write "due!")
+;	(= testcond 3)
+;		(write "tre!")
+;	:else
+;		(write "else!"))
+
+
+
 
 
 
@@ -109,10 +123,18 @@
 ;(write (empty? ""))
 
 
-(defn partition (n step coll)
-    (if (< (count coll) n)
-        nil
-        (concat (take n 0 coll) (partition n step (drop step coll)))))
-    
-(write (partition 2 1 [1 2 3 4 5 6 7 8]))
-(write (partition 2 1 (list 1 2 3 4 5 6 7 8)))
+;(write (append [1 2 3] 4))
+;(write (append (list 1 2 3) 4))
+;(write (insert [1 2 3] 4))
+;(write (insert (list 1 2 3) 4))
+;
+;(defn partition (n step coll)
+;    (if (< (count coll) n)
+;        nil
+;        (insert (partition n step (drop step coll)) (take n 0 coll) )))
+;    
+;(write (partition 2 1 [1 2 3 4 5 6 7 8]))
+;(write (partition 2 1 (list 1 2 3 4 5 6 7 8)))
+
+
+
