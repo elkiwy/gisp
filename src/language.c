@@ -597,19 +597,19 @@ __attribute__((aligned(16))) List* fpair(List* a) { return is_pair(first(a))    
 ///!1Any
 __attribute__((aligned(16))) List* fatom(List* a) { return is_atom(first(a))     ? e_true : e_false; }
 ///~Checks if the first argument is null
-///&null?
+///&nil?
 ///#Bool
 ///@1a
 ///!1Any
 __attribute__((aligned(16))) List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
 ///~Checks if the first argument is not null
-///&null?
+///&not-nil?
 ///#Bool
 ///@1a
 ///!1Any
 __attribute__((aligned(16))) List* fnotnull(List* a) { return first(a) == 0         ? e_false : e_true; }
 ///~Invert a boolean value
-///&null?
+///&not
 ///#Bool
 ///@1a
 ///!1Any
