@@ -61,6 +61,7 @@ void* INTERN_map	= 0;
 void* INTERN_mapv	= 0;
 void* INTERN_doseq	= 0;
 void* INTERN_profile= 0;
+void* INTERN_nil    = 0;
 
 //Input parsing methods
 int is_space(char x)  {
@@ -219,8 +220,8 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 List* eval(List* exp, Environment* env) {
 	//printf("Eval %p in %p\n", (void*)exp, (void*)env);fflush(stdout);
 	//If is a tagged hashmap...
-	if (is_hashmap(exp)){
-		return exp;	
+	if (exp == INTERN_nil){
+		return e_false;	
 
 	//If is a tagged vector...
 	}else if (is_vector(exp)){
@@ -928,6 +929,7 @@ int main(int argc, char* argv[]) {
 	INTERN_mapv		= intern("mapv");
 	INTERN_doseq	= intern("doseq");
 	INTERN_profile	= intern("profile");
+	INTERN_nil		= intern("nil");
 	printf("\n");
 	
 
