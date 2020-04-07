@@ -825,7 +825,9 @@ int main(int argc, char* argv[]) {
 	extendEnv("include", (void*)fincludefile, global_env);
 	extendEnv("read",    (void*)freadobj, global_env);
 	extendEnv("write",   (void*)fwriteobj, global_env);
-	extendEnv("null?",   (void*)fnull, global_env);
+	extendEnv("nil?",    (void*)fnull, global_env);
+	extendEnv("not-nil?",(void*)fnotnull, global_env);
+	extendEnv("not",     (void*)fnot, global_env);
 	extendEnv("symbol?", (void*)fatom, global_env);
 	extendEnv("pair?",   (void*)fpair, global_env);
 	extendEnv("eq?",     (void*)feq, global_env);

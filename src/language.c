@@ -586,6 +586,18 @@ __attribute__((aligned(16))) List* fatom(List* a) { return is_atom(first(a))    
 ///@1a
 ///!1Any
 __attribute__((aligned(16))) List* fnull(List* a) { return first(a) == 0         ? e_true : e_false; }
+///~Checks if the first argument is not null
+///&null?
+///#Bool
+///@1a
+///!1Any
+__attribute__((aligned(16))) List* fnotnull(List* a) { return first(a) == 0         ? e_false : e_true; }
+///~Invert a boolean value
+///&null?
+///#Bool
+///@1a
+///!1Any
+__attribute__((aligned(16))) List* fnot(List* a) { return first(a) == e_false    ? e_true : e_false; }
 ///~Checks if the first argument is an empty collection
 ///&empty?
 ///#Bool

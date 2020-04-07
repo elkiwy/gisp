@@ -113,12 +113,14 @@ List* fhashmap(List* a);
 List* feq(List* a);
 List* flessThan(List* a);
 List* fgreaterThan(List* a);
+List* fnot(List* a);
 
 // -----------------------------------------
 //Conditions - Type checking
 List* fpair(List* a);
 List* fatom(List* a);
 List* fnull(List* a);
+List* fnotnull(List* a);
 List* fempty(List* a);
 
 
