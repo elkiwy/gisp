@@ -517,7 +517,7 @@ void environmentFree(Environment* env){
 
 
 List* objCopy(List* obj){
-	//printf("\e[35m--- Copying obj: %p\n\e[39m", obj);
+	if(debugPrintCopy){char* str = objToString(obj, 1); printf("\e[35m--- Copying obj: %p value: %s\n\e[39m", obj, str); free(str);}
 	if(is_string(obj)){return stringCopy(obj);}
 	if(is_hashmap(obj)){return hashmapCopy(obj);}
 	if(is_vector(obj)){return vectorCopy(obj);}
