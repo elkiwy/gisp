@@ -224,6 +224,14 @@ List* eval(List* exp, Environment* env) {
 	if (exp == INTERN_nil){
 		return e_false;	
 
+	//If is a tagged string...
+	}else if (is_string(exp)){
+		return exp;	
+
+	//If is a tagged hasmap...
+	}else if (is_hashmap(exp)){
+		return exp;	
+
 	//If is a tagged vector...
 	}else if (is_vector(exp)){
 		return exp;	
