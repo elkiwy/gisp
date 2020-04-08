@@ -29,7 +29,7 @@
 ;;;#Number
 ;;;!1Point
 ;;;!2Point
-(defn point-Angle (a b)
+(defn point-angle (a b)
     (atan2 (- (- (:y b) (:y a))) (- (:x b) (:x a))))
 	
 ;;;~Creates a new intermediate point between two Points pos is a floating number between 0 and 1 that defines. The distance between the two points. 0 returns point a,1 returns point b, 0.5 returns the middle point between a and b, etc...
