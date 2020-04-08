@@ -44,6 +44,9 @@ double environmentCounter_searchTimeSum = 0;
 double environmentCounter_searchTimeSum_hash = 0;
 void* allocations[1024*1024];
 
+//Helper for sort function
+List* sort_function = 0;
+Environment* sort_environment = 0;
 
 //Intern costant symbols
 void* INTERN_quote	= 0;
@@ -57,6 +60,7 @@ void* INTERN_progn	= 0;
 void* INTERN_let	= 0;
 void* INTERN_reduce	= 0;
 void* INTERN_filter	= 0;
+void* INTERN_sort	= 0;
 void* INTERN_map	= 0;
 void* INTERN_mapv	= 0;
 void* INTERN_doseq	= 0;
@@ -202,6 +206,26 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 	environmentFree(innerEnv);
 	return result;
 }
+
+
+int sortComparison_lambda(const void* elem1, const void* elem2) {
+	printf("elem1: %p\n", elem1);fflush(stdout);
+	printf("elem2: %p\n", elem2);fflush(stdout);
+    List* a = *((List**)elem1);
+    List* b = *((List**)elem2);
+	debugPrintObj("a:", a);
+	debugPrintObj("b:", b);
+
+	List* lambda = objCopy(sort_function);
+	List* args = cons(objCopy(a), cons(objCopy(b), 0));
+	List* r = apply_lambda(lambda, args, sort_environment);
+	objFree(lambda); objFree(args);
+	if(r == e_true){objFree(r); return -1;
+	}else if(r == e_false){objFree(r); return 1;
+	}else{objFree(r); return 0;}
+}
+
+
 
 //Eval functions
 //List* evlist(List* list, Environment* env) {
@@ -585,6 +609,44 @@ List* eval(List* exp, Environment* env) {
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mfilter Evaluated to:" , correct); printf("\e[39m");fflush(stdout);}
 			return correct;
 
+
+
+		/// (sort function list)
+		}else if (first(exp) == INTERN_sort){
+			if(debugPrintInfo){debugPrintObj("===>Evaluating sort ", exp);}
+			List* ret = 0;
+
+			//Get the sequence
+			List* seq = eval(third(exp), env);
+			consSetData(cdr(cdr(exp)), 0);
+			if (is_pair(seq)){
+				Vector* vecSeq = listToVec(seq);
+				objFree(seq);
+				seq = (List*)tag_vector(vecSeq);
+			}
+
+			List* function = eval(second(exp), env);
+			consSetData(cdr(exp), env);
+			if (is_pair(function)){
+				//Lambda
+				sort_function = function;
+				List* newSeq = objCopy(seq);
+				Vector* vecCopy = (Vector*)untag_vector(newSeq);
+				void** data = vecCopy->data;
+				sort_environment = env;
+				qsort(data, vecCopy->size, sizeof(List*), sortComparison_lambda);
+				ret = (List*)tag_vector(vecCopy);
+			}
+
+			objFree(function);
+			objFree(seq);
+			objFree(exp);
+
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96msort Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
+			return ret;
+
+
+
 		/// (doseq (bind seq) body)
 		}else if (first(exp) == INTERN_doseq){
 			if(debugPrintInfo){debugPrintObj("===>Expanding doseq macro  ", exp);}
@@ -934,6 +996,7 @@ int main(int argc, char* argv[]) {
 	INTERN_let		= intern("let");
 	INTERN_reduce	= intern("reduce");
 	INTERN_filter	= intern("filter");
+	INTERN_sort		= intern("sort");
 	INTERN_map		= intern("map");
 	INTERN_mapv		= intern("mapv");
 	INTERN_doseq	= intern("doseq");
