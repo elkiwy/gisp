@@ -378,7 +378,7 @@ __attribute__((aligned(16))) List* freverse(List* a) {
 ///!2List/Vector
 __attribute__((aligned(16))) List* fconcat(List* a) {
 	List* v1 = first(a);
-	if(second(a)==0){return objCopy(v1);}
+	if(second(a)==0 || second(a)==e_false){return objCopy(v1);}
 	
 	if(is_string(v1)){
 		char* s1 = (char*)untag_string(v1);
@@ -437,8 +437,8 @@ __attribute__((aligned(16))) List* fconcat(List* a) {
 ///!2Any
 __attribute__((aligned(16))) List* fappend(List* a) {
 	List* v1 = first(a);
-	if(v1==0){return cons(objCopy(second(a)), 0);}
-	if(second(a)==0){return objCopy(v1);}
+	if(v1==0 || v1==e_false){return cons(objCopy(second(a)), 0);}
+	if(second(a)==0 || second(a)==e_false){return objCopy(v1);}
 	
 	if(is_vector(v1)){
 		Vector* vec = (Vector*)untag_vector(v1);
@@ -461,7 +461,7 @@ __attribute__((aligned(16))) List* fappend(List* a) {
 		return ret;
 
 	}else{
-		printf("Concat not yet implemented with type: %p", v1);
+		printf("Append not yet implemented with type: %p", v1);
 		exit(1);
 		return 0;
 	}
@@ -477,8 +477,8 @@ __attribute__((aligned(16))) List* fappend(List* a) {
 ///!2Any
 __attribute__((aligned(16))) List* finsert(List* a) {
 	List* v1 = first(a);
-	if(v1==0){return cons(objCopy(second(a)), 0);}
-	if(second(a)==0){return objCopy(v1);}
+	if(v1==0 || v1==e_false){return cons(objCopy(second(a)), 0);}
+	if(second(a)==0 || second(a)==e_false){return objCopy(v1);}
 	
 	if(is_vector(v1)){
 		Vector* vec = (Vector*)untag_vector(v1);
@@ -498,7 +498,7 @@ __attribute__((aligned(16))) List* finsert(List* a) {
 		return ret;
 
 	}else{
-		printf("Concat not yet implemented with type: %p", v1);
+		printf("Insert not yet implemented with type: %p", v1);
 		exit(1);
 		return 0;
 	}
@@ -682,6 +682,7 @@ __attribute__((aligned(16))) List* fstr(List* a) {
 	for(int i=0;i<stringsCount;++i){
 		free(strings[i]);
 	}
+
 
 	List* ret = (List*)tag_string(final);
 	return ret;
