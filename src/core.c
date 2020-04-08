@@ -247,8 +247,8 @@ void* searchInEnvironment(List* name, Environment* env){
 // ------------------------------------------------------------------
 // String utilities
 char* newStringFromText(char* text){
-	if (text[0]=='"'){text=trim_quotes(text);}
 	char* ptr = strdup(text);
+	if (ptr[0]=='"'){ptr=trim_quotes(ptr);}
 	return ptr;
 }
 
