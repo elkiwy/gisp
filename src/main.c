@@ -278,7 +278,7 @@ List* eval(List* exp, Environment* env) {
 			List* condition = eval(second(exp), env);
 			consSetData(cdr(exp), 0);
 			List* ret;
-			if (condition != 0){
+			if (condition != e_false){
 				ret = eval(third(exp), env);
 				consSetData(cdr(cdr(exp)), 0);
 			}else{
@@ -299,7 +299,7 @@ List* eval(List* exp, Environment* env) {
 				List* condition = eval(car(condToEval), env);
 				consSetData(condToEval, 0);
 
-				if (condition != 0){
+				if (condition != e_false){
 					List* expToEval = cdr(condToEval);
 					ret = eval(car(expToEval), env);
 					consSetData(expToEval, 0);
