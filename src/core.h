@@ -9,7 +9,7 @@
 
 #include "hashmap.h"
 
-#define SYMBOL_MAX  32
+#define SYMBOL_MAX  128
 
 extern int debugPrintInfo;
 extern int debugPrintFrees;
