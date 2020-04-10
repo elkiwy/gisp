@@ -84,7 +84,7 @@ char* objToString(List* ob, int head_of_list){
 void print_obj(List* ob, int head_of_list) {
 	//printf("\e[100m%p\e[49m", ob);fflush(stdout);
 	char* str = objToString(ob, head_of_list);
-	printf("%s\n", str);
+	printf("%s", str);
 	free(str);
 	//if(is_string(ob)){
 	//	char* untagged = (char*)untag_string(ob);
