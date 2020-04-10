@@ -126,23 +126,37 @@
                   x (/ B (- slope1 slope2)))
                 (point x (+ (* slope2 (- x (:x a2))) (:y a2)))))))
 
+
+
+
+
+;;;~Checks if a point is on a line
+;;;#Boolean
+;;;!1Point
+;;;!2Line
+(defn point-on-line? (point line)
+	(let (ac (point-distance point (:a line))
+		  bc (point-distance point (:b line))
+		  ab (point-distance (:a line) (:b line))
+		  diff (abs (- (+ ac bc) ab)))
+		(< diff 0.00001)))
+		
+
+
 ;;;~Get the intersection point between two lines, returns nil if l1 and l2 doesn't intersects.
 ;;;#Point
 ;;;!1Line
 ;;;!2Line
 (defn segment-intersection (l1 l2)
     (let (crossing (line-intersection l1 l2))
-        (if (nil? crossing)
-            nil
-            (let (minx-l1 (min (:x (:a l1)) (:x (:b l1)))
-                  maxx-l1 (max (:x (:a l1)) (:x (:b l1)))
-                  in-x-l1 (and (<= minx-l1 (:x crossing)) (<= (:x crossing) maxx-l1))
-                  miny-l1 (min (:y (:a l1)) (:y (:b l1)))
-                  maxy-l1 (max (:y (:a l1)) (:y (:b l1)))
-                  in-y-l1 (and (<= miny-l1 (:y crossing)) (<= (:y crossing) maxy-l1))   )
-                (if (and in-x-l1 in-y-l1)
-                    crossing
-                    nil)))))
+		(cond
+			(nil? crossing)
+				nil
+			(and (point-on-line? crossing l1) (point-on-line? crossing l2))
+				crossing
+			:else 
+				nil)))
+
     
 ;;;~Get the position of a point to a line. Returns 1, -1 or 0.
 ;;;#Number
