@@ -74,6 +74,9 @@ typedef struct Vector {
 #define car(x)           (((List*)untag(x))->data)
 #define cdr(x)           (((List*)untag(x))->next)
 
+#define notNil(x)        (x!=e_nil && x!=0)
+#define nil(x)           (x==e_nil || x==0)
+
 // ------------------------------------------------------------------
 //Handy list shortcuts
 #define first(x)   car(x)
@@ -160,6 +163,7 @@ void* searchInEnvironment(List* exp, Environment* env);
 //Define what is true and what is false
 #define e_true     intern("true")
 #define e_false    intern("nil")
+#define e_nil      intern("nil")
 
 
 #endif

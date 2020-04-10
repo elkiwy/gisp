@@ -64,7 +64,7 @@ char* objToString(List* ob, int head_of_list){
 		char* str = objToString(car(ob), 1);
 		target += sprintf(target, "%s", str);
 		free(str);
-		if (cdr(ob) != 0) {
+		if (notNil(cdr(ob))) {
 			target += sprintf(target, " ");
 			char* str2 = objToString(cdr(ob), 0);
 			target += sprintf(target, "%s", str2); //Change to 1 to enable the cons cells view
@@ -279,6 +279,7 @@ double* value_to_number(double value){
 	*ptr = value;
 	return (double*)tag_number(ptr);}
 double numVal(List* tagged_number){
+	if(nil(tagged_number)){return 0;}
 	return *((double*)untag_number(tagged_number));
 }
 
@@ -323,14 +324,14 @@ Vector* listToVec(List* l){
 	//Count elements
 	int n = 0;
 	List* items = l;
-	while(items){n++; items = cdr(items);}
+	while(notNil(items)){n++; items = cdr(items);}
 
 	//Create the vector
 	Vector* vec = newVec(n);
 	void** data = vec->data;
 	List* current = l;
 	int i = 0;
-	while(current){
+	while(notNil(current)){
 		data[i] = objCopy(first(current));
 		current = cdr(current);
 		i++;
@@ -343,7 +344,7 @@ Vector* listToVec(List* l){
 List* vecToList(Vector* vec){
 	int size = vec->size;
 	void** data = vec->data;
-	List* l = 0;
+	List* l = e_nil;
 	for(int i=size-1; i>=0; i--){
 		l = cons(objCopy(data[i]), l);
 	}
@@ -356,7 +357,7 @@ List* vecToList(Vector* vec){
 
 List* listGetLastCons(List* l){
 	List* current = l;
-	while(cdr(current)){
+	while(notNil(cdr(current))){
 		current = cdr(current);
 	}
 	return current;
@@ -432,7 +433,7 @@ void numberFree(List* number){
 
 void listFree(List* l){
 	//If this cons has a cdr free that first
-	if(cdr(l)){objFree(cdr(l));}//else{printf("!!Stopping\n");fflush(stdout);}
+	if(notNil(cdr(l))){objFree(cdr(l));}//else{printf("!!Stopping\n");fflush(stdout);}
 
 	//Free this cons data
 	void* data = (void*)car(l);
@@ -445,8 +446,8 @@ void listFree(List* l){
 }
 
 void listFreeOnlyCons(List* l){
-	if(l==NULL)return;
-	if(cdr(l)){listFreeOnlyCons(cdr(l));}
+	if(nil(l))return;
+	if(notNil(cdr(l))){listFreeOnlyCons(cdr(l));}
 	consFree(l);
 }
 
@@ -518,6 +519,7 @@ void environmentFree(Environment* env){
 
 List* objCopy(List* obj){
 	if(debugPrintCopy){char* str = objToString(obj, 1); printf("\e[35m--- Copying obj: %p value: %s\n\e[39m", obj, str); free(str);}
+	if(obj==e_nil || obj==e_false || obj==e_true){ return obj;}
 	if(is_string(obj)){return stringCopy(obj);}
 	if(is_hashmap(obj)){return hashmapCopy(obj);}
 	if(is_vector(obj)){return vectorCopy(obj);}
@@ -579,15 +581,15 @@ List* numberCopy(List* num){
 
 
 List* listCopyOnlyCons(List* l){
-	if(l==NULL){return 0;}
+	if(nil(l)){return e_nil;}
 	List* current = l;
-	List* newFirst = cons(0,0);
+	List* newFirst = cons(e_nil, e_nil);
 	List* last = newFirst;
-	while(current){
+	while(notNil(current)){
 		//Copy current data and create a new next
 		List* untagged = (List*)untag(last);
 		untagged->data = car(current);
-		if(cdr(current)){untagged->next = cons(0, 0);}
+		if(notNil(cdr(current))){untagged->next = cons(e_nil, e_nil);}
 
 		//Save current last one and iterate
 		last = cdr(last);
@@ -601,15 +603,18 @@ List* listCopyOnlyCons(List* l){
 
 
 List* listCopy(List* l){
-	if(l==NULL){return 0;}
+	//printf("copy list %p\n", l);fflush(stdout);
+
+	if(nil(l)){return e_nil;}
 	List* current = l;
-	List* newFirst = cons(0,0);
+	List* newFirst = cons(e_nil,e_nil);
 	List* last = newFirst;
-	while(current){
+	while(notNil(current)){
 		//Copy current data and create a new next
 		List* untagged = (List*)untag(last);
+		//printf("current %p\n", current);fflush(stdout);
 		untagged->data = objCopy(car(current));
-		if(cdr(current)){untagged->next = cons(0, 0);}
+		if(notNil(cdr(current))){untagged->next = cons(e_nil, e_nil);}
 
 		if(debugPrintCopy){printf("+++ listCopy %p", last); printf(" (%p ", car(last)); printf(". %p) ", cdr(last)); debugPrintObj("", last);}
 
@@ -617,7 +622,9 @@ List* listCopy(List* l){
 		last = cdr(last);
 		current = cdr(current);
 	}
-	if(debugPrintCopy){printf("\e[35m===> Copied list %p", newFirst); debugPrintObj(" : ", newFirst); List* c = newFirst; while(c){printf("%p, ", c);c=cdr(c);} printf("\n\e[39m");}
+	if(debugPrintCopy){printf("\e[35m===> Copied list %p", newFirst); debugPrintObj(" : ", newFirst); List* c = newFirst; while(notNil(c)){printf("%p, ", c);c=cdr(c);} printf("\n\e[39m");}
+
+	//printf("done copy %p %p\n", current, newFirst);fflush(stdout);
 	return newFirst;
 }
 

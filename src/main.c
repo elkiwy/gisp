@@ -149,7 +149,7 @@ void* getobj() {
 		}
 		look = read_char();
 		List* expr = getlist();
-		List* lamda = cons(intern("lambda"), cons(cons(intern("%"), 0), cons(expr, 0)));
+		List* lamda = cons(intern("lambda"), cons(cons(intern("%"), e_nil), cons(expr, e_nil)));
 		return lamda;
 	}
 	//Else just return the symbol
@@ -158,7 +158,7 @@ List* getlist() {
 	//Get next token
 	gettoken();
 	//Check If i'm done with this list
-	if (token[0] == ')' || token[0] == ']' || token[0] == '}') return 0;
+	if (token[0] == ')' || token[0] == ']' || token[0] == '}') return e_nil;
 	//If I'm not done get the full object from the current token and concatenate it to the rest of the list	
 	List* tmp = getobj();
 	return cons(tmp, getlist());
@@ -182,11 +182,12 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 	Environment* innerEnv = makeEnvironment(env);
 	if(debugPrintInfo){printf("===>binding names\n ");fflush(stdout);}
 	List *names = second(lambda), *vars = args;
-	for (  ; names ; names = cdr(names), vars = cdr(vars) ){
+	for (  ; notNil(names) ; names = cdr(names), vars = cdr(vars) ){
+		if(nil(names) || nil(vars)){break;}
 		char* sym = car(names);
 		if(debugPrintInfo){char* s = objToString(car(vars), 1); printf("==> binding %s to value %s\n", sym, s);free(s);fflush(stdout);}
 		List* val = eval(car(vars), innerEnv);
-		consSetData(vars, 0);
+		consSetData(vars, e_nil);
 		extendEnv(sym, val, innerEnv);
 		if(debugPrintInfo){char* s = objToString(val, 1);printf("==> binded %s to value %s\n", sym, s);free(s);fflush(stdout);}
 		objFree(val);
@@ -195,11 +196,11 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 	//Eval every body sexp in an implicit progn
 	if(debugPrintInfo){printf("===>evaluating lambda in own environemnt\n ");fflush(stdout);}
 	List *sexp = cdr(cdr(lambda)), *result = 0;	
-	while (sexp){
+	while (notNil(sexp)){
 		if(debugPrintInfo){debugPrintObj("   Evaluating lambda sexp : ", car(sexp));}
-		if (result){objFree(result);}
+		if (notNil(result)){objFree(result);}
 		result = eval(car(sexp), innerEnv);
-		consSetData(sexp, 0);
+		consSetData(sexp, e_nil);
 		sexp = cdr(sexp);
 	}
 
@@ -209,15 +210,10 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 
 
 int sortComparison_lambda(const void* elem1, const void* elem2) {
-	printf("elem1: %p\n", elem1);fflush(stdout);
-	printf("elem2: %p\n", elem2);fflush(stdout);
     List* a = *((List**)elem1);
     List* b = *((List**)elem2);
-	debugPrintObj("a:", a);
-	debugPrintObj("b:", b);
-
 	List* lambda = objCopy(sort_function);
-	List* args = cons(objCopy(a), cons(objCopy(b), 0));
+	List* args = cons(objCopy(a), cons(objCopy(b), e_nil));
 	List* r = apply_lambda(lambda, args, sort_environment);
 	objFree(lambda); objFree(args);
 	if(r == e_true){objFree(r); return -1;
@@ -245,8 +241,8 @@ int sortComparison_lambda(const void* elem1, const void* elem2) {
 List* eval(List* exp, Environment* env) {
 	//printf("Eval %p in %p\n", (void*)exp, (void*)env);fflush(stdout);
 	//If is a tagged hashmap...
-	if (exp == INTERN_nil){
-		return e_false;	
+	if (nil(exp) || exp==INTERN_nil){
+		return e_nil;	
 
 	//If is a tagged string...
 	}else if (is_string(exp)){
@@ -293,7 +289,7 @@ List* eval(List* exp, Environment* env) {
 		}
 
 		//Else return it as an atom
-		return 0;
+		return e_nil;
 	//Else if is a list with the first atom being an atom
 	//(At this point we should be sure that the exp is a list)
 	} else if (is_atom(first(exp))) { 
@@ -308,14 +304,14 @@ List* eval(List* exp, Environment* env) {
 		// (if (cond) (success) (fail))
 		} else if (first(exp) == INTERN_if) {
 			List* condition = eval(second(exp), env);
-			consSetData(cdr(exp), 0);
+			consSetData(cdr(exp), e_nil);
 			List* ret;
 			if (condition != e_false){
 				ret = eval(third(exp), env);
-				consSetData(cdr(cdr(exp)), 0);
+				consSetData(cdr(cdr(exp)), e_nil);
 			}else{
 				ret = eval(fourth(exp), env);
-				consSetData(cdr(cdr(cdr(exp))), 0);
+				consSetData(cdr(cdr(cdr(exp))), e_nil);
 			}
 			objFree(condition);
 			objFree(exp);
@@ -324,17 +320,17 @@ List* eval(List* exp, Environment* env) {
 
 		// (cond (cond1) (body1) ...)
 		} else if (first(exp) == INTERN_cond) {
-			List* ret = 0;
+			List* ret = e_nil;
 			int done = 0;
 			List* condToEval = cdr(exp);
-			while(done==0 && condToEval){
+			while(done==0 && notNil(condToEval)){
 				List* condition = eval(car(condToEval), env);
-				consSetData(condToEval, 0);
+				consSetData(condToEval, e_nil);
 
 				if (condition != e_false){
 					List* expToEval = cdr(condToEval);
 					ret = eval(car(expToEval), env);
-					consSetData(expToEval, 0);
+					consSetData(expToEval, e_nil);
 					done = 1;
 				}else{
 					condToEval = cdr(cdr(condToEval));
@@ -371,11 +367,11 @@ List* eval(List* exp, Environment* env) {
 			extendEnv(sym, val, env);
 			//printf("== Done Defining %s ", sym); print_obj(val, 1); printf("\n"); fflush(stdout);
 			consFree(cdr(cdr(exp)));
-			consSetNext(cdr(exp), 0);
+			consSetNext(cdr(exp), e_nil);
 			objFree(exp);
 			objFree(val);
-			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("def Evaluated to:" , 0); printf("\e[39m");fflush(stdout);}
-			return 0;
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("def Evaluated to:" , e_nil); printf("\e[39m");fflush(stdout);}
+			return e_nil;
 
 		// (defn symbol (params) sexp)
 		}else if (first(exp) == INTERN_defn){
@@ -394,17 +390,17 @@ List* eval(List* exp, Environment* env) {
 			consFree(cdr(lambda));
 			consFree(lambda);
 			objFree(exp);
-			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("defn Evaluated to:" , 0); printf("\e[39m");fflush(stdout);}
-			return 0;
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("defn Evaluated to:" , e_nil); printf("\e[39m");fflush(stdout);}
+			return e_nil;
 
 		// (progn exp1 exp2 ...)
 		}else if (first(exp) == INTERN_progn){
 			List* sexp = cdr(exp);
-			List* ret = 0;	
-			while (sexp){
-				if(ret){objFree(ret);}
+			List* ret = e_nil;	
+			while (notNil(sexp)){
+				if(notNil(ret)){objFree(ret);}
 				ret = eval(first(sexp), env);
-				consSetData(sexp, 0);
+				consSetData(sexp, e_nil);
 				sexp = cdr(sexp);
 			}
 			objFree(exp);
@@ -416,10 +412,10 @@ List* eval(List* exp, Environment* env) {
 			//Bind all the values
 			Environment* innerEnv = makeEnvironment(env);
 			List *bindings = second(exp);
-			while(bindings){
+			while(notNil(bindings)){
 				char* sym = first(bindings);
 				List* val = eval(second(bindings), innerEnv);
-				consSetData(cdr(bindings), 0);
+				consSetData(cdr(bindings), e_nil);
 				extendEnv(sym, val, innerEnv);
 				objFree(val);
 				bindings = cdr(cdr(bindings));
@@ -428,11 +424,11 @@ List* eval(List* exp, Environment* env) {
 
 			//Evaluate all the body sexp in an implicit progn
 			List* body = cdr(cdr(exp));
-			List* result = 0;
-			while(body){
-				if(result)objFree(result);
+			List* result = e_nil;
+			while(notNil(body)){
+				if(notNil(result))objFree(result);
 				result = eval(car(body), innerEnv);
-				consSetData(body, 0);
+				consSetData(body, e_nil);
 				body = cdr(body);
 			}
 
@@ -445,10 +441,10 @@ List* eval(List* exp, Environment* env) {
 		/// (reduce function start list)
 		}else if (first(exp) == INTERN_reduce){
 			List* ret = eval(third(exp), env);
-			consSetData(cdr(cdr(exp)), 0);
+			consSetData(cdr(cdr(exp)), e_nil);
 			List* seqFirst = eval(fourth(exp), env);
 			List* seq = seqFirst;
-			consSetData(cdr(cdr(cdr(exp))), 0);
+			consSetData(cdr(cdr(cdr(exp))), e_nil);
 
 			//If I got a vector convert it into a list
 			if (is_vector(seq)){seq = vecToList((Vector*)untag_vector(seq));}
@@ -458,9 +454,9 @@ List* eval(List* exp, Environment* env) {
 			if (is_pair(function)){
 				//Lambda
 				List* lambda = function;
-				while (seq){
+				while (notNil(seq)){
 					List* lambdaCopy = objCopy(lambda);
-					List* lambdaArgs = cons(ret, cons(objCopy(car(seq)), 0));
+					List* lambdaArgs = cons(ret, cons(objCopy(car(seq)), e_nil));
 					List* r = apply_lambda(lambdaCopy, lambdaArgs, env);
 					objFree(lambdaCopy);
 					objFree(lambdaArgs);
@@ -470,8 +466,8 @@ List* eval(List* exp, Environment* env) {
 			}else{
 				//Known function name
 				void* f = function;
-				while (seq){
-					List* args = cons(ret, cons(objCopy(car(seq)), 0));
+				while (notNil(seq)){
+					List* args = cons(ret, cons(objCopy(car(seq)), e_nil));
 					List* r = ((List* (*) (List*))f)(args);
 					objFree(args);
 					ret = r;
@@ -488,12 +484,12 @@ List* eval(List* exp, Environment* env) {
 		/// (map function list)
 		}else if (first(exp) == INTERN_map || first(exp) == INTERN_mapv){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating map ", exp);}
-			List* ret = 0;
+			List* ret = e_nil;
 
 			//Get the sequence
 			List* seqFirst = eval(third(exp), env);
 			List* seq = seqFirst;
-			consSetData(cdr(cdr(exp)), 0);
+			consSetData(cdr(cdr(exp)), e_nil);
 
 			//If I got a vector convert it into a list
 			if (is_vector(seqFirst)){
@@ -509,9 +505,9 @@ List* eval(List* exp, Environment* env) {
 			if (is_pair(function)){
 				//Lambda
 				List* lambda = function;
-				while (seq){
+				while (notNil(seq)){
 					List* lambdaCopy = objCopy(lambda);
-					List* lambdaArg = cons(objCopy(car(seq)), 0);
+					List* lambdaArg = cons(objCopy(car(seq)), e_nil);
 					List* r = apply_lambda(lambdaCopy, lambdaArg, env);
 					objFree(lambdaCopy);
 					objFree(lambdaArg);
@@ -521,9 +517,9 @@ List* eval(List* exp, Environment* env) {
 			}else{
 				//Known function name
 				void* f = function;
-				if(f==NULL){printf("\nERROR: \"%s\" is not a valid function for map. Exiting.\n\n", (char*)second(exp));fflush(stdout);exit(1);}
-				while (seq){
-					List* functionArg = cons(objCopy(car(seq)), 0);
+				if(nil(f)){printf("\nERROR: \"%s\" is not a valid function for map. Exiting.\n\n", (char*)second(exp));fflush(stdout);exit(1);}
+				while (notNil(seq)){
+					List* functionArg = cons(objCopy(car(seq)), e_nil);
 					List* r = ((List* (*) (List*))f)(functionArg);
 					objFree(functionArg);
 					ret = cons(r, ret);
@@ -531,7 +527,7 @@ List* eval(List* exp, Environment* env) {
 				}
 			}
 
-			List* reversed = cons(ret, 0);
+			List* reversed = cons(ret, e_nil);
 			List* correct = freverse(reversed);
 			objFree(reversed);
 
@@ -552,12 +548,12 @@ List* eval(List* exp, Environment* env) {
 		/// (filter function list)
 		}else if (first(exp) == INTERN_filter){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating filter ", exp);}
-			List* ret = 0;
+			List* ret = e_nil;
 
 			//Get the sequence
 			List* seqFirst = eval(third(exp), env);
 			List* seq = seqFirst;
-			consSetData(cdr(cdr(exp)), 0);
+			consSetData(cdr(cdr(exp)), e_nil);
 
 			//If I got a vector convert it into a list
 			if (is_vector(seqFirst)){
@@ -573,9 +569,9 @@ List* eval(List* exp, Environment* env) {
 			if (is_pair(function)){
 				//Lambda
 				List* lambda = function;
-				while (seq){
+				while (notNil(seq)){
 					List* lambdaCopy = objCopy(lambda);
-					List* lambdaArg = cons(objCopy(car(seq)), 0);
+					List* lambdaArg = cons(objCopy(car(seq)), e_nil);
 					List* r = apply_lambda(lambdaCopy, lambdaArg, env);
 					objFree(lambdaCopy);
 					objFree(lambdaArg);
@@ -587,9 +583,9 @@ List* eval(List* exp, Environment* env) {
 			}else{
 				//Known function name
 				void* f = function;
-				if(f==NULL){printf("\nERROR: \"%s\" is not a valid function for map. Exiting.\n\n", (char*)second(exp));fflush(stdout);exit(1);}
-				while (seq){
-					List* functionArg = cons(objCopy(car(seq)), 0);
+				if(nil(f)){printf("\nERROR: \"%s\" is not a valid function for map. Exiting.\n\n", (char*)second(exp));fflush(stdout);exit(1);}
+				while (notNil(seq)){
+					List* functionArg = cons(objCopy(car(seq)), e_nil);
 					List* r = ((List* (*) (List*))f)(functionArg);
 					objFree(functionArg);
 					if(r==e_true){
@@ -599,7 +595,7 @@ List* eval(List* exp, Environment* env) {
 				}
 			}
 
-			List* reversed = cons(ret, 0);
+			List* reversed = cons(ret, e_nil);
 			List* correct = freverse(reversed);
 			objFree(reversed);
 			objFree(function);
@@ -614,11 +610,11 @@ List* eval(List* exp, Environment* env) {
 		/// (sort function list)
 		}else if (first(exp) == INTERN_sort){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating sort ", exp);}
-			List* ret = 0;
+			List* ret = e_nil;
 
 			//Get the sequence
 			List* seq = eval(third(exp), env);
-			consSetData(cdr(cdr(exp)), 0);
+			consSetData(cdr(cdr(exp)), e_nil);
 			if (is_pair(seq)){
 				Vector* vecSeq = listToVec(seq);
 				objFree(seq);
@@ -659,19 +655,19 @@ List* eval(List* exp, Environment* env) {
 			List* seqCurrent = evaluatedSeq;
 
 			List* body = cdr(cdr(exp));
-			List* ret = 0;
-			while(seqCurrent){
+			List* ret = e_nil;
+			while(notNil(seqCurrent)){
 				//Update the symbol value
 				extendEnv(sym, car(seqCurrent), innerEnv);
 
 				//Eval the body and go to the next
 				List* bodyCopy = objCopy(body);
 				List* current = bodyCopy;
-				while(current){
+				while(notNil(current)){
 					//Eval the body and go to the next
-					if (ret) objFree(ret);
+					if (notNil(ret)) objFree(ret);
 					ret = eval(car(current), innerEnv);
-					consSetData(current, 0);
+					consSetData(current, e_nil);
 					current = cdr(current);
 				}
 				objFree(bodyCopy);
@@ -689,7 +685,7 @@ List* eval(List* exp, Environment* env) {
 			look = EOF;
 			exitFlag = 1;
 			objFree(exp);
-			return 0;
+			return e_nil;
 
 		/// (profile tag body)
 		}else if (first(exp) == INTERN_profile){
@@ -698,12 +694,12 @@ List* eval(List* exp, Environment* env) {
 
 			//Eval and profile
 			clock_t begin = clock();
-			List* ret = 0;
+			List* ret = e_nil;
 			List* seq = cdr(cdr(exp));
-			while(seq){
-				if(ret){objFree(ret);}
+			while(notNil(seq)){
+				if(notNil(ret)){objFree(ret);}
 				ret = eval(car(seq), env);
-				consSetData(seq, 0);
+				consSetData(seq, e_nil);
 				seq = cdr(seq);
 			}
 			clock_t end = clock();
@@ -711,7 +707,7 @@ List* eval(List* exp, Environment* env) {
 			//Print the result
 			printf("PROFILE for %s : %f seconds\n", (char*)tag, (double)(end - begin) / CLOCKS_PER_SEC);
 			objFree(tag);
-			consSetData(cdr(exp), 0);
+			consSetData(cdr(exp), e_nil);
 			objFree(exp);
 
 			//Return the value
@@ -721,10 +717,10 @@ List* eval(List* exp, Environment* env) {
 		//Keyword map member accessing
 		}else if (*((char*)first(exp)) == ':'){
 			List* obj = eval(second(exp), env);
-			consSetData(cdr(exp), 0);
+			consSetData(cdr(exp), e_nil);
 
 			//Equivalent to (get hashmap keyword)
-			List* expandedExp = cons(obj, cons(objCopy(first(exp)), 0));
+			List* expandedExp = cons(obj, cons(objCopy(first(exp)), e_nil));
 			List* ret = fget(expandedExp);
 			objFree(expandedExp);
 			objFree(exp);
@@ -755,9 +751,9 @@ List* eval(List* exp, Environment* env) {
 				List* argsToEval = cdr(exp);
 				List* args = 0;
 				List** tmp = &args;
-				for ( ; argsToEval ; argsToEval = cdr(argsToEval)) {
-					*tmp = cons(eval(car(argsToEval), env), 0);
-					consSetData(argsToEval, 0);
+				for ( ; notNil(argsToEval) ; argsToEval = cdr(argsToEval)) {
+					*tmp = cons(eval(car(argsToEval), env), e_nil);
+					consSetData(argsToEval, e_nil);
 					tmp = &((List*)untag(*tmp))->next;
 				}
 
@@ -792,14 +788,14 @@ List* eval(List* exp, Environment* env) {
 
 	printf("ERROR: cannot evaluate exp: %p \"%s\" in %p\n", (char*)exp, (char*)first(exp), env);
 	exit(1);
-	return 0;
+	return e_nil;
 }
 
 
 
 //Read the current input in stdin or the inputfile if present
 List* read_and_eval(){
-	List* result = 0;	
+	List* result = e_nil;	
 	look = read_char();
 	while(look != EOF){
 		gettoken();
@@ -811,7 +807,7 @@ List* read_and_eval(){
 			if(debugPrintInfo){
 				debugPrintObj("Read: ", obj);
 				printf("\e[39m"); fflush(stdout);}
-			if(result){objFree(result);result=0;}
+			if(notNil(result)){objFree(result);result=e_nil;}
 			result = eval(obj, global_env);
 		}
 
@@ -836,7 +832,7 @@ __attribute__((aligned(16))) List* fincludefile(List* a){
 	objFree(result);
 	inputFile = originalFile;
 	printf("Done.\n");fflush(stdout);
-	return 0;
+	return e_nil;
 }
 __attribute__((aligned(16))) List* freadobj(List* a) {
 	look = read_char();
@@ -847,7 +843,7 @@ __attribute__((aligned(16))) List* freadobj(List* a) {
 __attribute__((aligned(16))) List* fwriteobj(List* a){
 	fflush(stdout);
 	List* current = a;
-	while(current){
+	while(notNil(current)){
 		print_obj(car(current), 1);
 		current = cdr(current);
 	}
@@ -914,7 +910,7 @@ int main(int argc, char* argv[]) {
 	//Create the global environment
 	clock_t begin = clock();
 	global_env = makeEnvironment(NULL);
-	extendEnv("null", 0, global_env);
+	extendEnv("null",   e_nil, global_env);
 	extendEnv("list",    (void*)flist, global_env);
 	extendEnv("vector",  (void*)fvec, global_env);
 	extendEnv("hashmap", (void*)fhashmap, global_env);
