@@ -186,7 +186,7 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 		if(nil(names) || nil(vars)){break;}
 		char* sym = car(names);
 		if(debugPrintInfo){char* s = objToString(car(vars), 1); printf("==> binding %s to value %s\n", sym, s);free(s);fflush(stdout);}
-		List* val = eval(car(vars), innerEnv);
+		List* val = eval(car(vars), env);
 		consSetData(vars, e_nil);
 		extendEnv(sym, val, innerEnv);
 		if(debugPrintInfo){char* s = objToString(val, 1);printf("==> binded %s to value %s\n", sym, s);free(s);fflush(stdout);}
