@@ -221,9 +221,9 @@ void* searchInEnvironment(List* name, Environment* env){
 	Environment* currentEnv = env;
 	while(currentEnv){
 		//Search in the hash
-		void* value = 0;
-		hashmap_get(currentEnv->hashData, (char*)name, (any_t)&value);
-		if (value){
+		void* value = e_nil;
+		int status = hashmap_get(currentEnv->hashData, (char*)name, (any_t)&value);
+		if (status == MAP_OK){
 			clock_t end = clock(); environmentCounter_searchTimeSum += (double)(end - start) / CLOCKS_PER_SEC;
 			List* copy = objCopy(value);
 
