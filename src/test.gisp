@@ -103,6 +103,33 @@
 ;(write (sort (lambda (a b) (< a b)) [1 5 3 6 7 3 5 6 7]))
 
 
+(defn test (l)
+	(write l)
+	(if (nil? l)
+		nil
+		(test (cdr l))))
+
+(write (str "test:" (test (list 1 2 3))))
+
+
+
+
+(defn flatten (l)
+    (write (str "cose: " l))
+    (cond 
+        (nil? l)
+            nil
+        (pair? (car l))
+            (concat (flatten (car l)) (flatten (cdr l)))
+        :else
+            (cons (car l) (flatten (cdr l)))))
+    
+    
+(write (str "flatten: " (flatten (list 1 2 (list 3 4)))))
+
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TEST CORE FUNCTIONS
