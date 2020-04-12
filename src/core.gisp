@@ -299,7 +299,6 @@
 ;;;#Point
 ;;;!1Shape
 (defn shape-centroid (points)
-    ;(write (str "centroid-points: " points))
     (let (sum-x (reduce + 0 (map #(:x %) points))
           sum-y (reduce + 0 (map #(:y %) points))
           length (count points))
