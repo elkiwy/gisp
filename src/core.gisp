@@ -1,3 +1,31 @@
+;;;=Gisp Core: Utilities
+
+;;;~Subdivide a collection in groups of n elements incrementing by step
+;;;#Sequence
+;;;!1Number
+;;;!2Number
+;;;!3Collection
+(defn partition (n step coll)
+    (if (> n (count coll))
+        nil
+        (insert (partition n step (drop step coll)) (take n 0 coll) )))
+
+;;;~Flatten nested collections into a single flat one
+;;;#Collection
+;;;!1Collection
+(defn flatten (l)
+    (cond 
+        (nil? l)
+            nil
+        (pair? (car l))
+            (concat (flatten (car l)) (flatten (cdr l)))
+        :else
+            (cons (car l) (flatten (cdr l)))))
+
+
+
+
+
 ;;;=Gisp Core: Points
 
 (def PI 3.14159265)
