@@ -319,6 +319,91 @@ __attribute__((aligned(16))) List* frand(List* a){
 
 
 
+
+
+///~Calculate the mandelbrot value of a specific point
+///&mandelbrot-point
+///#Number
+///@1a
+///!1Number
+///@2b
+///!2Number
+///@3max-iterations
+///!3Number
+///@4infinity
+///!4Number
+__attribute__((aligned(16))) List* fmandelbrot(List* a){
+	double realVal = numVal(first(a));
+	double imaginaryVal = numVal(second(a));
+	int maxIterations = (int)numVal(third(a));
+	int infinity = (int)numVal(fourth(a));
+
+	
+	double currentReal = realVal;
+	double currentImaginary = imaginaryVal;
+
+	int n = 0;
+	while(n<maxIterations){
+		//printf("mandel iteration : %d of %d\n", n, maxIterations);fflush(stdout);
+		double currentRealNew = ((currentReal * currentReal) - (currentImaginary * currentImaginary));
+		double currentImaginaryNew = (2 * currentReal * currentImaginary);
+		currentReal = currentRealNew + realVal;
+		currentImaginary = currentImaginaryNew + imaginaryVal;
+		if (currentReal + currentImaginary > infinity){
+			break;
+		}
+		n++;
+	}
+
+	if (n==maxIterations){n = 0;}
+	return (List*)value_to_number(n);
+}
+
+///~Rescale a value from a min and max to a newmin and a newmax
+///&rescale
+///#Number
+///@1n
+///!1Number
+///@2min
+///!2Number
+///@3max
+///!3Number
+///@4newmin
+///!4Number
+///@5newmax
+///!5Number
+__attribute__((aligned(16))) List* frescale(List* a){
+	double n = numVal(first(a));
+	double currmin = numVal(second(a));
+	double currmax = numVal(third(a));
+	double newmin = numVal(fourth(a));
+	double newmax = numVal(fifth(a));
+
+	double ran1 = currmax - currmin;
+	double ran2 = newmax - newmin;
+	double perc = (n - currmin) / ran1;
+	double result = newmin + (perc * ran2);
+	return (List*)value_to_number(result);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ---------------------------------------------
 ///=Core: List operations
 
@@ -1104,3 +1189,13 @@ __attribute__((aligned(16))) List* fsvg_to_png(List* a){
 	cairo_surface_write_to_png(surface, fullPath);
 	return e_nil;
 }
+
+
+
+
+
+
+
+
+
+

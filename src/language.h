@@ -72,6 +72,8 @@ List* fseed(List* a);
 List* frange(List* a);
 List* fminNum(List* a);
 List* fmaxNum(List* a);
+List* fmandelbrot(List* a);
+List* frescale(List* a);
 
 
 
