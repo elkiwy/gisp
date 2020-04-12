@@ -282,7 +282,7 @@
 ;;;!1Shape
 ;;;!2Vec
 (defn shape-move-by-vector (shape vect)
-    (map #(point-move-by-vector % vect) shape))
+    (mapv #(point-move-by-vector % vect) shape))
     
 
 
