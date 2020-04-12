@@ -527,7 +527,8 @@ __attribute__((aligned(16))) List* ffirst(List* a){
 	}else if(is_pair(seq)){
 		return objCopy(first(first(a)));
 	}else{
-		printf("first doesn't support this object.");fflush(stdout);
+		printf("first doesn't support this object.\n");fflush(stdout);
+		exit(1);
 		return e_nil;
 	}
 }
@@ -559,6 +560,7 @@ __attribute__((aligned(16))) List* flast(List* a){
 
 	}else{
 		printf("last doesn't support this object.");fflush(stdout);
+		exit(1);
 		return e_nil;
 	}
 }
@@ -920,6 +922,7 @@ __attribute__((aligned(16))) List* fcount(List* a){
 		return (List*)value_to_number(size);
 	}else{
 		printf("%p not supported for count.", arg);
+		exit(1);
 		return e_nil;
 	}
 }
