@@ -283,8 +283,9 @@ __attribute__((aligned(16))) List* frange(List* a){
 ///!1Number
 __attribute__((aligned(16))) List* fseed(List* a){
 	int seed = 0;
-	if (notNil(a)){ seed = (int)numVal(first(a));
-	}else{  seed = time(NULL);}
+	if (notNil(a)){seed = (int)numVal(first(a));
+	}else{seed = time(NULL);}
+	printf("Seed set to: %d\n", seed);
 	srand(seed);
 	return e_nil;
 }
