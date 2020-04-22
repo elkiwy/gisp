@@ -793,7 +793,7 @@ int listLength(List* a){
 }
 
 /// (vector values...)
-///~Convert a list into a vector
+///~Creates a vector
 ///&vector
 ///#Vector
 ///@1val
@@ -804,6 +804,20 @@ __attribute__((aligned(16))) List* fvec(List* a){
 	Vector* vec = listToVec(a);
 	return (List*)tag_vector(vec);
 }
+
+
+/// (to-vector list)
+///~Convert a list into a vector
+///&vector
+///#Vector
+///@1val
+///!1List
+__attribute__((aligned(16))) List* ftovec(List* a){
+	Vector* vec = listToVec(first(a));
+	return (List*)tag_vector(vec);
+}
+
+
 
 /// (hashmap key val ...)
 ///~Create an hashmap structure from a set of keys and values

@@ -104,6 +104,7 @@ List* fassoc(List* a);
 // -----------------------------------------
 //Sequences - Vectors
 List* fvec(List* a);
+List* ftovec(List* a);
 
 // -----------------------------------------
 //Sequences - Hashmaps
