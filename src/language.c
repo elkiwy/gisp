@@ -284,7 +284,11 @@ __attribute__((aligned(16))) List* frange(List* a){
 __attribute__((aligned(16))) List* fseed(List* a){
 	int seed = 0;
 	if (notNil(a)){seed = (int)numVal(first(a));
-	}else{seed = time(NULL);}
+	}else{
+		struct timeval t;
+		gettimeofday(&t, NULL);
+		seed = t.tv_usec;
+	}
 	printf("Seed set to: %d\n", seed);
 	srand(seed);
 	return e_nil;
