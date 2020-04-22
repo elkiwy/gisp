@@ -1,18 +1,18 @@
 ;;;=Gisp Core: Utilities
 
-;;;~Subdivide a collection in groups of n elements incrementing by step
+;;;~Subdivide a sequence in groups of n elements incrementing by step
 ;;;#Sequence
 ;;;!1Number
 ;;;!2Number
-;;;!3Collection
-(defn partition (n step coll)
-    (if (> n (count coll))
+;;;!3Sequence
+(defn partition (n step seq)
+    (if (> n (count seq))
         nil
-        (insert (partition n step (drop step coll)) (take n 0 coll) )))
+        (insert (partition n step (drop step seq)) (take n 0 seq) )))
 
-;;;~Flatten nested collections into a single flat one
-;;;#Collection
-;;;!1Collection
+;;;~Flatten nested sequence into a single flat one
+;;;#Sequence
+;;;!1Sequence
 (defn flatten (l)
     (cond 
         (nil? l)
@@ -22,6 +22,12 @@
         :else
             (cons (car l) (flatten (cdr l)))))
 
+;;;~Replace the first and last elements of a sequence.
+;;;#Sequence
+;;;!1Sequence
+(defn replace-first-and-last (seq newFirst newLast)
+    (let (trimmed (take (- (count seq) 2) 1 seq))
+         (insert (append trimmed newLast) newFirst)))
 
 
 
@@ -154,10 +160,6 @@
                   x (/ B (- slope1 slope2)))
                 (point x (+ (* slope2 (- x (:x a2))) (:y a2)))))))
 
-
-
-
-
 ;;;~Checks if a point is on a line
 ;;;#Boolean
 ;;;!1Point
@@ -168,8 +170,6 @@
 		  ab (point-distance (:a line) (:b line))
 		  diff (abs (- (+ ac bc) ab)))
 		(< diff 0.00001)))
-		
-
 
 ;;;~Get the intersection point between two lines, returns nil if l1 and l2 doesn't intersects.
 ;;;#Point
@@ -184,7 +184,6 @@
 				crossing
 			:else 
 				nil)))
-
     
 ;;;~Get the position of a point to a line. Returns 1, -1 or 0.
 ;;;#Number
@@ -313,5 +312,77 @@
     
 
 
+
+
+
+
+
+
+
+
+
+
+;;;=Gisp Code: Paths
+
+
+
+;;;~Draw a path on the screen.
+;;;#void
+;;;!1PointList
+(defn draw-path (points)
+	(if (nil? points)
+		nil
+		(doseq (i (range 1 (count points)))
+			(draw-line c (get points (- i 1)) (get points i)))))
+
+;;;~Draw a list of Paths on the screen.
+;;;#void
+;;;!1PathList
+(defn draw-paths (paths)
+    (doseq (p paths)
+        (draw-path p)))
+
+;;;~Convert a line to a segmented path.
+;;;#Path
+;;;!1Line
+;;;!2Number
+(defn line-to-path (l n)
+    (let (step (/ 1 n)
+          cuts (map #(* step %) (range (+ n 1))))
+        (mapv #(point-between (:a l) (:b l) %) cuts)))
+
+;;;~Dispose randomly a path through its segments.
+;;;#Path
+;;;!1Path
+;;;!2Number
+;;;!3Number
+(defn path-dispose (p noiseX noiseY)
+    (mapv  #(point (gauss (:x %) noiseX) (gauss (:y %) noiseY)) p))
+
+;;;~Subfunction of path-smooth
+;;;#PointList
+;;;!1Point
+;;;!2Point
+;;;!3Number
+(defn chaikin-segment (a b chaikin-param)
+    (let (lowMargin  chaikin-param 
+          highMargin (- 1 lowMargin))
+        (list (point-between a b lowMargin) (point-between a b highMargin))))
+
+;;;~Approximate a Path with the chaikin subdivision algorythm, smoothing the original Path.
+;;;!1Path
+;;;!2Number
+;;;!3Number
+(defn path-smooth (path iteration chaikin-param)
+    (if (> iteration 0)
+        ;Recursive step
+        (let (segmentationPoint (if (number? chaikin-param) chaikin-param (rand (first chaikin-param) (second chaikin-param)))
+              linesList         (partition 2 1 path)
+              newLineList       (map #(chaikin-segment (get % 0) (get % 1) segmentationPoint) linesList)
+              curve             (path-smooth (to-vector (flatten newLineList)) (- iteration 1) chaikin-param))
+            ;Keep the first and last point where they are
+            (replace-first-and-last curve (first path) (last path)))
+        ;When i completed all the iteration I just return the point list
+        path))
 
 
