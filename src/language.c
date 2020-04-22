@@ -62,7 +62,7 @@ __attribute__((aligned(16))) List* fdiv(List* a) {return applyOperationOnList('/
 ///#Number
 ///@1n
 ///!1Number
-__attribute__((aligned(16))) List* fabsval(List* a) {return (List*)value_to_number(abs(numVal(first(a))));}
+__attribute__((aligned(16))) List* fabsval(List* a) {return (List*)value_to_number(fabs(numVal(first(a))));}
 ///~Calculate the sin of a radiant value
 ///&sin
 ///#Number
