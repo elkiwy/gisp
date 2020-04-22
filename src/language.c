@@ -689,6 +689,12 @@ __attribute__((aligned(16))) List* feq(List* a)   {
 		return first(a) == second(a) ? e_true : e_false;
 	}
 }
+///~Checks if the first argument is a number
+///&number?
+///#Bool
+///@1a
+///!1Any
+__attribute__((aligned(16))) List* fnumber(List* a) { return is_number(first(a)) ? e_true : e_false; }
 ///~Checks if the first argument is a pair
 ///&pair?
 ///#Bool

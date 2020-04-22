@@ -126,6 +126,7 @@ List* fand(List* a);
 // -----------------------------------------
 //Conditions - Type checking
 List* fpair(List* a);
+List* fnumber(List* a);
 List* fatom(List* a);
 List* fnull(List* a);
 List* fnotnull(List* a);

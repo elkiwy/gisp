@@ -973,6 +973,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("and",     (void*)fand, global_env);
 	extendEnv("symbol?", (void*)fatom, global_env);
 	extendEnv("pair?",   (void*)fpair, global_env);
+	extendEnv("number?", (void*)fnumber, global_env);
 	extendEnv("eq?",     (void*)feq, global_env);
 	extendEnv("empty?",  (void*)fempty, global_env);
 	extendEnv("cons",    (void*)fcons, global_env);
