@@ -131,6 +131,9 @@
 
 
 
+(write (str "abs: " -0.5))
+(write (str "abs: " (abs -0.5)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TEST CORE FUNCTIONS
 

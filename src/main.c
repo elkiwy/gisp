@@ -1023,6 +1023,10 @@ int main(int argc, char* argv[]) {
 	clock_t end_env = clock();
 	List* result = read_and_eval();
 	print_obj(result, 1);printf("\n");fflush(stdout);
+	debugPrintInfo = 0;
+	debugPrintFrees = 0;
+	debugPrintCopy = 0;
+	debugPrintAllocs = 0;
 	objFree(result);
 
 
