@@ -65,6 +65,7 @@ List* flog10(List* a);
 // -----------------------------------------
 //Math - Random
 List* frand(List* a);
+List* fgauss(List* a);
 List* fseed(List* a);
 
 // -----------------------------------------

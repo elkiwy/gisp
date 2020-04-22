@@ -930,6 +930,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("log10",   (void*)flog10, global_env);
 	extendEnv("atan2",   (void*)fatan2, global_env);
 	extendEnv("rand",    (void*)frand, global_env);
+	extendEnv("gauss",   (void*)fgauss, global_env);
 	extendEnv("seed",    (void*)fseed, global_env);
 	extendEnv("=",       (void*)feq, global_env);
 	extendEnv("<",       (void*)flessThan, global_env);

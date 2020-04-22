@@ -314,6 +314,23 @@ __attribute__((aligned(16))) List* frand(List* a){
 	return (List*)value_to_number(randInt(min, max));
 }
 
+///~Get a random number weighted within a gaussian distribution
+///&gauss
+///#Number
+///@1center
+///!1Number
+///@2amplitude
+///!2Number
+__attribute__((aligned(16))) List* fgauss(List* a){
+	double center = numVal(first(a));
+	double ampl   = numVal(second(a));
+
+	double x = (double)rand() / RAND_MAX;
+	double y = (double)rand() / RAND_MAX;
+	double z = sqrt(-2 * log(x)) * cos(2 * M_PI * y);
+	return (List*)value_to_number((z * ampl) + center);
+}
+
 
 
 
