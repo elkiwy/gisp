@@ -2,7 +2,7 @@
 
 
 // --------------------------------------------
-///= Core: Math operations
+///=Core: Math operations
 
 ///Apply an operation between two floats
 double numberOperation(char op, double a, double b){
@@ -977,7 +977,7 @@ __attribute__((aligned(16))) List* ftake(List* a){
 
 /// (drop n coll)
 ///~Drop n elements from a collection coll
-///&take
+///&drop
 ///#List/Vector
 ///@1n
 ///!1Number
