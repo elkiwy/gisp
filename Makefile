@@ -22,6 +22,10 @@ $(OBJ)/%.o: $(SRC)/%.c
 run: build/main
 	./build/main
 
+docu:
+	docu -i src -m HTML -s Docs.css -o Docs.html
+	docu -i src -m DEBUG
+
 test: build/main
 	./build/main src/test.gisp
 

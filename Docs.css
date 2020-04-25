@@ -19,6 +19,8 @@ main p { line-height:25px }
 
 
 
+.docu_index_module:hover { background:var(--col-fg);color:var(--col-bg) } 
+.docu_index_func:hover { background:var(--col-fg);color:var(--col-bg) } 
 
 
 
