@@ -25,6 +25,8 @@
 ;;;~Replace the first and last elements of a sequence.
 ;;;#Sequence
 ;;;!1Sequence
+;;;!2Any
+;;;!3Any
 (defn replace-first-and-last (seq newFirst newLast)
     (let (trimmed (take (- (count seq) 2) 1 seq))
          (insert (append trimmed newLast) newFirst)))
@@ -41,23 +43,23 @@
 ;;;!1Number
 ;;;!2Number
 (defn point (x y)
-	{ :x x :y y })
+    { :x x :y y })
 
 ;;;~Creates a Vec structure with length len and direction dir in radians.
 ;;;#Vec
 ;;;!1Number
 ;;;!2Number
 (defn vec (len dir)
-	{ :len len :dir dir})
+    { :len len :dir dir})
 
 ;;;~Calculate the distance between two Points.
 ;;;#Number
 ;;;!1Point
 ;;;!2Point
 (defn point-distance (a b)
-	(let (a2 (pow (- (:x b) (:x a)) 2)
-		  b2 (pow (- (:y b) (:y a)) 2))
-		(sqrt (+ a2 b2))))
+    (let (a2 (pow (- (:x b) (:x a)) 2)
+          b2 (pow (- (:y b) (:y a)) 2))
+        (sqrt (+ a2 b2))))
 
 ;;;~Calculate the angle between two Points.
 ;;;#Number
@@ -65,7 +67,7 @@
 ;;;!2Point
 (defn point-angle (a b)
     (atan2 (- (* -1 (:y b)) (* -1 (:y a))) (- (:x b) (:x a))))
-	
+    
 ;;;~Creates a new intermediate point between two Points pos is a floating number between 0 and 1 that defines. The distance between the two points. 0 returns point a,1 returns point b, 0.5 returns the middle point between a and b, etc...
 ;;;#Point
 ;;;!1Point
@@ -117,7 +119,7 @@
 
 
 
-;;;=Gisp Code: Lines
+;;;=Gisp Core: Lines
 
 ;;;~Creates a Line joining points.
 ;;;#Line
@@ -165,11 +167,11 @@
 ;;;!1Point
 ;;;!2Line
 (defn point-on-line? (point line)
-	(let (ac (point-distance point (:a line))
-		  bc (point-distance point (:b line))
-		  ab (point-distance (:a line) (:b line))
-		  diff (abs (- (+ ac bc) ab)))
-		(< diff 0.00001)))
+    (let (ac (point-distance point (:a line))
+          bc (point-distance point (:b line))
+          ab (point-distance (:a line) (:b line))
+          diff (abs (- (+ ac bc) ab)))
+        (< diff 0.00001)))
 
 ;;;~Get the intersection point between two lines, returns nil if l1 and l2 doesn't intersects.
 ;;;#Point
@@ -177,13 +179,13 @@
 ;;;!2Line
 (defn segment-intersection (l1 l2)
     (let (crossing (line-intersection l1 l2))
-		(cond
-			(nil? crossing)
-				nil
-			(and (point-on-line? crossing l1) (point-on-line? crossing l2))
-				crossing
-			:else 
-				nil)))
+        (cond
+            (nil? crossing)
+                nil
+            (and (point-on-line? crossing l1) (point-on-line? crossing l2))
+                crossing
+            :else 
+                nil)))
     
 ;;;~Get the position of a point to a line. Returns 1, -1 or 0.
 ;;;#Number
@@ -227,7 +229,7 @@
 
 
 
-;;;=Gisp Code: Circles
+;;;=Gisp Core: Circles
 
 ;;;~Draw a set of circles on the screen.
 ;;;#void
@@ -257,7 +259,7 @@
 
 
 
-;;;=Gisp Code: Shapes
+;;;=Gisp Core: Shapes
 
 ;;;~Draws a regular shape into the context.
 ;;;#void
@@ -267,25 +269,25 @@
 ;;;!4Number
 ;;;!5Number
 (defn reg-shape (context center side-n size angle)
-	(let (cx   (:x center)
-		  cy   (:y center)
-		  step (/ (* PI 2) side-n)
-		  angles (map #(+ (* % step) (rad angle)) (range side-n))
-		  points (map #(point-move-by-vector center (vec size %)) angles))
-		(doseq (i (range (- side-n 1)))
-			(line context (get points i) (get points (+ i 1))))
-		(line context (last points) (first points))))
+    (let (cx   (:x center)
+          cy   (:y center)
+          step (/ (* PI 2) side-n)
+          angles (map #(+ (* % step) (rad angle)) (range side-n))
+          points (map #(point-move-by-vector center (vec size %)) angles))
+        (doseq (i (range (- side-n 1)))
+            (line context (get points i) (get points (+ i 1))))
+        (line context (last points) (first points))))
 
 ;;;~Draw a shape on the screen.
 ;;;#void
 ;;;!1PointList
 (defn draw-shape (points)
-	(if (nil? points)
-		nil
-		(progn 
-			(doseq (i (range 1 (count points)))
-				(draw-line c (get points (- i 1)) (get points i)) )
-			(draw-line c (last points) (first points)) )))
+    (if (nil? points)
+        nil
+        (progn 
+            (doseq (i (range 1 (count points)))
+                (draw-line c (get points (- i 1)) (get points i)) )
+            (draw-line c (last points) (first points)) )))
     
 ;;;~Draw a set of shapes on the screen.
 ;;;#void
@@ -322,7 +324,7 @@
 
 
 
-;;;=Gisp Code: Paths
+;;;=Gisp Core: Paths
 
 
 
@@ -330,10 +332,10 @@
 ;;;#void
 ;;;!1PointList
 (defn draw-path (points)
-	(if (nil? points)
-		nil
-		(doseq (i (range 1 (count points)))
-			(draw-line c (get points (- i 1)) (get points i)))))
+    (if (nil? points)
+        nil
+        (doseq (i (range 1 (count points)))
+            (draw-line c (get points (- i 1)) (get points i)))))
 
 ;;;~Draw a list of Paths on the screen.
 ;;;#void
