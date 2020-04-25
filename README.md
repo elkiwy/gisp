@@ -31,6 +31,8 @@ Other than Gisp core, I'm also developing a custom editor to easily
 interact with Gisp. This is still needs some work to be usable from
 everyone and right now I'm focussing more on the interpreter.
 
+![GispEditor](/images/GispEditor.png)
+
 ## Missing feature to be added in the future
  - Verbose error message to help debugging
  - A REPL to evaluate code interactivly
