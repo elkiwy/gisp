@@ -13,10 +13,28 @@ functions to create, manipulate, and draw basic points, lines, and shapes.
 ## Full Documentation
 All the language documentation is currenly hosted on my website here: [Gisp Documentation](https://elkiwyart.com/site/gisp_documentation.html).
 
+## Installation
+Once cloned the repository you should be able to install Gisp by compiling it and installing into your system with these commands:
+```
+cd gisp
+make
+make install
+```
+This will place an executable named "gisp" into your `/usr/local/bin`.
+Once installed you can use it by executing:
+```
+gisp path/to/your/file.gisp
+```
+
+## Gisp Editor
+Other than Gisp core, I'm also developing a custom editor to easily
+interact with Gisp. This is still needs some work to be usable from
+everyone and right now I'm focussing more on the interpreter.
+
 ## Missing feature to be added in the future
-- [ ] Verbose error message to help debugging
-- [ ] A REPL to evaluate code interactivly
-- [ ] General improvement to make it better for new users
+ - Verbose error message to help debugging
+ - A REPL to evaluate code interactivly
+ - General improvement to make it better for new users
 
 ## Credits
 Gisp is *heavily influenced* by:
