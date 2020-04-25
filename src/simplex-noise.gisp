@@ -1,3 +1,5 @@
+;;;=Gisp Core: Simplxe-noise
+
 ;Seed
 (def RANDOM-SEED 0)
 
