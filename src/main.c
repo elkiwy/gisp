@@ -238,6 +238,9 @@ int sortComparison_lambda(const void* elem1, const void* elem2) {
 //	//printf("\e[39m");
 //	return head;
 //}
+
+
+///=Gisp Macros
 List* eval(List* exp, Environment* env) {
 	//printf("Eval %p in %p\n", (void*)exp, (void*)env);fflush(stdout);
 	//If is a tagged hashmap...
@@ -302,6 +305,15 @@ List* eval(List* exp, Environment* env) {
 			return second(exp);
 
 		// (if (cond) (success) (fail))
+		///+If cond is true evaluates success, else evaluates fail.
+		///&if
+		///#Any
+		///@1cond
+		///!1Boolean
+		///@2success
+		///!2Any
+		///@3fail
+		///!3Any
 		} else if (first(exp) == INTERN_if) {
 			List* condition = eval(second(exp), env);
 			consSetData(cdr(exp), e_nil);
@@ -319,6 +331,17 @@ List* eval(List* exp, Environment* env) {
 			return ret;
 
 		// (cond (cond1) (body1) ...)
+		///+Takes couple of condition and body, evaluates conditions until finds something true and evaluates its paired body.
+		///&cond
+		///#Any
+		///@1cond1
+		///!1Boolean
+		///@2body1
+		///!2Any
+		///@3...
+		///!3Boolean
+		///@4...
+		///!4Any
 		} else if (first(exp) == INTERN_cond) {
 			List* ret = e_nil;
 			int done = 0;
@@ -342,6 +365,13 @@ List* eval(List* exp, Environment* env) {
 			return ret;
 
 		// (lambda (params) body)
+		///+Creates a function with params and body
+		///&lambda
+		///#Function
+		///@1params
+		///!1List
+		///@2body
+		///!2Any
 		} else if (first(exp) == INTERN_lambda) {
 			List* ret = objCopy(exp);
 			objFree(exp);
@@ -349,6 +379,13 @@ List* eval(List* exp, Environment* env) {
 			return ret;
 
 		// (apply func args)
+		///+Applies the function f on each element of args
+		///&Any
+		///#Function
+		///@1f
+		///!1Function
+		///@2Sequence
+		///!2args
 		} else if (first(exp) == INTERN_apply) { 
 			List* args = eval(car(cdr(cdr(exp))), env);
 			consSetData(cdr(cdr(exp)), args);
@@ -359,7 +396,14 @@ List* eval(List* exp, Environment* env) {
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mapply Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 			return ret;
 
-		// (def symbol sexp)
+		// (def symbol value)
+		///+Defines a symbol with a value
+		///&def
+		///#Nil
+		///@1symbol
+		///!1Atom
+		///@2value
+		///!2Any
 		}else if (first(exp) == INTERN_def){
 			if(debugPrintInfo){printf("\n===> found def expression \n");fflush(stdout);}
 			char* sym = second(exp);
@@ -374,6 +418,15 @@ List* eval(List* exp, Environment* env) {
 			return e_nil;
 
 		// (defn symbol (params) sexp)
+		///+Defines a symbol with a function.
+		///&defn
+		///#Nil
+		///@1symbol
+		///!1Atom
+		///@2params
+		///!2List
+		///@3body
+		///!3Any
 		}else if (first(exp) == INTERN_defn){
 			if(debugPrintInfo){debugPrintObj("\n===> found defn expression ", exp);}
 			//Get function name
@@ -394,6 +447,13 @@ List* eval(List* exp, Environment* env) {
 			return e_nil;
 
 		// (progn exp1 exp2 ...)
+		///+Evaluates multiple bodies and returns the value of the last one.
+		///&progn
+		///#Any
+		///@1body1
+		///!1Any
+		///@2...
+		///!2Any
 		}else if (first(exp) == INTERN_progn){
 			List* sexp = cdr(exp);
 			List* ret = e_nil;	
@@ -408,6 +468,13 @@ List* eval(List* exp, Environment* env) {
 			return ret;
 
 		// (let (binds) body)
+		///+Binds pairs of symbols and values, and then evaluates the body.
+		///&let
+		///#Any
+		///@1binds
+		///!1List
+		///@2body
+		///!2Any
 		} else if (first(exp) == INTERN_let) {
 			//Bind all the values
 			Environment* innerEnv = makeEnvironment(env);
@@ -439,6 +506,15 @@ List* eval(List* exp, Environment* env) {
 			return result;
 
 		/// (reduce function start list)
+		///+Evaluates function with each element of seq and the result of the evaluation of it on the previous element. Starting with start as first result.
+		///&reduce
+		///#Any
+		///@1function
+		///!1Function
+		///@2start
+		///!2Any
+		///@3seq
+		///!3Sequence
 		}else if (first(exp) == INTERN_reduce){
 			List* ret = eval(third(exp), env);
 			consSetData(cdr(cdr(exp)), e_nil);
@@ -481,7 +557,22 @@ List* eval(List* exp, Environment* env) {
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("reduce Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 			return ret;
 
-		/// (map function list)
+		/// (map function seq)
+		///+Evaluate the function on the sequence seq returning a list of evaluated elements.
+		///&map
+		///#List
+		///@1function
+		///!1Function
+		///@2seq
+		///!2Sequence
+
+		///+Evaluate the function on the sequence seq returning a vector of evaluated elements.
+		///&mapv
+		///#Vector
+		///@1function
+		///!1Function
+		///@2seq
+		///!2Sequence
 		}else if (first(exp) == INTERN_map || first(exp) == INTERN_mapv){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating map ", exp);}
 			List* ret = e_nil;
@@ -545,7 +636,14 @@ List* eval(List* exp, Environment* env) {
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mmap Evaluated to:" , correct); printf("\e[39m");fflush(stdout);}
 			return correct;
 
-		/// (filter function list)
+		/// (filter function seq)
+		///+Filter a sequence seq evaluating function on each element of seq and returning only the ones evaluating the function to true.
+		///&filter
+		///#List
+		///@1function
+		///!1Function
+		///@2seq
+		///!2Sequence
 		}else if (first(exp) == INTERN_filter){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating filter ", exp);}
 			List* ret = e_nil;
@@ -607,7 +705,14 @@ List* eval(List* exp, Environment* env) {
 
 
 
-		/// (sort function list)
+		/// (sort function seq)
+		///+Sort a sequence seq using function as comparator.
+		///&sort
+		///#List
+		///@1function
+		///!1Function
+		///@2seq
+		///!2Sequence
 		}else if (first(exp) == INTERN_sort){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating sort ", exp);}
 			List* ret = e_nil;
@@ -644,6 +749,13 @@ List* eval(List* exp, Environment* env) {
 
 
 		/// (doseq (bind seq) body)
+		///+Providing a sequence and a symbol in binds, evaluates body multiple times on each element of the sequence binded to the symbol. Returns the value of the last evaluation.
+		///&doseq
+		///#Any
+		///@1binds
+		///!1List
+		///@2body
+		///!2Any
 		}else if (first(exp) == INTERN_doseq){
 			if(debugPrintInfo){debugPrintObj("===>Expanding doseq macro  ", exp);}
 			Environment* innerEnv = makeEnvironment(env);
@@ -688,6 +800,13 @@ List* eval(List* exp, Environment* env) {
 			return e_nil;
 
 		/// (profile tag body)
+		///+Evaluate body and prints the tag and how much time the evaluation took. Returns the value of the evaluation.
+		///&profile
+		///#Any
+		///@1tag
+		///!1String
+		///@2body
+		///!2Any
 		}else if (first(exp) == INTERN_profile){
 			//Get the tag
 			List* tag = eval(second(exp), env);
