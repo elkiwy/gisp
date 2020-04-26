@@ -26,6 +26,35 @@ Once installed you can use it by executing:
 gisp path/to/your/file.gisp
 ```
 
+## Hello Square
+To give you a brief glimpse at how Gisp works, here you have a simple
+example on how to generate an .svg file with a simple square.
+
+```lisp
+;Creates the file and its canvas of 1024x1024.
+(def s (make-surface "example.svg" 1024 1024))
+
+;Create the context of the surface, this will be used to draw.
+(def c (make-context s))
+
+;Define out simple function to draw a rectangle.
+(defn draw-rect (x1 y1 x2 y2)
+	(draw-line c (point x1 y1) (point x2 y1))
+	(draw-line c (point x2 y1) (point x2 y2))
+	(draw-line c (point x2 y2) (point x1 y2))
+	(draw-line c (point x1 y2) (point x1 y1)))
+
+;Execute out function.
+(draw-rect 100 100 300 300)
+
+;Create also a png version of the image, this is optional but very convenient.
+(surface-to-png s "example.png")
+
+;Clean the surface finishing all the work.
+(surface-clean s c)
+```
+
+
 ## Gisp Editor
 Other than Gisp core, I'm also developing a custom editor to easily
 interact with Gisp. This is still needs some work to be usable from
