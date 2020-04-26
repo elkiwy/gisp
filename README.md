@@ -30,7 +30,7 @@ gisp path/to/your/file.gisp
 To give you a brief glimpse at how Gisp works, here you have a simple
 example on how to generate an .svg file with a simple square.
 
-```lisp
+```clojure
 ;Creates the file and its canvas of 1024x1024.
 (def s (make-surface "example.svg" 1024 1024))
 
