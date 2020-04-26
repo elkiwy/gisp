@@ -1,10 +1,11 @@
 # Gisp
+
 Gisp is a Graphic oriented lisp-like language interpreter written in C.
 
 Gisp inherits most of the functions and syntax rules from Clojure, but
-is built for a much more specific and smaller scope than Clojure.
+is built for a much more specific and smaller scope.
 
-The main goal is to have a fast interpreter capable of parsing gisp
+It wants to be a simple and fast interpreter capable of parsing gisp
 file and generate SVG images through the Cairo library.
 
 Gisp provides an extensive graphic library full of useful
@@ -74,6 +75,6 @@ Gisp is *heavily influenced* by:
  - [Generative-toolbelt](https://github.com/elkiwy/generative-toolbelt) for the set of function for primitive shapes.
    
 ## Images and links
- - Every recent images posted on [Instagram](https://instagram.com/elkiwy) are made with Gisp.
- - You can find other information about Gisp here [ElkiwyArt.com](https://elkiwyart.com/site/gisp.html) are made with Gisp.
+ - Every recent image posted on [Instagram](https://instagram.com/elkiwy) is made with Gisp.
+ - You can find other information about Gisp here [ElkiwyArt.com](https://elkiwyart.com/site/gisp.html).
 
