@@ -135,6 +135,20 @@
 (write (str "abs: " (abs -0.5)))
 
 
+
+(def testdef 1)
+
+(defn incr ()
+	(def testdef (+ 1 testdef)))
+
+(incr)
+(incr)
+(incr)
+(incr)
+
+(write (str "testdef: " testdef))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TEST CORE FUNCTIONS
 
 
