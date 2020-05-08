@@ -408,7 +408,12 @@ List* eval(List* exp, Environment* env) {
 			if(debugPrintInfo){printf("\n===> found def expression \n");fflush(stdout);}
 			char* sym = second(exp);
 			List* val = eval(third(exp), env);
-			extendEnv(sym, val, env);
+
+			//Take global env
+			Environment* globalEnv = env;
+			while(globalEnv->outer != NULL){globalEnv = globalEnv->outer;}
+			extendEnv(sym, val, globalEnv);
+
 			//printf("== Done Defining %s ", sym); print_obj(val, 1); printf("\n"); fflush(stdout);
 			consFree(cdr(cdr(exp)));
 			consSetNext(cdr(exp), e_nil);
