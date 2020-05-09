@@ -287,7 +287,7 @@ double numVal(List* tagged_number){
 //String utilities
 char* trim_quotes(char* s){
 	if (s[0] == '"'){
-		for(uint i=0;i<strlen(s)-2;++i){
+		for(unsigned int i=0;i<strlen(s)-2;++i){
 			s[i] = s[i+1];
 		}
 		s[strlen(s)-2] = '\0';
