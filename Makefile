@@ -12,12 +12,21 @@ FLAGS = -g -Og -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointe
 
 
 
-build/main: $(OBJECTS)
+
+gispCore:
+	rm -f $(SRC)/gispCore.h
+	echo '#ifndef _GISPCORE_H' >> $(SRC)/gispCore.h
+	echo '#define _GISPCORE_H' >> $(SRC)/gispCore.h
+	for i in src/gisp-core/*; do \
+		xxd -i $$i >> $(SRC)/gispCore.h; \
+	done
+	echo '#endif /* _GISPCORE_H */' >> $(SRC)/gispCore.h
+
+
+build/main: gispCore $(OBJECTS) 
 	mkdir -p $(BUILD)
 	mkdir -p $(OBJ)
-	ld -r -b binary -o obj/gisp_core.o src/core.gisp
-	ld -r -b binary -o obj/gisp_noise.o src/simplex-noise.gisp
-	$(CC) $^ obj/gisp_core.o obj/gisp_noise.o $(FLAGS) -lcairo -lm -ldl -o $@ 
+	$(CC) $(OBJECTS) $(FLAGS) -lcairo -lm -ldl -o $@ 
 
 $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) $(FLAGS) -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
@@ -33,7 +42,7 @@ test: build/main
 	./build/main src/test.gisp
 
 fulltest: build/main
-	./build/main ~/Documents/artworks/sketch-simplex.gisp
+	./build/main ~/Documents/gisp-artworks/SKETCH/sketch.gisp
 
 simplextest: build/main
 	./build/main src/simplex-noise-profile.gisp

@@ -261,22 +261,19 @@
 
 ;;;=Gisp Core: Shapes
 
-;;;~Draws a regular shape into the context.
-;;;#void
-;;;!1Context
-;;;!2Point
+
+;;;~Creates a regular shape
+;;;#Shape
+;;;!1Point
+;;;!2Number
 ;;;!3Number
 ;;;!4Number
-;;;!5Number
-(defn reg-shape (context center side-n size angle)
-    (let (cx   (:x center)
-          cy   (:y center)
-          step (/ (* PI 2) side-n)
-          angles (map #(+ (* % step) (rad angle)) (range side-n))
-          points (map #(point-move-by-vector center (vec size %)) angles))
-        (doseq (i (range (- side-n 1)))
-            (line context (get points i) (get points (+ i 1))))
-        (line context (last points) (first points))))
+(defn reg-shape (center side-n size angle)
+    (let (cx   (:x center) cy   (:y center)
+		  step (/ (* PI 2) side-n)
+		  angles (map #(+ (* % step) (rad angle)) (range side-n))
+		  points (map #(point-move-by-vector center (vec size %)) angles))
+        points))
 
 ;;;~Draw a shape on the screen.
 ;;;#void

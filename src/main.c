@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <time.h>
 
+#include "gispCore.h"
 #include "hashmap.h"
 #include "core.h"
 #include "language.h"
@@ -13,10 +14,10 @@
 #define debug(m,e) printf("%s:%d: %s:",__FILE__,__LINE__,m); print_obj(e,1); puts("");
 
 //Prepare variables for binary linked files
-extern const char _binary_src_simplex_noise_gisp_start[];
-extern const char _binary_src_simplex_noise_gisp_end[];
-extern const char _binary_src_core_gisp_start[];
-extern const char _binary_src_core_gisp_end[];
+extern unsigned char src_gisp_core_simplex_noise_gisp[];
+extern unsigned int src_gisp_core_simplex_noise_gisp_len;
+extern unsigned char src_gisp_core_core_gisp[];
+extern unsigned int src_gisp_core_core_gisp_len;
 char* linkedFile = NULL;
 int linkedFileIndex = 0;
 int linkedFileSize = 0;
@@ -978,10 +979,10 @@ __attribute__((aligned(16))) List* fwriteobj(List* a){
 
 
 
-void includeLinkedBinaryFile(char* start, char* end){
+void includeLinkedBinaryFile(unsigned char* start, unsigned int len){
 	//Include gisp core
 	linkedFile = start;
-	linkedFileSize = end - start;
+	linkedFileSize = len;
 	printf("Including linked core.gisp size %d...", linkedFileSize);fflush(stdout);
 	List* result = read_and_eval();
 	objFree(result);
@@ -1136,8 +1137,8 @@ int main(int argc, char* argv[]) {
 	debugPrintFrees = 0;
 	debugPrintCopy = 0;
 	debugPrintAllocs = 0;
-	includeLinkedBinaryFile((char*)_binary_src_core_gisp_start, (char*)_binary_src_core_gisp_end);
-	includeLinkedBinaryFile((char*)_binary_src_simplex_noise_gisp_start, (char*)_binary_src_simplex_noise_gisp_end);
+	includeLinkedBinaryFile((unsigned char*)src_gisp_core_core_gisp, (unsigned int)src_gisp_core_core_gisp_len);
+	includeLinkedBinaryFile((unsigned char*)src_gisp_core_simplex_noise_gisp, (unsigned int)src_gisp_core_simplex_noise_gisp_len);
 
 	//Evaluate everything 
 	debugPrintInfo = 0;
