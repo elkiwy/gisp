@@ -289,10 +289,10 @@ __attribute__((aligned(16))) List* fseed(List* a){
 		gettimeofday(&t, NULL);
 		seed = t.tv_usec;
 	}
-	printf("Seed set to: %d\n", seed);
 	srand(seed);
 	return e_nil;
 }
+
 
 
 
