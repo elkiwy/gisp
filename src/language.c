@@ -342,6 +342,110 @@ __attribute__((aligned(16))) List* fgauss(List* a){
 
 
 
+
+
+
+double dot(double* grad, double x, double y){
+	return (grad[0] * x) + (grad[1] * y);
+}	
+
+double contribution(int grad_index, double x, double y){
+	double  p1[3] = { 1,  1,  0};
+	double  p2[3] = {-1,  1,  0};
+	double  p3[3] = { 1, -1,  0};
+	double  p4[3] = {-1, -1,  0};
+	double  p5[3] = { 1,  0,  1};
+	double  p6[3] = {-1,  0,  1};
+	double  p7[3] = { 1,  0, -1};
+	double  p8[3] = {-1,  0, -1};
+	double  p9[3] = { 0,  1,  1};
+	double p10[3] = { 0, -1,  1};
+	double p11[3] = { 0,  1, -1};
+	double p12[3] = { 0, -1, -1};
+	double* gradiens[12] = {p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12};
+	double val = 0.5 - (x * x) - (y * y);
+	if (val < 0){
+		return 0;
+	}else{
+		val = val*val;
+		return val * val * dot(gradiens[grad_index], x, y);
+	}
+}
+
+double noise(void** octavePerm, void** octavePermMod12, double xin, double yin){
+	double F2 = 0.3660254038;
+	double G2 = 0.2113248654;
+	double s = (xin + yin) * F2;
+	int i = floor(xin + s);
+	int j = floor(yin + s);
+	double t = (i + j) * G2;
+	double X0 = i - t;
+	double Y0 = j - t;
+	double x0 = xin - X0;
+	double y0 = yin - Y0;
+	int i1 = (x0 > y0) ? 1 : 0;
+	int j1 = (x0 > y0) ? 0 : 1;
+	double x1 = (x0 - i1) + G2;
+	double y1 = (y0 - j1) + G2;
+	double x2 = (x0 - 1.0) + (2.0 * G2);
+	double y2 = (y0 - 1.0) + (2.0 * G2);
+	int ii = i & 255;
+	int jj = j & 255;
+	int gi0 = (int)numVal(octavePermMod12[ii + (int)numVal(octavePerm[jj])]);
+	int gi1 = (int)numVal(octavePermMod12[ii + i1 + (int)numVal(octavePerm[jj + j1])]);
+	int gi2 = (int)numVal(octavePermMod12[ii +  1 + (int)numVal(octavePerm[jj +  1])]);
+	double n0 = contribution(gi0, x0, y0);
+	double n1 = contribution(gi1, x1, y1);
+	double n2 = contribution(gi2, x2, y2);
+	return 70 * (n0 + n1 + n2);
+}
+
+///~Extract a value from a previously defined generator at x and y
+///&simplex-noise-value
+///#Number
+///@1simplex
+///!1Generator
+///@2x
+///!2Number
+///@3y
+///!3Number
+__attribute__((aligned(16))) List* fsimplex(List* a){
+	List* simplex_list = first(a);
+	double x = numVal(second(a));
+	double y = numVal(third(a));
+
+	double result = 0;
+	List* current = simplex_list;
+	while(current != e_nil){
+		map_t simplex = (map_t)untag_hashmap(car(current));
+		List *octave, *frequency, *amplitude;
+		hashmap_get(simplex, ":octave", (any_t)&octave);
+		hashmap_get(simplex, ":frequency", (any_t)&frequency);
+		hashmap_get(simplex, ":amplitude", (any_t)&amplitude);
+
+		List *octavePerm, *octavePermMod12;
+		map_t octaveMap = (map_t)untag_hashmap(octave);
+		hashmap_get(octaveMap, ":perm", (any_t)&octavePerm);
+		hashmap_get(octaveMap, ":permMod12", (any_t)&octavePermMod12);
+
+		Vector* perm = (Vector*)untag_vector(octavePerm);
+		Vector* permMod12 = (Vector*)untag_vector(octavePermMod12);
+
+		result += numVal(amplitude) * noise(perm->data, permMod12->data, x/numVal(frequency), y/numVal(frequency));
+		current = cdr(current);
+	}
+
+	return (List*)value_to_number(result);
+}
+
+
+
+
+
+
+
+
+
 ///~Calculate the mandelbrot value of a specific point
 ///&mandelbrot-point
 ///#Number

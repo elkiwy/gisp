@@ -149,6 +149,13 @@
 (write (str "testdef: " testdef))
 
 
+
+(let (simplex (simplex-noise 32 0.9 (rand 999999)))
+	(write (str (simplex-noise-value simplex 1 1)))
+	(write (str (simplex-noise-value simplex 2 2)))
+)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TEST CORE FUNCTIONS
 
 
