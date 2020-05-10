@@ -123,6 +123,7 @@ List* flessOrEqThan(List* a);
 List* fgreaterOrEqThan(List* a);
 List* fnot(List* a);
 List* fand(List* a);
+List* forr(List* a);
 
 // -----------------------------------------
 //Conditions - Type checking
