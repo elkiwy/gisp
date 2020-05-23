@@ -39,7 +39,7 @@ docu:
 	docu -i src -m DEBUG
 
 test: build/main
-	./build/main src/test.gisp --time
+	./build/main src/test.gisp --time --memory
 
 fulltest: build/main
 	./build/main ~/Documents/gisp-artworks/SKETCH/sketch.gisp
