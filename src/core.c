@@ -518,6 +518,7 @@ void environmentFree(Environment* env){
 
 
 List* objCopy(List* obj){
+	profile("objCopy", 1);
 	if(debugPrintCopy){char* str = objToString(obj, 1); printf("\e[35m--- Copying obj: %p value: %s\n\e[39m", obj, str); free(str);}
 	if(obj==e_nil || obj==e_false || obj==e_true){ return obj;}
 	if(is_string(obj)){return stringCopy(obj);}
@@ -525,6 +526,7 @@ List* objCopy(List* obj){
 	if(is_vector(obj)){return vectorCopy(obj);}
 	if(is_number(obj)){return numberCopy(obj);}
 	if(is_pair(obj)){return listCopy(obj);}
+	profile("objCopy", 0);
 	return obj;
 }
 

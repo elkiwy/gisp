@@ -224,6 +224,7 @@ void debug_printEnv(Environment* a){
 
 List* eval(List* exp, Environment* env);
 List* apply_lambda(List* lambda, List* args, Environment* env){
+	profile("lambda", 1);
 	if(debugPrintInfo){printf("===>Applying lambda ");fflush(stdout); print_obj(lambda, 1);fflush(stdout); printf(" with args ");fflush(stdout); print_obj(args, 1);fflush(stdout); printf(" \n");fflush(stdout);}
 
 	//bind names into env and eval body
@@ -253,6 +254,7 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 	}
 
 	environmentFree(innerEnv);
+	profile("lambda", 0);
 	return result;
 }
 
@@ -630,6 +632,8 @@ List* eval(List* exp, Environment* env) {
 			if(debugPrintInfo){debugPrintObj("===>Evaluating map ", exp);}
 			List* ret = e_nil;
 
+			profile("map", 1);
+
 			//Get the sequence
 			List* seqFirst = eval(third(exp), env);
 			List* seq = seqFirst;
@@ -687,6 +691,9 @@ List* eval(List* exp, Environment* env) {
 			objFree(exp);
 
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mmap Evaluated to:" , correct); printf("\e[39m");fflush(stdout);}
+
+			profile("map", 0);
+
 			return correct;
 
 		/// (filter function seq)
@@ -1219,7 +1226,11 @@ int main(int argc, char* argv[]) {
 		printf("Time elpased for setup %f\n", time);
 		time += (double)(end - end_env) / CLOCKS_PER_SEC;
 		printf("Time elpased for eval %f", time);
+
+
+		profile_print();
 	}
+
 
 	//Print memory usage and operations
 	if (memory){
