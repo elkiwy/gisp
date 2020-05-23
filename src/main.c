@@ -234,8 +234,9 @@ List* apply_lambda(List* lambda, List* args, Environment* env, bool autoclean){
 	List *names = second(lambda), *vars = args;
 	for (  ; notNil(names) ; names = cdr(names), vars = cdr(vars) ){
 		if(nil(names) || nil(vars)){break;}
+		if(debugPrintInfo){char* s = objToString(car(vars), 1); printf("==> binding %s to value %s\n", (char*)car(names), s);free(s);fflush(stdout);}
+
 		char* sym = car(names);
-		if(debugPrintInfo){char* s = objToString(car(vars), 1); printf("==> binding %s to value %s\n", sym, s);free(s);fflush(stdout);}
 		List* val = eval(car(vars), env, true);
 		consSetData(vars, e_nil);
 		extendEnv(sym, val, innerEnv);
@@ -249,8 +250,8 @@ List* apply_lambda(List* lambda, List* args, Environment* env, bool autoclean){
 	while (notNil(sexp)){
 		if(debugPrintInfo){debugPrintObj("   Evaluating lambda sexp : ", car(sexp));}
 		if (notNil(result)){objFree(result);}
-		result = eval(car(sexp), innerEnv, true);
-		consSetData(sexp, e_nil);
+		result = eval(car(sexp), innerEnv, autoclean);
+		if(autoclean){consSetData(sexp, e_nil);}
 		sexp = cdr(sexp);
 	}
 
@@ -653,12 +654,9 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 			consSetData(cdr(exp), env);
 			if (is_pair(function)){
 				//Lambda
-				List* lambda = function;
 				while (notNil(seq)){
-					List* lambdaCopy = objCopy(lambda);
 					List* lambdaArg = cons(objCopy(car(seq)), e_nil);
-					List* r = apply_lambda(lambdaCopy, lambdaArg, env, true);
-					objFree(lambdaCopy);
+					List* r = apply_lambda(function, lambdaArg, env, false);
 					objFree(lambdaArg);
 					ret = cons(r, ret);
 					seq = cdr(seq);
@@ -913,13 +911,18 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 
 			//user defined lambda, arg list eval happens in binding  below
 			if (is_pair(primop)) { 
-				if(debugPrintInfo){printf("===>Evaluating lambda"); debugPrintObj(" ", exp); printf("====> %p ", primop);fflush(stdout); debugPrintObj("Primop ", primop);}
+				if(debugPrintInfo){printf("===>Found user defined function, expanding it into a lambda expression. "); debugPrintObj("Exp:", exp); printf("   %p ", primop);fflush(stdout); debugPrintObj(" Primop ", primop);}
 
+				//Es:
+				//Gets an exp like: (point 1 2)
+				//Reads "point" and evaluate it into (lambda (x y) (hashmap :x x :y y)) 
+				//Put that into a cons with the arguments of the lambda
+				//Evaluate it
 				List* lambda = cons(primop, objCopy(cdr(exp)));
-				List* result = eval(lambda, env, true); 
+				List* result = eval(lambda, env, autoclean); 
 
 				//objFree(lambda);
-				objFree(exp);
+				if(autoclean){objFree(exp);}
 				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96muser defined function Evaluated to:" , result); printf("\e[39m");fflush(stdout);}
 				return result;
 
@@ -932,8 +935,8 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 				List* args = 0;
 				List** tmp = &args;
 				for ( ; notNil(argsToEval) ; argsToEval = cdr(argsToEval)) {
-					*tmp = cons(eval(car(argsToEval), env, true), e_nil);
-					consSetData(argsToEval, e_nil);
+					*tmp = cons(eval(car(argsToEval), env, autoclean), e_nil);
+					if(autoclean){consSetData(argsToEval, e_nil);}
 					tmp = &((List*)untag(*tmp))->next;
 				}
 
@@ -942,7 +945,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 
 				//Free the current expression
 				objFree(args);
-				objFree(exp);
+				if(autoclean){objFree(exp);}
 				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("primitive Evaluated to:" , result); printf("\e[39m");fflush(stdout);}
 				return result;
 			}
@@ -954,6 +957,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 		//bind names into env and eval body
 		List* ret = apply_lambda(car(exp), cdr(exp), env, true);
 		objFree(exp);
+
 		if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("lambda Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 		return ret;
 
