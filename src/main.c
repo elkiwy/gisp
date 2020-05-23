@@ -932,8 +932,8 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 				List* args = 0;
 				List** tmp = &args;
 				for ( ; notNil(argsToEval) ; argsToEval = cdr(argsToEval)) {
-					consSetData(argsToEval, e_nil);
 					*tmp = cons(eval(car(argsToEval), env, true), e_nil);
+					consSetData(argsToEval, e_nil);
 					tmp = &((List*)untag(*tmp))->next;
 				}
 
