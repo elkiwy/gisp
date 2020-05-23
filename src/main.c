@@ -1200,7 +1200,7 @@ int main(int argc, char* argv[]) {
 	debugPrintCopy = 0;
 	debugPrintAllocs = 0;
 	includeLinkedBinaryFile((unsigned char*)src_gisp_core_core_gisp, (unsigned int)src_gisp_core_core_gisp_len);
-	includeLinkedBinaryFile((unsigned char*)src_gisp_core_simplex_noise_gisp, (unsigned int)src_gisp_core_simplex_noise_gisp_len);
+	//includeLinkedBinaryFile((unsigned char*)src_gisp_core_simplex_noise_gisp, (unsigned int)src_gisp_core_simplex_noise_gisp_len);
 
 	//Evaluate everything 
 	debugPrintInfo = 0;
