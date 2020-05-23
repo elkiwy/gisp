@@ -345,59 +345,173 @@ __attribute__((aligned(16))) List* fgauss(List* a){
 
 
 
-double dot(double* grad, double x, double y){
-	return (grad[0] * x) + (grad[1] * y);
-}	
+
+
+#define RANDOM_SEED 0
+
+#define NUMBER_OF_SWAPS 400
+
+const double P_SUPPLY[] = {
+	151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36,
+	103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0,
+	26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56,
+	87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27, 166,
+	77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230, 220, 105, 92, 41, 55,
+	46, 245, 40, 244, 102, 143, 54, 65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132, 187,
+	208, 89, 18, 169, 200, 196, 135, 130, 116, 188, 159, 86, 164, 100, 109, 198, 173, 186,
+	3, 64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147, 118, 126, 255, 82, 85, 212, 207,
+	206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42, 223, 183, 170, 213, 119, 248, 152,
+	2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43, 172, 9, 129, 22, 39, 253, 19, 98,
+	108, 110, 79, 113, 224, 232, 178, 185, 112, 104, 218, 246, 97, 228, 251, 34, 242,
+	193, 238, 210, 144, 12, 191, 179, 162, 241, 81, 51, 145, 235, 249, 14, 239, 107,
+	49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127,
+	4, 150, 254, 138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78,
+    66, 215, 61, 156, 180};
+
+#define P_SUPPLY_SIZE 256
+
+
+
+typedef struct simplex_octave{
+	double* octavePerm;
+	double* octavePermMod12;
+	double frequency;
+	double amplitude;
+} simplex_octave;
+
+typedef struct simplex_generator{
+	simplex_octave** octaves;
+	int octaves_count;
+} simplex_generator;
+
+///~Create e simplex noise generator
+///&simplex-noise
+///#Generator
+///@1largest_feature
+///!1Number
+///@2persistance
+///!2Number
+///@3seed
+///!3Number
+__attribute__((aligned(16))) List* fsimplex_noise(List* a){
+	double largest_feature = numVal(first(a));
+	double persistance     = numVal(second(a));
+	double starting_seed   = numVal(third(a));
+
+	srand(starting_seed);
+
+	double octaves_count = ceil(log10(largest_feature) / log10(2));
+	simplex_generator* generator = malloc(sizeof(simplex_generator));
+	generator->octaves_count = (int)octaves_count;
+	simplex_octave** octaves = malloc(sizeof(simplex_octave*) * octaves_count);
+	for(int i=0; i<octaves_count; ++i){
+
+		srand(randInt(0, 99999));
+
+		int size = (P_SUPPLY_SIZE * 2);
+		double* perm = malloc(sizeof(double) * size);
+		for (int j=0;j<P_SUPPLY_SIZE; ++j){
+			perm[j] = P_SUPPLY[j];	
+		}
+
+		for(int j=0; j<NUMBER_OF_SWAPS; ++j){
+			int r1 = randInt(0, P_SUPPLY_SIZE);
+			int r2 = randInt(0, P_SUPPLY_SIZE);
+			double tmp = perm[r1];
+			perm[r1] = perm[r2];
+			perm[r2] = tmp;
+		}
+
+		for (int j=0;j<P_SUPPLY_SIZE; ++j){
+			perm[j+P_SUPPLY_SIZE] = perm[j];	
+		}
+		
+		double* permMod12 = malloc(sizeof(double) * size);
+		for (int j=0; j<size; ++j){
+			permMod12[j] = (int)perm[j] % 12;
+		}
+
+		octaves[i] = malloc(sizeof(simplex_octave));
+		octaves[i]->octavePerm = perm;
+		octaves[i]->octavePermMod12 = permMod12;
+		octaves[i]->frequency = pow(2, i);
+		octaves[i]->amplitude = pow(persistance, octaves_count - i);
+	}
+	generator->octaves = octaves;
+
+
+	//DEBUG
+	//printf("New generator:\n");
+	//printf("octaves:%d\n", generator->octaves_count);
+	//for(int i=0; i<octaves_count; ++i){
+	//	printf("octave[%d]->freq:%f\n", i, generator->octaves[i]->frequency);
+	//	printf("octave[%d]->ampl:%f\n", i, generator->octaves[i]->amplitude);
+	//	printf("octave[%d]->perm:", i);
+	//	for (int j=0;j<(P_SUPPLY_SIZE*2);++j){printf(" %d", (int)generator->octaves[i]->octavePerm[j]);}
+	//	printf("octave[%d]->perm12:", i);
+	//	for (int j=0;j<(P_SUPPLY_SIZE*2);++j){printf(" %d", (int)generator->octaves[i]->octavePermMod12[j]);}
+	//}
+
+
+
+
+	return (List*)generator;
+}
+
+
+
+double  pp1[3] = { 1,  1,  0};
+double  pp2[3] = {-1,  1,  0};
+double  pp3[3] = { 1, -1,  0};
+double  pp4[3] = {-1, -1,  0};
+double  pp5[3] = { 1,  0,  1};
+double  pp6[3] = {-1,  0,  1};
+double  pp7[3] = { 1,  0, -1};
+double  pp8[3] = {-1,  0, -1};
+double  pp9[3] = { 0,  1,  1};
+double pp10[3] = { 0, -1,  1};
+double pp11[3] = { 0,  1, -1};
+double pp12[3] = { 0, -1, -1};
+double* gradiens[12] = {pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8, pp9, pp10, pp11, pp12};
+
+double F2 = 0.3660254038;
+double G2 = 0.2113248654;
+
 
 double contribution(int grad_index, double x, double y){
-	double  p1[3] = { 1,  1,  0};
-	double  p2[3] = {-1,  1,  0};
-	double  p3[3] = { 1, -1,  0};
-	double  p4[3] = {-1, -1,  0};
-	double  p5[3] = { 1,  0,  1};
-	double  p6[3] = {-1,  0,  1};
-	double  p7[3] = { 1,  0, -1};
-	double  p8[3] = {-1,  0, -1};
-	double  p9[3] = { 0,  1,  1};
-	double p10[3] = { 0, -1,  1};
-	double p11[3] = { 0,  1, -1};
-	double p12[3] = { 0, -1, -1};
-	double* gradiens[12] = {p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12};
 	double val = 0.5 - (x * x) - (y * y);
 	if (val < 0){
 		return 0;
 	}else{
 		val = val*val;
-		return val * val * dot(gradiens[grad_index], x, y);
+		return val * val * ((gradiens[grad_index][0] * x) + (gradiens[grad_index][1] * y));
 	}
 }
 
-double noise(void** octavePerm, void** octavePermMod12, double xin, double yin){
-	double F2 = 0.3660254038;
-	double G2 = 0.2113248654;
+double noise(double* octavePerm, double* octavePermMod12, double xin, double yin){
 	double s = (xin + yin) * F2;
 	int i = floor(xin + s);
 	int j = floor(yin + s);
-	double t = (i + j) * G2;
+	double t = (double)(i + j) * G2;
 	double X0 = i - t;
 	double Y0 = j - t;
 	double x0 = xin - X0;
 	double y0 = yin - Y0;
 	int i1 = (x0 > y0) ? 1 : 0;
 	int j1 = (x0 > y0) ? 0 : 1;
-	double x1 = (x0 - i1) + G2;
-	double y1 = (y0 - j1) + G2;
+	double x1 = (x0 - (double)i1) + G2;
+	double y1 = (y0 - (double)j1) + G2;
 	double x2 = (x0 - 1.0) + (2.0 * G2);
 	double y2 = (y0 - 1.0) + (2.0 * G2);
 	int ii = i & 255;
 	int jj = j & 255;
-	int gi0 = (int)numVal(octavePermMod12[ii + (int)numVal(octavePerm[jj])]);
-	int gi1 = (int)numVal(octavePermMod12[ii + i1 + (int)numVal(octavePerm[jj + j1])]);
-	int gi2 = (int)numVal(octavePermMod12[ii +  1 + (int)numVal(octavePerm[jj +  1])]);
+	int gi0 = octavePermMod12[ii + (int)octavePerm[jj]];
+	int gi1 = octavePermMod12[ii + i1 + (int)octavePerm[jj + j1]];
+	int gi2 = octavePermMod12[ii +  1 + (int)octavePerm[jj +  1]];
 	double n0 = contribution(gi0, x0, y0);
 	double n1 = contribution(gi1, x1, y1);
 	double n2 = contribution(gi2, x2, y2);
-	return 70 * (n0 + n1 + n2);
+	return (double)70 * (n0 + n1 + n2);
 }
 
 ///~Extract a value from a previously defined generator at x and y
@@ -410,29 +524,21 @@ double noise(void** octavePerm, void** octavePermMod12, double xin, double yin){
 ///@3y
 ///!3Number
 __attribute__((aligned(16))) List* fsimplex(List* a){
-	List* simplex_list = first(a);
+	simplex_generator* generator = (simplex_generator*)first(a);
 	double x = numVal(second(a));
 	double y = numVal(third(a));
+	int octaves_count = generator->octaves_count;
 
 	double result = 0;
-	List* current = simplex_list;
-	while(current != e_nil){
-		map_t simplex = (map_t)untag_hashmap(car(current));
-		List *octave, *frequency, *amplitude;
-		hashmap_get(simplex, ":octave", (any_t)&octave);
-		hashmap_get(simplex, ":frequency", (any_t)&frequency);
-		hashmap_get(simplex, ":amplitude", (any_t)&amplitude);
+	for(int i=0; i<octaves_count; ++i){
+		simplex_octave* octave = generator->octaves[i];
+		
+		double freq = octave->frequency;
+		double ampl = octave->amplitude;
+		double* perm = octave->octavePerm;
+		double* permMod12 = octave->octavePermMod12;
 
-		List *octavePerm, *octavePermMod12;
-		map_t octaveMap = (map_t)untag_hashmap(octave);
-		hashmap_get(octaveMap, ":perm", (any_t)&octavePerm);
-		hashmap_get(octaveMap, ":permMod12", (any_t)&octavePermMod12);
-
-		Vector* perm = (Vector*)untag_vector(octavePerm);
-		Vector* permMod12 = (Vector*)untag_vector(octavePermMod12);
-
-		result += numVal(amplitude) * noise(perm->data, permMod12->data, x/numVal(frequency), y/numVal(frequency));
-		current = cdr(current);
+		result += ampl * noise(perm, permMod12, x/freq, y/freq);
 	}
 
 	return (List*)value_to_number(result);
