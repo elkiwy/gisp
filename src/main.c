@@ -1109,6 +1109,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("take",    (void*)ftake, global_env);
 	extendEnv("drop",    (void*)fdrop, global_env);
 
+	extendEnv("simplex-noise",(void*)fsimplex_noise, global_env);
 	extendEnv("simplex-noise-value",(void*)fsimplex, global_env);
 	extendEnv("mandelbrot-point",(void*)fmandelbrot, global_env);
 	extendEnv("rescale",         (void*)frescale, global_env);
