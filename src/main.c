@@ -13,6 +13,53 @@
 //Handy debug method
 #define debug(m,e) printf("%s:%d: %s:",__FILE__,__LINE__,m); print_obj(e,1); puts("");
 
+
+typedef struct profile_struct{
+	clock_t total;
+	clock_t ref;
+	int calls;
+}profile_struct;
+
+map_t profile_map = NULL;
+void profile(char* name, int active){
+	if (profile_map==NULL){profile_map = hashmap_new();}
+	profile_struct* prof;
+	if (hashmap_get(profile_map, name, (any_t)&prof) == MAP_MISSING){
+		prof = malloc(sizeof(profile_struct));
+		prof->ref = -1;
+		prof->total = 0;
+		prof->calls = 0;
+		hashmap_put(profile_map, name, prof);
+	}
+	if (active){
+		prof->calls += 1;
+		if (prof->ref != -1){
+			prof->total += clock() - prof->ref;
+		}
+		prof->ref = clock();
+	}else{
+		prof->total += clock() - prof->ref;
+		prof->ref = -1;
+	}
+	hashmap_put(profile_map, name, prof);
+}
+
+void profile_print(){
+	int size = hashmap_length(profile_map);
+	char* keys[size];
+	profile_struct* structs[size];
+	hashmap_keys_and_values(profile_map, keys, (void**)structs);
+	for (int i=0; i<size; ++i){
+		double total = ((double)structs[i]->total)/CLOCKS_PER_SEC;
+		double calls = (double)structs[i]->calls;
+		double avg   = total/calls;
+		printf("\nProfile_total[%s] = %f, calls: %d, avg: %f", keys[i], total, (int)calls, avg);
+	}
+}
+
+
+
+
 //Prepare variables for binary linked files
 extern unsigned char src_gisp_core_simplex_noise_gisp[];
 extern unsigned int src_gisp_core_simplex_noise_gisp_len;
