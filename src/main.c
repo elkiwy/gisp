@@ -249,7 +249,7 @@ List* apply_lambda(List* lambda, List* args, Environment* env, bool autoclean){
 	while (notNil(sexp)){
 		if(debugPrintInfo){debugPrintObj("   Evaluating lambda sexp : ", car(sexp));}
 		if (notNil(result)){objFree(result);}
-		result = eval(car(sexp), innerEnv, autoclean);
+		result = eval(car(sexp), innerEnv, true);
 		consSetData(sexp, e_nil);
 		sexp = cdr(sexp);
 	}
@@ -909,14 +909,14 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 
 		// (function args)
 		} else { 
-			List* primop = eval(first(exp), env, autoclean);
+			List* primop = eval(first(exp), env, true);
 
 			//user defined lambda, arg list eval happens in binding  below
 			if (is_pair(primop)) { 
 				if(debugPrintInfo){printf("===>Evaluating lambda"); debugPrintObj(" ", exp); printf("====> %p ", primop);fflush(stdout); debugPrintObj("Primop ", primop);}
 
 				List* lambda = cons(primop, objCopy(cdr(exp)));
-				List* result = eval(lambda, env, autoclean); 
+				List* result = eval(lambda, env, true); 
 
 				//objFree(lambda);
 				objFree(exp);
@@ -933,7 +933,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 				List** tmp = &args;
 				for ( ; notNil(argsToEval) ; argsToEval = cdr(argsToEval)) {
 					consSetData(argsToEval, e_nil);
-					*tmp = cons(eval(car(argsToEval), env, autoclean), e_nil);
+					*tmp = cons(eval(car(argsToEval), env, true), e_nil);
 					tmp = &((List*)untag(*tmp))->next;
 				}
 
