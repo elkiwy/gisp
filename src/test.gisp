@@ -102,58 +102,69 @@
 ;(write "sort")
 ;(write (sort (lambda (a b) (< a b)) [1 5 3 6 7 3 5 6 7]))
 
-
-(defn test (l)
-	(write l)
-	(if (nil? l)
-		nil
-		(test (cdr l))))
-
-(write (str "test:" (test (list 1 2 3))))
-
-
-
-
-(defn flatten (l)
-    (write (str "cose: " l))
-    (cond 
-        (nil? l)
-            nil
-        (pair? (car l))
-            (concat (flatten (car l)) (flatten (cdr l)))
-        :else
-            (cons (car l) (flatten (cdr l)))))
+;
+;(defn test (l)
+;	(write l)
+;	(if (nil? l)
+;		nil
+;		(test (cdr l))))
+;
+;(write (str "test:" (test (list 1 2 3))))
+;
+;
+;
+;
+;(defn flatten (l)
+;    (write (str "cose: " l))
+;    (cond 
+;        (nil? l)
+;            nil
+;        (pair? (car l))
+;            (concat (flatten (car l)) (flatten (cdr l)))
+;        :else
+;            (cons (car l) (flatten (cdr l)))))
     
     
-(write (str "flatten: " (flatten (list 1 2 (list 3 4)))))
+;(write (str "flatten: " (flatten (list 1 2 (list 3 4)))))
+;
+;
+;
+;
+;
+;(write (str "abs: " -0.5))
+;(write (str "abs: " (abs -0.5)))
+;
+;
+;
+;(def testdef 1)
+;
+;(defn incr ()
+;	(def testdef (+ 1 testdef)))
+;
+;(incr)
+;(incr)
+;(incr)
+;(incr)
+;
+;(write (str "testdef: " testdef))
+;
+;
+;
+;
+;(let (simplex (simplex-noise 32 0.9 666))
+;	(doseq (i (range 340))
+;		(simplex-noise-value simplex (* 1 i) 1)))
 
 
 
 
-
-(write (str "abs: " -0.5))
-(write (str "abs: " (abs -0.5)))
-
-
-
-(def testdef 1)
-
-(defn incr ()
-	(def testdef (+ 1 testdef)))
-
-(incr)
-(incr)
-(incr)
-(incr)
-
-(write (str "testdef: " testdef))
+;(map #(point % %) (range 10000))
+;(map #(point (* % (+ % %)) %) (range 10))
+;(map deg (range 10))
+;(map #(+ % %) (range 10))
+(map #(point % %) (range 10))
 
 
-
-(let (simplex (simplex-noise 32 0.9 (rand 999999)))
-	(write (str (simplex-noise-value simplex 1 1)))
-	(write (str (simplex-noise-value simplex 2 2)))
-)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TEST CORE FUNCTIONS
