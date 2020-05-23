@@ -27,6 +27,8 @@ extern double environmentCounter_searchTimeSum;
 extern double environmentCounter_searchTimeSum_hash;
 
 extern void* allocations[1024*1024];
+extern void profile(char* name, int active);
+
 
 //This is the main List structure
 typedef struct List {
