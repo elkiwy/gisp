@@ -12,6 +12,10 @@ FLAGS = -g -Og -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointe
 
 
 
+build/main: gispCore $(OBJECTS) 
+	mkdir -p $(BUILD)
+	mkdir -p $(OBJ)
+	$(CC) $(OBJECTS) $(FLAGS) -lcairo -lm -ldl -o $@ 
 
 gispCore:
 	rm -f $(SRC)/gispCore.h
@@ -23,10 +27,6 @@ gispCore:
 	echo '#endif /* _GISPCORE_H */' >> $(SRC)/gispCore.h
 
 
-build/main: gispCore $(OBJECTS) 
-	mkdir -p $(BUILD)
-	mkdir -p $(OBJ)
-	$(CC) $(OBJECTS) $(FLAGS) -lcairo -lm -ldl -o $@ 
 
 $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) $(FLAGS) -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
