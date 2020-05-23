@@ -657,7 +657,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 				while (notNil(seq)){
 					List* lambdaCopy = objCopy(lambda);
 					List* lambdaArg = cons(objCopy(car(seq)), e_nil);
-					List* r = apply_lambda(lambdaCopy, lambdaArg, env);
+					List* r = apply_lambda(lambdaCopy, lambdaArg, env, true);
 					objFree(lambdaCopy);
 					objFree(lambdaArg);
 					ret = cons(r, ret);
