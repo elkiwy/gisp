@@ -250,7 +250,7 @@ List* apply_lambda(List* lambda, List* args, Environment* env, bool autoclean){
 		if(debugPrintInfo){debugPrintObj("   Evaluating lambda sexp : ", car(sexp));}
 		if (notNil(result)){objFree(result);}
 		result = eval(car(sexp), innerEnv, autoclean);
-		if(autoclean) consSetData(sexp, e_nil);
+		consSetData(sexp, e_nil);
 		sexp = cdr(sexp);
 	}
 
