@@ -117,7 +117,7 @@ __attribute__((aligned(16))) List* ffloor(List* a) {return (List*)value_to_numbe
 ///#Number
 ///@1n
 ///!1Number
-__attribute__((aligned(16))) List* fceil(List* a)  {return (List*)value_to_number(1+(int)numVal(first(a)));}
+__attribute__((aligned(16))) List* fceil(List* a)  {return (List*)value_to_number(ceil(numVal(first(a))));}
 
 ///~Get the minimum value of all the arguments
 ///&min
