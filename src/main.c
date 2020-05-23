@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include <stdbool.h>
 
 #include "gispCore.h"
 #include "hashmap.h"
@@ -222,8 +223,8 @@ void debug_printEnv(Environment* a){
 
 
 
-List* eval(List* exp, Environment* env);
-List* apply_lambda(List* lambda, List* args, Environment* env){
+List* eval(List* exp, Environment* env, bool autoclean);
+List* apply_lambda(List* lambda, List* args, Environment* env, bool autoclean){
 	profile("lambda", 1);
 	if(debugPrintInfo){printf("===>Applying lambda ");fflush(stdout); print_obj(lambda, 1);fflush(stdout); printf(" with args ");fflush(stdout); print_obj(args, 1);fflush(stdout); printf(" \n");fflush(stdout);}
 
@@ -235,7 +236,7 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 		if(nil(names) || nil(vars)){break;}
 		char* sym = car(names);
 		if(debugPrintInfo){char* s = objToString(car(vars), 1); printf("==> binding %s to value %s\n", sym, s);free(s);fflush(stdout);}
-		List* val = eval(car(vars), env);
+		List* val = eval(car(vars), env, true);
 		consSetData(vars, e_nil);
 		extendEnv(sym, val, innerEnv);
 		if(debugPrintInfo){char* s = objToString(val, 1);printf("==> binded %s to value %s\n", sym, s);free(s);fflush(stdout);}
@@ -248,8 +249,8 @@ List* apply_lambda(List* lambda, List* args, Environment* env){
 	while (notNil(sexp)){
 		if(debugPrintInfo){debugPrintObj("   Evaluating lambda sexp : ", car(sexp));}
 		if (notNil(result)){objFree(result);}
-		result = eval(car(sexp), innerEnv);
-		consSetData(sexp, e_nil);
+		result = eval(car(sexp), innerEnv, autoclean);
+		if(autoclean) consSetData(sexp, e_nil);
 		sexp = cdr(sexp);
 	}
 
@@ -264,7 +265,7 @@ int sortComparison_lambda(const void* elem1, const void* elem2) {
     List* b = *((List**)elem2);
 	List* lambda = objCopy(sort_function);
 	List* args = cons(objCopy(a), cons(objCopy(b), e_nil));
-	List* r = apply_lambda(lambda, args, sort_environment);
+	List* r = apply_lambda(lambda, args, sort_environment, true);
 	objFree(lambda); objFree(args);
 	if(r == e_true){objFree(r); return -1;
 	}else if(r == e_false){objFree(r); return 1;
@@ -291,7 +292,7 @@ int sortComparison_lambda(const void* elem1, const void* elem2) {
 
 
 ///=Gisp Macros
-List* eval(List* exp, Environment* env) {
+List* eval(List* exp, Environment* env, bool autoclean) {
 	//printf("Eval %p in %p\n", (void*)exp, (void*)env);fflush(stdout);
 	//If is a tagged hashmap...
 	if (nil(exp) || exp==INTERN_nil){
@@ -365,14 +366,14 @@ List* eval(List* exp, Environment* env) {
 		///@3fail
 		///!3Any
 		} else if (first(exp) == INTERN_if) {
-			List* condition = eval(second(exp), env);
+			List* condition = eval(second(exp), env, true);
 			consSetData(cdr(exp), e_nil);
 			List* ret;
 			if (condition != e_false){
-				ret = eval(third(exp), env);
+				ret = eval(third(exp), env, true);
 				consSetData(cdr(cdr(exp)), e_nil);
 			}else{
-				ret = eval(fourth(exp), env);
+				ret = eval(fourth(exp), env, true);
 				consSetData(cdr(cdr(cdr(exp))), e_nil);
 			}
 			objFree(condition);
@@ -397,12 +398,12 @@ List* eval(List* exp, Environment* env) {
 			int done = 0;
 			List* condToEval = cdr(exp);
 			while(done==0 && notNil(condToEval)){
-				List* condition = eval(car(condToEval), env);
+				List* condition = eval(car(condToEval), env, true);
 				consSetData(condToEval, e_nil);
 
 				if (condition != e_false){
 					List* expToEval = cdr(condToEval);
-					ret = eval(car(expToEval), env);
+					ret = eval(car(expToEval), env, true);
 					consSetData(expToEval, e_nil);
 					done = 1;
 				}else{
@@ -437,9 +438,9 @@ List* eval(List* exp, Environment* env) {
 		///@2Sequence
 		///!2args
 		} else if (first(exp) == INTERN_apply) { 
-			List* args = eval(car(cdr(cdr(exp))), env);
+			List* args = eval(car(cdr(cdr(exp))), env, true);
 			consSetData(cdr(cdr(exp)), args);
-			List* function = eval(second(exp), env);
+			List* function = eval(second(exp), env, true);
 			consSetData(cdr(exp), function);
 			List* ret = ((List* (*) (List*))function) (args);
 			objFree(exp);
@@ -457,7 +458,7 @@ List* eval(List* exp, Environment* env) {
 		}else if (first(exp) == INTERN_def){
 			if(debugPrintInfo){printf("\n===> found def expression \n");fflush(stdout);}
 			char* sym = second(exp);
-			List* val = eval(third(exp), env);
+			List* val = eval(third(exp), env, true);
 
 			//Take global env
 			Environment* globalEnv = env;
@@ -514,7 +515,7 @@ List* eval(List* exp, Environment* env) {
 			List* ret = e_nil;	
 			while (notNil(sexp)){
 				if(notNil(ret)){objFree(ret);}
-				ret = eval(first(sexp), env);
+				ret = eval(first(sexp), env, true);
 				consSetData(sexp, e_nil);
 				sexp = cdr(sexp);
 			}
@@ -536,7 +537,7 @@ List* eval(List* exp, Environment* env) {
 			List *bindings = second(exp);
 			while(notNil(bindings)){
 				char* sym = first(bindings);
-				List* val = eval(second(bindings), innerEnv);
+				List* val = eval(second(bindings), innerEnv, true);
 				consSetData(cdr(bindings), e_nil);
 				extendEnv(sym, val, innerEnv);
 				objFree(val);
@@ -549,7 +550,7 @@ List* eval(List* exp, Environment* env) {
 			List* result = e_nil;
 			while(notNil(body)){
 				if(notNil(result))objFree(result);
-				result = eval(car(body), innerEnv);
+				result = eval(car(body), innerEnv, true);
 				consSetData(body, e_nil);
 				body = cdr(body);
 			}
@@ -571,16 +572,16 @@ List* eval(List* exp, Environment* env) {
 		///@3seq
 		///!3Sequence
 		}else if (first(exp) == INTERN_reduce){
-			List* ret = eval(third(exp), env);
+			List* ret = eval(third(exp), env, true);
 			consSetData(cdr(cdr(exp)), e_nil);
-			List* seqFirst = eval(fourth(exp), env);
+			List* seqFirst = eval(fourth(exp), env, true);
 			List* seq = seqFirst;
 			consSetData(cdr(cdr(cdr(exp))), e_nil);
 
 			//If I got a vector convert it into a list
 			if (is_vector(seq)){seq = vecToList((Vector*)untag_vector(seq));}
 
-			List* function = eval(second(exp), env);
+			List* function = eval(second(exp), env, true);
 			consSetData(cdr(exp), env);
 			if (is_pair(function)){
 				//Lambda
@@ -588,7 +589,7 @@ List* eval(List* exp, Environment* env) {
 				while (notNil(seq)){
 					List* lambdaCopy = objCopy(lambda);
 					List* lambdaArgs = cons(ret, cons(objCopy(car(seq)), e_nil));
-					List* r = apply_lambda(lambdaCopy, lambdaArgs, env);
+					List* r = apply_lambda(lambdaCopy, lambdaArgs, env, true);
 					objFree(lambdaCopy);
 					objFree(lambdaArgs);
 					ret = r;
@@ -635,7 +636,7 @@ List* eval(List* exp, Environment* env) {
 			profile("map", 1);
 
 			//Get the sequence
-			List* seqFirst = eval(third(exp), env);
+			List* seqFirst = eval(third(exp), env, true);
 			List* seq = seqFirst;
 			consSetData(cdr(cdr(exp)), e_nil);
 
@@ -648,7 +649,7 @@ List* eval(List* exp, Environment* env) {
 				seq = list;
 			}
 
-			List* function = eval(second(exp), env);
+			List* function = eval(second(exp), env, true);
 			consSetData(cdr(exp), env);
 			if (is_pair(function)){
 				//Lambda
@@ -709,7 +710,7 @@ List* eval(List* exp, Environment* env) {
 			List* ret = e_nil;
 
 			//Get the sequence
-			List* seqFirst = eval(third(exp), env);
+			List* seqFirst = eval(third(exp), env, true);
 			List* seq = seqFirst;
 			consSetData(cdr(cdr(exp)), e_nil);
 
@@ -722,7 +723,7 @@ List* eval(List* exp, Environment* env) {
 				seq = list;
 			}
 
-			List* function = eval(second(exp), env);
+			List* function = eval(second(exp), env, true);
 			consSetData(cdr(exp), env);
 			if (is_pair(function)){
 				//Lambda
@@ -730,7 +731,7 @@ List* eval(List* exp, Environment* env) {
 				while (notNil(seq)){
 					List* lambdaCopy = objCopy(lambda);
 					List* lambdaArg = cons(objCopy(car(seq)), e_nil);
-					List* r = apply_lambda(lambdaCopy, lambdaArg, env);
+					List* r = apply_lambda(lambdaCopy, lambdaArg, env, true);
 					objFree(lambdaCopy);
 					objFree(lambdaArg);
 					if(r==e_true){
@@ -778,7 +779,7 @@ List* eval(List* exp, Environment* env) {
 			List* ret = e_nil;
 
 			//Get the sequence
-			List* seq = eval(third(exp), env);
+			List* seq = eval(third(exp), env, true);
 			consSetData(cdr(cdr(exp)), e_nil);
 			if (is_pair(seq)){
 				Vector* vecSeq = listToVec(seq);
@@ -786,7 +787,7 @@ List* eval(List* exp, Environment* env) {
 				seq = (List*)tag_vector(vecSeq);
 			}
 
-			List* function = eval(second(exp), env);
+			List* function = eval(second(exp), env, true);
 			consSetData(cdr(exp), env);
 			if (is_pair(function)){
 				//Lambda
@@ -823,7 +824,7 @@ List* eval(List* exp, Environment* env) {
 
 			//Create a copy of the seq expression and evaluate the copy so it free itself in eval
 			List* seqCopy = objCopy(second(second(exp)));
-			List* evaluatedSeq = eval(seqCopy, env);
+			List* evaluatedSeq = eval(seqCopy, env, true);
 			List* seqCurrent = evaluatedSeq;
 
 			List* body = cdr(cdr(exp));
@@ -838,7 +839,7 @@ List* eval(List* exp, Environment* env) {
 				while(notNil(current)){
 					//Eval the body and go to the next
 					if (notNil(ret)) objFree(ret);
-					ret = eval(car(current), innerEnv);
+					ret = eval(car(current), innerEnv, true);
 					consSetData(current, e_nil);
 					current = cdr(current);
 				}
@@ -869,7 +870,7 @@ List* eval(List* exp, Environment* env) {
 		///!2Any
 		}else if (first(exp) == INTERN_profile){
 			//Get the tag
-			List* tag = eval(second(exp), env);
+			List* tag = eval(second(exp), env, true);
 
 			//Eval and profile
 			clock_t begin = clock();
@@ -877,7 +878,7 @@ List* eval(List* exp, Environment* env) {
 			List* seq = cdr(cdr(exp));
 			while(notNil(seq)){
 				if(notNil(ret)){objFree(ret);}
-				ret = eval(car(seq), env);
+				ret = eval(car(seq), env, true);
 				consSetData(seq, e_nil);
 				seq = cdr(seq);
 			}
@@ -895,7 +896,7 @@ List* eval(List* exp, Environment* env) {
 
 		//Keyword map member accessing
 		}else if (*((char*)first(exp)) == ':'){
-			List* obj = eval(second(exp), env);
+			List* obj = eval(second(exp), env, true);
 			consSetData(cdr(exp), e_nil);
 
 			//Equivalent to (get hashmap keyword)
@@ -908,14 +909,14 @@ List* eval(List* exp, Environment* env) {
 
 		// (function args)
 		} else { 
-			List* primop = eval(first(exp), env);
+			List* primop = eval(first(exp), env, autoclean);
 
 			//user defined lambda, arg list eval happens in binding  below
 			if (is_pair(primop)) { 
 				if(debugPrintInfo){printf("===>Evaluating lambda"); debugPrintObj(" ", exp); printf("====> %p ", primop);fflush(stdout); debugPrintObj("Primop ", primop);}
 
 				List* lambda = cons(primop, objCopy(cdr(exp)));
-				List* result = eval(lambda, env); //Lambda and primop automatically cleared by eval
+				List* result = eval(lambda, env, autoclean); 
 
 				//objFree(lambda);
 				objFree(exp);
@@ -931,8 +932,8 @@ List* eval(List* exp, Environment* env) {
 				List* args = 0;
 				List** tmp = &args;
 				for ( ; notNil(argsToEval) ; argsToEval = cdr(argsToEval)) {
-					*tmp = cons(eval(car(argsToEval), env), e_nil);
 					consSetData(argsToEval, e_nil);
+					*tmp = cons(eval(car(argsToEval), env, autoclean), e_nil);
 					tmp = &((List*)untag(*tmp))->next;
 				}
 
@@ -951,7 +952,7 @@ List* eval(List* exp, Environment* env) {
 		if(debugPrintInfo){printf("\e[95m%p : ", exp); debugPrintObj("\e[95mEvaluating lambda expression:" , exp); printf("\e[39m");fflush(stdout);}
 
 		//bind names into env and eval body
-		List* ret = apply_lambda(car(exp), cdr(exp), env);
+		List* ret = apply_lambda(car(exp), cdr(exp), env, true);
 		objFree(exp);
 		if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("lambda Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 		return ret;
@@ -987,7 +988,7 @@ List* read_and_eval(){
 				debugPrintObj("Read: ", obj);
 				printf("\e[39m"); fflush(stdout);}
 			if(notNil(result)){objFree(result);result=e_nil;}
-			result = eval(obj, global_env);
+			result = eval(obj, global_env, true);
 		}
 
 		if (exitFlag==0){look = read_char();
