@@ -198,15 +198,14 @@ void extendEnv(char* name, void* value, Environment* env){
 	void* cellData;
 	int cellIndex;
 	int found = hashmap_get_cell_data(env->hashData, name, &cellKey, &cellData, &cellIndex);
+	void* hashmap_obj = objCopy(value);
 	if(found){
 		objFree(cellData);
-		void* hashmap_obj = objCopy(value);
 		if(debugPrintInfo){printf("replacing \"%s\" (%p) with %p (original: %p)\n", cellKey, cellKey, hashmap_obj, value);fflush(stdout);}
 		hashmap_put(env->hashData, cellKey, hashmap_obj);
 		
 	}else{
 		char* hashmap_key = strdup(name);
-		void* hashmap_obj = objCopy(value);
 		if(debugPrintInfo){printf("adding \"%s\" (%p) as %p (original: %p)\n", hashmap_key, hashmap_key, hashmap_obj, value);fflush(stdout);}
 		hashmap_put(env->hashData, hashmap_key, hashmap_obj);
 	}
