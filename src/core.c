@@ -214,22 +214,16 @@ void extendEnv(char* name, void* value, Environment* env){
 void* searchInEnvironment(List* name, Environment* env){
 	if(debugPrintInfo){printf("==> Search in environment \"%s\"\n", (char*)name);fflush(stdout);}
 	
-	environmentCounter_search++;
-	clock_t start = clock();
 
 	Environment* currentEnv = env;
 	while(currentEnv){
 		//Search in the hash
-		void* value = e_nil;
+		void* value;
 		int status = hashmap_get(currentEnv->hashData, (char*)name, (any_t)&value);
 		if (status == MAP_OK){
-			clock_t end = clock(); environmentCounter_searchTimeSum += (double)(end - start) / CLOCKS_PER_SEC;
 			List* copy = objCopy(value);
 
-			if (debugPrintInfo){
-				printf("==> Found, returning copy %p of value:%p ", copy, value);fflush(stdout);
-				debugPrintObj("", value);
-			}
+			//if (debugPrintInfo){printf("==> Found, returning copy %p of value:%p ", copy, value);fflush(stdout); debugPrintObj("", value);}
 			return copy;
 		}
 
@@ -237,7 +231,6 @@ void* searchInEnvironment(List* name, Environment* env){
 		currentEnv = currentEnv->outer;
 	}
 
-	clock_t end = clock(); environmentCounter_searchTimeSum += (double)(end - start) / CLOCKS_PER_SEC;
 	//printf("++not found value:\"\"\n");fflush(stdout);
 	return 0;
 }
@@ -515,19 +508,38 @@ void environmentFree(Environment* env){
 
 
 
-
 List* objCopy(List* obj){
 	profile("objCopy", 1);
-	if(debugPrintCopy){char* str = objToString(obj, 1); printf("\e[35m--- Copying obj: %p value: %s\n\e[39m", obj, str); free(str);}
-	if(obj==e_nil || obj==e_false || obj==e_true){ return obj;}
-	if(is_string(obj)){return stringCopy(obj);}
-	if(is_hashmap(obj)){return hashmapCopy(obj);}
-	if(is_vector(obj)){return vectorCopy(obj);}
-	if(is_number(obj)){return numberCopy(obj);}
-	if(is_pair(obj)){return listCopy(obj);}
-	profile("objCopy", 0);
-	return obj;
+	if(obj==e_nil || obj==e_true){
+		profile("objCopy", 0);
+		return obj;
+	}
+	
+	if(is_list(obj)){
+		if(is_string(obj)){
+			profile("objCopy", 0);
+			return stringCopy(obj);
+		}else if(is_vector(obj)){
+			profile("objCopy", 0);
+			return vectorCopy(obj);
+		}else{
+			profile("objCopy", 0);
+			return listCopy(obj);
+		}
+	}else{
+		if(is_hashmap(obj)){
+			profile("objCopy", 0);
+			return hashmapCopy(obj);
+		}else if(is_number(obj)){
+			profile("objCopy", 0);
+			return numberCopy(obj);
+		}else{
+			profile("objCopy", 0);
+			return obj;
+		}
+	}
 }
+
 
 List* stringCopy(List* s){
 	char* untagged = (char*)untag_string(s);
@@ -536,7 +548,7 @@ List* stringCopy(List* s){
 }
 
 List* vectorCopy(List* v){
-	if(debugPrintCopy){printf("\e[35m--- Copying vector: %p\n\e[39m", v);}
+	//if(debugPrintCopy){printf("\e[35m--- Copying vector: %p\n\e[39m", v);}
 	Vector* old = (Vector*)untag_vector(v);
 	int s = old->size;
 	Vector* new = newVec(s);
@@ -546,12 +558,12 @@ List* vectorCopy(List* v){
 		data[i] = objCopy(oldd[i]);
 	}
 	data[s] = 0;
-	if(debugPrintCopy){printf("\e[35m===> Copied vector %p", new); debugPrintObj(" : \e[39m", (List*)tag_vector(new));}
+	//if(debugPrintCopy){printf("\e[35m===> Copied vector %p", new); debugPrintObj(" : \e[39m", (List*)tag_vector(new));}
 	return (List*)tag_vector(new);
 }
 
 List* hashmapCopy(List* hashmap){
-	if(debugPrintCopy){printf("\e[35m--- Copying hashmap: %p\n\e[39m", hashmap);}
+	//if(debugPrintCopy){printf("\e[35m--- Copying hashmap: %p\n\e[39m", hashmap);}
 
 	//Extract old hashmap information
 	map_t old = (map_t)untag_hashmap(hashmap);
@@ -568,7 +580,7 @@ List* hashmapCopy(List* hashmap){
 		hashmap_put(new, key, val);
 	}
 
-	if(debugPrintCopy){printf("\e[35m===> Copied hashmap %p", new); debugPrintObj(" : \e[39m", (List*)tag_hashmap(new));}
+	//if(debugPrintCopy){printf("\e[35m===> Copied hashmap %p", new); debugPrintObj(" : \e[39m", (List*)tag_hashmap(new));}
 	return (List*)tag_hashmap(new);
 }
 
@@ -617,13 +629,13 @@ List* listCopy(List* l){
 		untagged->data = objCopy(car(current));
 		if(notNil(cdr(current))){untagged->next = cons(e_nil, e_nil);}
 
-		if(debugPrintCopy){printf("+++ listCopy %p", last); printf(" (%p ", car(last)); printf(". %p) ", cdr(last)); debugPrintObj("", last);}
+		//if(debugPrintCopy){printf("+++ listCopy %p", last); printf(" (%p ", car(last)); printf(". %p) ", cdr(last)); debugPrintObj("", last);}
 
 		//Save current last one and iterate
 		last = cdr(last);
 		current = cdr(current);
 	}
-	if(debugPrintCopy){printf("\e[35m===> Copied list %p", newFirst); debugPrintObj(" : ", newFirst); List* c = newFirst; while(notNil(c)){printf("%p, ", c);c=cdr(c);} printf("\n\e[39m");}
+	//if(debugPrintCopy){printf("\e[35m===> Copied list %p", newFirst); debugPrintObj(" : ", newFirst); List* c = newFirst; while(notNil(c)){printf("%p, ", c);c=cdr(c);} printf("\n\e[39m");}
 
 	//printf("done copy %p %p\n", current, newFirst);fflush(stdout);
 	return newFirst;
