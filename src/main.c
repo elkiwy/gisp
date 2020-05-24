@@ -711,54 +711,50 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 			}
 
 
-			List* ret = e_nil;
+			//Get the sequence size and prepare the result vector
+			int size = 0;
+			List* items = seq;
+			while(notNil(items)){size++; items = cdr(items);}
+			Vector* ret_vec = newVec(size);
+			void** ret_vec_data = ret_vec->data;
+
+			//Evaluate and fill the result vector
 			List* function = eval(second(exp), env, true);
 			consSetData(cdr(exp), env);
 			if (is_pair(function)){
 				//Lambda
+				int i = 0;
 				while (notNil(seq)){
 					List* lambdaArg = cons(objCopy(car(seq)), e_nil);
 					List* r = apply_lambda(function, lambdaArg, env, false);
 					objFree(lambdaArg);
-					ret = cons(r, ret);
+					ret_vec_data[i] = r;
 					seq = cdr(seq);
+					i++;
 				}
 			}else{
 				//Known function name
 				void* f = function;
+				int i = 0;
 				if(nil(f)){printf("\nERROR: \"%s\" is not a valid function for map. Exiting.\n\n", (char*)second(exp));fflush(stdout);exit(1);}
 				while (notNil(seq)){
 					List* functionArg = cons(objCopy(car(seq)), e_nil);
 					List* r = ((List* (*) (List*))f)(functionArg);
 					objFree(functionArg);
-					ret = cons(r, ret);
+					ret_vec_data[i] = r;
 					seq = cdr(seq);
+					i++;
 				}
 			}
-
-			//Reverse the result list
-			List* correct = e_nil;
-			List* l = ret;
-			while(notNil(l)){
-				correct = cons(car(l), correct);
-				l = cdr(l);
-			}
-
-			//Clean the previous result cons since we recycled the same objects during the reverse
-			listFreeOnlyCons(ret);
-
-			//Convert into vector 
-			Vector* untagged_vec = listToVec(correct);
-			objFree(correct);
-			correct = (List*)tag_vector(untagged_vec);
 
 			objFree(function);
 			objFree(seqFirst);
 			objFree(exp);
 
-			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mmap Evaluated to:" , correct); printf("\e[39m");fflush(stdout);}
+			List* finalResult = (List*)tag_vector(ret_vec);
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mmap Evaluated to:" , finalResult); printf("\e[39m");fflush(stdout);}
 
-			return correct;
+			return finalResult;
 
 		/// (filter function seq)
 		///+Filter a sequence seq evaluating function on each element of seq and returning only the ones evaluating the function to true.
