@@ -623,19 +623,8 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 		///!1Function
 		///@2seq
 		///!2Sequence
-
-		///+Evaluate the function on the sequence seq returning a vector of evaluated elements.
-		///&mapv
-		///#Vector
-		///@1function
-		///!1Function
-		///@2seq
-		///!2Sequence
-		}else if (first(exp) == INTERN_map || first(exp) == INTERN_mapv){
+		}else if (first(exp) == INTERN_map){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating map ", exp);}
-			List* ret = e_nil;
-
-			profile("map", 1);
 
 			//Get the sequence
 			List* seqFirst = eval(third(exp), env, true);
@@ -651,6 +640,8 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 				seq = list;
 			}
 
+
+			List* ret = e_nil;
 			List* function = eval(second(exp), env, true);
 			consSetData(cdr(exp), env);
 			if (is_pair(function)){
@@ -686,21 +677,86 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 			//Clean the previous result cons since we recycled the same objects during the reverse
 			listFreeOnlyCons(ret);
 
-
-			//Convert into vector if necessary
-			if(first(exp) == INTERN_mapv){
-				Vector* untagged_vec = listToVec(correct);
-				objFree(correct);
-				correct = (List*)tag_vector(untagged_vec);
-			}
-
 			objFree(function);
 			objFree(seqFirst);
 			objFree(exp);
 
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mmap Evaluated to:" , correct); printf("\e[39m");fflush(stdout);}
 
-			profile("map", 0);
+			return correct;
+
+
+		///+Evaluate the function on the sequence seq returning a vector of evaluated elements.
+		///&mapv
+		///#Vector
+		///@1function
+		///!1Function
+		///@2seq
+		///!2Sequence
+		}else if (first(exp) == INTERN_mapv){
+			if(debugPrintInfo){debugPrintObj("===>Evaluating map ", exp);}
+
+			//Get the sequence
+			List* seqFirst = eval(third(exp), env, true);
+			List* seq = seqFirst;
+			consSetData(cdr(cdr(exp)), e_nil);
+
+			//If I got a vector convert it into a list
+			if (is_vector(seqFirst)){
+				Vector* vec = (Vector*)untag_vector(seqFirst);
+				List* list = vecToList(vec);
+				objFree((List*)seqFirst);
+				seqFirst = list;
+				seq = list;
+			}
+
+
+			List* ret = e_nil;
+			List* function = eval(second(exp), env, true);
+			consSetData(cdr(exp), env);
+			if (is_pair(function)){
+				//Lambda
+				while (notNil(seq)){
+					List* lambdaArg = cons(objCopy(car(seq)), e_nil);
+					List* r = apply_lambda(function, lambdaArg, env, false);
+					objFree(lambdaArg);
+					ret = cons(r, ret);
+					seq = cdr(seq);
+				}
+			}else{
+				//Known function name
+				void* f = function;
+				if(nil(f)){printf("\nERROR: \"%s\" is not a valid function for map. Exiting.\n\n", (char*)second(exp));fflush(stdout);exit(1);}
+				while (notNil(seq)){
+					List* functionArg = cons(objCopy(car(seq)), e_nil);
+					List* r = ((List* (*) (List*))f)(functionArg);
+					objFree(functionArg);
+					ret = cons(r, ret);
+					seq = cdr(seq);
+				}
+			}
+
+			//Reverse the result list
+			List* correct = e_nil;
+			List* l = ret;
+			while(notNil(l)){
+				correct = cons(car(l), correct);
+				l = cdr(l);
+			}
+
+			//Clean the previous result cons since we recycled the same objects during the reverse
+			listFreeOnlyCons(ret);
+
+			//Convert into vector 
+			Vector* untagged_vec = listToVec(correct);
+			objFree(correct);
+			correct = (List*)tag_vector(untagged_vec);
+
+			objFree(function);
+			objFree(seqFirst);
+			objFree(exp);
+
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mmap Evaluated to:" , correct); printf("\e[39m");fflush(stdout);}
 
 			return correct;
 
