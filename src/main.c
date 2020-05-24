@@ -227,7 +227,6 @@ void debug_printEnv(Environment* a){
 
 List* eval(List* exp, Environment* env, bool autoclean);
 List* apply_lambda(List* lambda, List* args, Environment* env, bool autoclean){
-	profile("lambda", 1);
 	if(debugPrintInfo){printf("===>Applying lambda ");fflush(stdout); print_obj(lambda, 1);fflush(stdout); printf(" with args ");fflush(stdout); print_obj(args, 1);fflush(stdout); printf(" \n");fflush(stdout);}
 
 	//bind names into env and eval body
@@ -258,7 +257,6 @@ List* apply_lambda(List* lambda, List* args, Environment* env, bool autoclean){
 	}
 
 	environmentFree(innerEnv);
-	profile("lambda", 0);
 	return result;
 }
 
