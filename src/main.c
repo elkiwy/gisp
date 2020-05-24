@@ -47,14 +47,16 @@ void profile(char* name, int active){
 
 void profile_print(){
 	int size = hashmap_length(profile_map);
-	char* keys[size];
-	profile_struct* structs[size];
-	hashmap_keys_and_values(profile_map, keys, (void**)structs);
-	for (int i=0; i<size; ++i){
-		double total = ((double)structs[i]->total)/CLOCKS_PER_SEC;
-		double calls = (double)structs[i]->calls;
-		double avg   = total/calls;
-		printf("\nProfile_total[%s] = %f, calls: %d, avg: %f", keys[i], total, (int)calls, avg);
+	if (size>0){
+		char* keys[size];
+		profile_struct* structs[size];
+		hashmap_keys_and_values(profile_map, keys, (void**)structs);
+		for (int i=0; i<size; ++i){
+			double total = ((double)structs[i]->total)/CLOCKS_PER_SEC;
+			double calls = (double)structs[i]->calls;
+			double avg   = total/calls;
+			printf("\nProfile_total[%s] = %f, calls: %d, avg: %f", keys[i], total, (int)calls, avg);
+		}
 	}
 }
 
