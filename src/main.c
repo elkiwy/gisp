@@ -427,10 +427,9 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 		///@2body
 		///!2Any
 		} else if (first(exp) == INTERN_lambda) {
-			List* ret = objCopy(exp);
-			objFree(exp);
-			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mlambda Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
-			return ret;
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mlambda Evaluated to:" , exp); printf("\e[39m");fflush(stdout);}
+			return exp;
+
 
 		// (apply func args)
 		///+Applies the function f on each element of args
@@ -676,9 +675,17 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 				}
 			}
 
-			List* reversed = cons(ret, e_nil);
-			List* correct = freverse(reversed);
-			objFree(reversed);
+			//Reverse the result list
+			List* correct = e_nil;
+			List* l = ret;
+			while(notNil(l)){
+				correct = cons(car(l), correct);
+				l = cdr(l);
+			}
+
+			//Clean the previous result cons since we recycled the same objects during the reverse
+			listFreeOnlyCons(ret);
+
 
 			//Convert into vector if necessary
 			if(first(exp) == INTERN_mapv){
@@ -965,10 +972,8 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 
 	// Else should be just a normal list
 	} else if (is_pair(exp)){
-		List* ret = objCopy(exp);
-		objFree(exp);
-		if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("list Evaluated to itself:" , ret); printf("\e[39m");fflush(stdout);}
-		return ret;
+		if(!debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("list Evaluated to itself:" , exp); printf("\e[39m");fflush(stdout);}
+		return exp;
 	}
 
 
