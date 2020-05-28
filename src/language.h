@@ -145,6 +145,15 @@ List* fstr(List* a);
 
 
 // ------------------------------------------------------------------
+// Graphic objects
+List* fpoint(List* a);
+List* fpointx(List* a);
+List* fpointy(List* a);
+List* fprintPoint(List* a);
+
+
+
+// ------------------------------------------------------------------
 // Cairo
 List* fsvg_surface(List* a);
 List* fsvg_status(List* a);
@@ -154,6 +163,8 @@ List* fsvg_line(List* a);
 List* fsvg_circle(List* a);
 List* fsvg_to_png(List* a);
 
+
+List* fprintAddress(List* a);
 
 #endif
 

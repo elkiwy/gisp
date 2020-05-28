@@ -1225,10 +1225,17 @@ int main(int argc, char* argv[]) {
 	extendEnv("take",    (void*)ftake, global_env);
 	extendEnv("drop",    (void*)fdrop, global_env);
 
+	extendEnv("fastpoint", (void*)fpoint, global_env);
+	extendEnv("point-x",   (void*)fpointx, global_env);
+	extendEnv("point-y",   (void*)fpointy, global_env);
+	extendEnv("point-print",   (void*)fprintPoint, global_env);
+
 	extendEnv("simplex-noise",(void*)fsimplex_noise, global_env);
 	extendEnv("simplex-noise-value",(void*)fsimplex, global_env);
 	extendEnv("mandelbrot-point",(void*)fmandelbrot, global_env);
 	extendEnv("rescale",         (void*)frescale, global_env);
+
+	extendEnv("printAddress",   (void*)fprintAddress, global_env);
 
 	//Intern all the macro strings
 	INTERN_quote	= intern("quote");

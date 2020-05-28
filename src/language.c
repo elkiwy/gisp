@@ -1456,5 +1456,66 @@ __attribute__((aligned(16))) List* fsvg_to_png(List* a){
 
 
 
+__attribute__((aligned(16))) List* fprintAddress(List* a){
+	printf("Debug print address: '%p'\n", first(a));fflush(stdout);
+	return e_nil;
+}
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------
+///=Gisp Core: Points
+
+typedef struct gisp_point{
+	double x;
+	double y;
+} gisp_point;
+
+///~Creates a Point with absolutes coordinates.
+///#Point
+///@1x
+///!1Number
+///@2y
+///!2Number
+__attribute__((aligned(16))) List* fpoint(List* a){
+	float x = numVal(first(a));
+	float y = numVal(second(a));
+	/**/
+	gisp_point* p = tgc_alloc(&gc, sizeof(gisp_point));
+	//printf("Allocated memory with gc:  %p\n", p);
+	/*/
+	gisp_point* p1 = malloc(sizeof(gisp_point));
+	/**/
+	p->x = x;
+	p->y = y;
+	return (List*)p;
+}
+
+
+__attribute__((aligned(16))) List* fpointx(List* a){
+	gisp_point* p = (gisp_point*)first(a);
+	return (List*)value_to_number(p->x);
+}
+
+__attribute__((aligned(16))) List* fpointy(List* a){
+	gisp_point* p = (gisp_point*)first(a);
+	return (List*)value_to_number(p->y);
+}
+
+
+
+__attribute__((aligned(16))) List* fprintPoint(List* a){
+	gisp_point* p = (gisp_point*)first(a);
+	printf("{%p} X:%f Y:%f\n", p, p->x, p->y);fflush(stdout);
+	return e_nil;
+}
 
 
