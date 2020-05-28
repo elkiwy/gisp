@@ -318,7 +318,12 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 
 	//If is an atom...
 	}else if (is_atom(exp) ) {
-		//printf("atom found %s\n", (char*)exp);
+		//printf("atom found %s (%p)\n", (char*)exp, exp);
+
+		if (strlen((char*)exp)==0){
+			//Evaluating a custom object
+			return exp;
+		}
 
 		//Check if I have the symbol in the environment
 		List* symbolValue = searchInEnvironment(exp, env);
@@ -344,7 +349,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 		}
 
 		//Else return it as an atom
-		return e_nil;
+		return exp;
 	//Else if is a list with the first atom being an atom
 	//(At this point we should be sure that the exp is a list)
 	} else if (is_atom(first(exp))) { 
