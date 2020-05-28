@@ -1488,11 +1488,11 @@ typedef struct gisp_point{
 __attribute__((aligned(16))) List* fpoint(List* a){
 	float x = numVal(first(a));
 	float y = numVal(second(a));
-	/**/
+	/*/
 	gisp_point* p = tgc_alloc(&gc, sizeof(gisp_point));
 	//printf("Allocated memory with gc:  %p\n", p);
 	/*/
-	gisp_point* p1 = malloc(sizeof(gisp_point));
+	gisp_point* p = malloc(sizeof(gisp_point));
 	/**/
 	p->x = x;
 	p->y = y;
