@@ -54,4 +54,8 @@ clean:
 	rm -r build && rm -r $(OBJ) && mkdir build && mkdir $(OBJ)
 
 
+sketch: clean build/main
+	build/main ~/Documents/artworks/SKETCH/sketch.gisp --time
 
+valgrind-sketch: clean build/main
+	valgrind --leak-check=yes build/main ~/Documents/artworks/SKETCH/sketch.gisp --time	
