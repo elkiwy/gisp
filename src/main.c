@@ -299,7 +299,11 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 	if (nil(exp) || exp==INTERN_nil){
 		return e_nil;	
 
-	//If is a tagged string...
+	//if is a tagged object...
+	}else if (is_object(exp)){
+		return exp;	
+
+	//if is a tagged string...
 	}else if (is_string(exp)){
 		return exp;	
 

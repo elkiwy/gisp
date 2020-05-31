@@ -1474,11 +1474,6 @@ __attribute__((aligned(16))) List* fprintAddress(List* a){
 // ---------------------------------------------
 ///=Gisp Core: Points
 
-typedef struct gisp_point{
-	double x;
-	double y;
-} gisp_point;
-
 ///~Creates a Point with absolutes coordinates.
 ///#Point
 ///@1x
@@ -1486,34 +1481,34 @@ typedef struct gisp_point{
 ///@2y
 ///!2Number
 __attribute__((aligned(16))) List* fpoint(List* a){
-	float x = numVal(first(a));
-	float y = numVal(second(a));
-	/*/
-	gisp_point* p = tgc_alloc(&gc, sizeof(gisp_point));
-	//printf("Allocated memory with gc:  %p\n", p);
-	/*/
+	double x = numVal(first(a));
+	double y = numVal(second(a));
+
+	gisp_object* o = malloc(sizeof(gisp_object));
+	o->type = GISPOBJ_POINT;
 	gisp_point* p = malloc(sizeof(gisp_point));
-	/**/
 	p->x = x;
 	p->y = y;
-	return (List*)p;
+	o->obj = p;
+	return (List*)tag_object(o);
 }
 
 
 __attribute__((aligned(16))) List* fpointx(List* a){
-	gisp_point* p = (gisp_point*)first(a);
-	return (List*)value_to_number(p->x);
+	double x = ((gisp_point*)((gisp_object*)untag_object(first(a)))->obj)->x;
+	return (List*)value_to_number(x);
 }
 
 __attribute__((aligned(16))) List* fpointy(List* a){
-	gisp_point* p = (gisp_point*)first(a);
-	return (List*)value_to_number(p->y);
+	double y = ((gisp_point*)((gisp_object*)untag_object(first(a)))->obj)->y;
+	return (List*)value_to_number(y);
 }
 
 
 
 __attribute__((aligned(16))) List* fprintPoint(List* a){
-	gisp_point* p = (gisp_point*)first(a);
+	gisp_object* o = (gisp_object*)untag_object(first(a));
+	gisp_point* p = (gisp_point*)o->obj;
 	printf("{%p} X:%f Y:%f\n", p, p->x, p->y);fflush(stdout);
 	return e_nil;
 }

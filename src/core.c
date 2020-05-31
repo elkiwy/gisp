@@ -337,7 +337,11 @@ void debugPrintObj(char* pre, List* obj){
 
 
 void objFree(List* obj){
-	if(is_string(obj)){
+	if(is_object(obj)){
+		if(debugPrintFrees){printf("\e[31m--- Freeing object: %p ", (void*)obj);fflush(stdout); print_obj(obj, 1); printf("\n\e[39m");fflush(stdout);}
+		gispObjectFree(obj);
+
+	}else if(is_string(obj)){
 		if(debugPrintFrees){printf("\e[31m--- Freeing string: %p ", (void*)obj);fflush(stdout); print_obj(obj, 1); printf("\n\e[39m");fflush(stdout);}
 		stringFree(obj);
 
@@ -455,32 +459,26 @@ void environmentFree(Environment* env){
 
 
 List* objCopy(List* obj){
-	profile("objCopy", 1);
 	if(obj==e_nil || obj==e_true){
-		profile("objCopy", 0);
 		return obj;
 	}
 	
 	if(is_list(obj)){
 		if(is_string(obj)){
-			profile("objCopy", 0);
 			return stringCopy(obj);
 		}else if(is_vector(obj)){
-			profile("objCopy", 0);
 			return vectorCopy(obj);
 		}else{
-			profile("objCopy", 0);
 			return listCopy(obj);
 		}
 	}else{
-		if(is_hashmap(obj)){
-			profile("objCopy", 0);
+		if(is_object(obj)){
+			return gispObjectCopy(obj);
+		}else if(is_hashmap(obj)){
 			return hashmapCopy(obj);
 		}else if(is_number(obj)){
-			profile("objCopy", 0);
 			return numberCopy(obj);
 		}else{
-			profile("objCopy", 0);
 			return obj;
 		}
 	}
@@ -585,6 +583,43 @@ List* listCopy(List* l){
 
 	//printf("done copy %p %p\n", current, newFirst);fflush(stdout);
 	return newFirst;
+}
+
+
+
+
+List* gispObjectCopy(List* obj){
+	gisp_object* o = (gisp_object*)untag_object(obj);
+	if (o->type == GISPOBJ_POINT){
+		gisp_point* p = (gisp_point*)o->obj;
+		gisp_object* newo = malloc(sizeof(gisp_object));
+		newo->type = o->type;
+		gisp_point* newp = malloc(sizeof(gisp_point));
+		newp->x = p->x;
+		newp->y = p->y;
+		newo->obj = newp;
+		return (List*)tag_object(newo);
+	}else{
+		printf("TODO");
+		exit(1);
+	}
+	return NULL;
+}
+
+
+
+void gispObjectFree(List* obj){
+	gisp_object* o = (gisp_object*)untag_object(obj);
+	if (o->type == GISPOBJ_POINT){
+		gisp_point* p = (gisp_point*)o->obj;
+		free(o);
+		free(p);
+		return;
+	}else{
+		printf("TODO");
+		exit(1);
+	}
+	return;
 }
 
 
