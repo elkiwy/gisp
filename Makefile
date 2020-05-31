@@ -38,14 +38,8 @@ docu:
 	docu -i src -m HTML -s Docs.css -o Docs.html
 	docu -i src -m DEBUG
 
-test: build/main
-	./build/main src/test.gisp --time --memory
 
-fulltest: build/main
-	./build/main ~/Documents/gisp-artworks/SKETCH/sketch.gisp
 
-simplextest: build/main
-	./build/main src/simplex-noise-profile.gisp
 
 install: build/main
 	sudo cp build/main /usr/local/bin/gisp
@@ -54,8 +48,12 @@ clean:
 	rm -r build && rm -r $(OBJ) && mkdir build && mkdir $(OBJ)
 
 
+test: clean build/main
+	./build/main src/test.gisp --time --memory
 sketch: clean build/main
 	build/main ~/Documents/artworks/SKETCH/sketch.gisp --time
 
 valgrind-sketch: clean build/main
 	valgrind --leak-check=yes build/main ~/Documents/artworks/SKETCH/sketch.gisp --time	
+valgrind-test: clean build/main
+	valgrind --leak-check=yes build/main ~/Documents/gisp/src/test.gisp --time	
