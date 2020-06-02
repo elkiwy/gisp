@@ -167,14 +167,25 @@ void* searchInEnvironment(List* exp, Environment* env);
 
 
 enum {
-	GISPOBJ_POINT = 0x01,
-	GISPOBJ_LINE  = 0x02
+	GISPOBJ_POINT = 1,
+	GISPOBJ_VEC   = 2,
+	GISPOBJ_LINE  = 3
 };
 
 typedef struct gisp_point{
 	double x;
 	double y;
 } gisp_point;
+
+typedef struct gisp_vec{
+	double len;
+	double dir;
+} gisp_vec;
+
+typedef struct gisp_line{
+	gisp_point* a;
+	gisp_point* b;
+} gisp_line;
 
 typedef struct gisp_object{
 	int type;
@@ -185,6 +196,8 @@ typedef struct gisp_object{
 List* gispObjectCopy(List* obj);
 void gispObjectFree(List* obj);
 gisp_object* newGispPoint(double x, double y);
+gisp_object* newGispVec(double len, double dir);
+gisp_object* newGispLine(double ax, double ay, double bx, double by);
 
 
 // ------------------------------------------------------------------

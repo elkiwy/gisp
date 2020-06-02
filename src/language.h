@@ -150,6 +150,20 @@ List* fpoint(List* a);
 List* fpointx(List* a);
 List* fpointy(List* a);
 List* fprintPoint(List* a);
+List* fpointvec(List* a);
+List* fveclen(List* a);
+List* fvecdir(List* a);
+List* fpointDistance(List* a);
+List* fpointAngle(List* a);
+List* fpointBetween(List* a);
+List* fpointMoveByVector(List* a);
+List* fpointDraw(List* a);
+List* fpointsDraw(List* a);
+
+List* fline(List* a);
+List* flineA(List* a);
+List* flineB(List* a);
+List* fdrawPath(List* a);
 
 
 
@@ -165,6 +179,11 @@ List* fsvg_to_png(List* a);
 
 
 List* fprintAddress(List* a);
+
+
+
+
+
 
 #endif
 

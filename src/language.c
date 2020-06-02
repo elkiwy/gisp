@@ -1314,6 +1314,24 @@ __attribute__((aligned(16))) List* fassoc(List* a){
 
 // ---------------------------------------------
 ///=Core: Cairo 
+
+
+
+void context_draw_circle(cairo_t* context, double x, double y, double r){
+	cairo_move_to(context, x+r, y);
+	cairo_arc(context, x, y, r, 0, M_PI*2);
+	cairo_stroke(context);
+}
+
+
+void context_draw_line(cairo_t* context, double ax, double ay, double bx, double by){
+	cairo_move_to(context, ax, ay);
+	cairo_line_to(context, bx, by);
+	cairo_stroke(context);
+}
+
+
+
 ///~Creates a new surface of width w and height h 
 ///&make-surface
 ///#Surface
@@ -1391,16 +1409,23 @@ __attribute__((aligned(16))) List* fsvg_clean(List* a){
 ///!3Point
 __attribute__((aligned(16))) List* fsvg_line(List* a){
 	cairo_t* context = first(a);
-	map_t p1 = (map_t)untag_hashmap(second(a));
-	map_t p2 = (map_t)untag_hashmap(third(a));
-	List *x1, *y1, *x2, *y2;
-	hashmap_get(p1, ":x", (any_t)&x1);
-	hashmap_get(p1, ":y", (any_t)&y1);
-	hashmap_get(p2, ":x", (any_t)&x2);
-	hashmap_get(p2, ":y", (any_t)&y2);
-	cairo_move_to(context, numVal(x1), numVal(y1));
-	cairo_line_to(context, numVal(x2), numVal(y2));
-	cairo_stroke(context);
+	if (is_object(second(a))){
+		//New fast points
+		gisp_point* p1 = ((gisp_point*)((gisp_object*)untag_object(second(a)))->obj);
+		gisp_point* p2 = ((gisp_point*)((gisp_object*)untag_object(third(a)))->obj);
+		context_draw_line(context, p1->x, p1->y, p2->x, p2->y);
+
+	}else{
+		//Legacy deprecated old points
+		map_t p1 = (map_t)untag_hashmap(second(a));
+		map_t p2 = (map_t)untag_hashmap(third(a));
+		List *x1, *y1, *x2, *y2;
+		hashmap_get(p1, ":x", (any_t)&x1);
+		hashmap_get(p1, ":y", (any_t)&y1);
+		hashmap_get(p2, ":x", (any_t)&x2);
+		hashmap_get(p2, ":y", (any_t)&y2);
+		context_draw_line(context, numVal(x1), numVal(y1), numVal(x2), numVal(y2));
+	}
 	return e_nil;
 }
 
@@ -1416,16 +1441,23 @@ __attribute__((aligned(16))) List* fsvg_line(List* a){
 ///!3Number
 __attribute__((aligned(16))) List* fsvg_circle(List* a){
 	cairo_t* context = first(a);
-	map_t c = (map_t)untag_hashmap(second(a));
-	List *cx, *cy;
-	hashmap_get(c, ":x", (any_t)&cx);
-	hashmap_get(c, ":y", (any_t)&cy);
 	double r = numVal(third(a));
-	double x = numVal(cx);
-	double y = numVal(cy);
-	cairo_move_to(context, x+r, y);
-	cairo_arc(context, x, y, r, 0, M_PI*2);
-	cairo_stroke(context);
+	if (is_object(second(a))){
+		//New fast points
+		gisp_point* p = ((gisp_point*)((gisp_object*)untag_object(second(a)))->obj);
+		context_draw_circle(context, p->x, p->y, r);
+
+	}else{
+		//Legacy deprecated old points
+		map_t c = (map_t)untag_hashmap(second(a));
+		List *cx, *cy;
+		hashmap_get(c, ":x", (any_t)&cx);
+		hashmap_get(c, ":y", (any_t)&cy);
+		double x = numVal(cx);
+		double y = numVal(cy);
+		context_draw_circle(context, x, y, r);
+	}
+
 	return e_nil;
 }
 
@@ -1448,6 +1480,8 @@ __attribute__((aligned(16))) List* fsvg_to_png(List* a){
 	cairo_surface_write_to_png(surface, fullPath);
 	return e_nil;
 }
+
+
 
 
 
@@ -1483,26 +1517,178 @@ __attribute__((aligned(16))) List* fprintAddress(List* a){
 __attribute__((aligned(16))) List* fpoint(List* a){
 	double x = numVal(first(a));
 	double y = numVal(second(a));
+	gisp_object* o = newGispPoint(x, y);
+	return (List*)tag_object(o);
+}
 
-	gisp_object* o = malloc(sizeof(gisp_object));
-	o->type = GISPOBJ_POINT;
-	gisp_point* p = malloc(sizeof(gisp_point));
-	p->x = x;
-	p->y = y;
-	o->obj = p;
+///~Creates a Vec structure with length len and direction dir in radians.
+///#Vec
+///@1len
+///!1Number
+///@2dir
+///!2Number
+__attribute__((aligned(16))) List* fpointvec(List* a){
+	double len = numVal(first(a));
+	double dir = numVal(second(a));
+	gisp_object* o = newGispVec(len, dir);
 	return (List*)tag_object(o);
 }
 
 
+///~Get the length of a vec
+///#Number
+///@1p
+///!1Point
+__attribute__((aligned(16))) List* fveclen(List* a){
+	double len = ((gisp_vec*)((gisp_object*)untag_object(first(a)))->obj)->len;
+	return (List*)value_to_number(len);
+}
+
+
+///~Get the direction of a vec
+///#Number
+///@1p
+///!1Point
+__attribute__((aligned(16))) List* fvecdir(List* a){
+	double dir = ((gisp_vec*)((gisp_object*)untag_object(first(a)))->obj)->dir;
+	return (List*)value_to_number(dir);
+}
+
+
+///~Get the X coordinate of a point
+///#Number
+///@1p
+///!1Point
 __attribute__((aligned(16))) List* fpointx(List* a){
 	double x = ((gisp_point*)((gisp_object*)untag_object(first(a)))->obj)->x;
 	return (List*)value_to_number(x);
 }
 
+
+///~Get the Y coordinate of a point
+///#Number
+///@1p
+///!1Point
 __attribute__((aligned(16))) List* fpointy(List* a){
 	double y = ((gisp_point*)((gisp_object*)untag_object(first(a)))->obj)->y;
 	return (List*)value_to_number(y);
 }
+
+
+///~Calculate the distance between two Points.
+///#Number
+///!1Point
+///@1a
+///!2Point
+///@2b
+__attribute__((aligned(16))) List* fpointDistance(List* a){
+	gisp_object* oa = (gisp_object*)untag_object(first(a));
+	gisp_point* pa = (gisp_point*)oa->obj;
+	gisp_object* ob = (gisp_object*)untag_object(second(a));
+	gisp_point* pb = (gisp_point*)ob->obj;
+	double a2 = pow(pb->x - pa->x, 2);
+	double b2 = pow(pb->y - pa->y, 2);
+	return (List*)value_to_number(sqrt(a2 + b2));
+}
+
+
+///~Calculate the angle between two Points.
+///#Number
+///!1Point
+///@1a
+///!2Point
+///@2b
+__attribute__((aligned(16))) List* fpointAngle(List* a){
+	gisp_object* oa = (gisp_object*)untag_object(first(a));
+	gisp_point* pa = (gisp_point*)oa->obj;
+	gisp_object* ob = (gisp_object*)untag_object(second(a));
+	gisp_point* pb = (gisp_point*)ob->obj;
+	double yy = (-1 * pb->y) - (-1 * pa->y);
+	double xx = pb->x - pa->x;
+	return (List*)value_to_number(atan2(yy, xx));
+}
+
+///~Creates a new intermediate point between two Points pos is a floating number between 0 and 1 that defines. The distance between the two points. 0 returns point a,1 returns point b, 0.5 returns the middle point between a and b, etc...
+///#Point
+///!1Point
+///@1a
+///!2Point
+///@2b
+///!3Number
+///@3pos
+__attribute__((aligned(16))) List* fpointBetween(List* a){
+	gisp_object* oa = (gisp_object*)untag_object(first(a));
+	gisp_point* pa = (gisp_point*)oa->obj;
+	gisp_object* ob = (gisp_object*)untag_object(second(a));
+	gisp_point* pb = (gisp_point*)ob->obj;
+	double pos = numVal(third(a));
+	double newx = pa->x + (pos * (pb->x - pa->x));
+	double newy = pa->y + (pos * (pb->y - pa->y));
+	gisp_object* newo = newGispPoint(newx, newy);
+	return (List*)tag_object(newo);
+}
+
+///~Creates a new Point which is moved by a certain ammount in a certain direction defined by a Vector structure.
+///#Point
+///!1Point
+///@1p
+///!2Vec
+///@2vect
+__attribute__((aligned(16))) List* fpointMoveByVector(List* a){
+	gisp_object* po = (gisp_object*)untag_object(first(a));
+	gisp_point* p = (gisp_point*)po->obj;
+	gisp_object* vo = (gisp_object*)untag_object(second(a));
+	gisp_vec* v = (gisp_vec*)vo->obj;
+	double newx = p->x + (v->len * cos(v->dir));
+	double newy = p->y + (-1 * v->len * sin(v->dir));
+	gisp_object* newo = newGispPoint(newx, newy);
+	return (List*)tag_object(newo);
+}
+
+///~Draw a point on the screen
+///#void
+///!1Context
+///@1context
+///!2Point
+///@2p
+__attribute__((aligned(16))) List* fpointDraw(List* a){
+	cairo_t* context = first(a);
+	gisp_object* o = (gisp_object*)untag_object(second(a));
+	gisp_point* p = (gisp_point*)o->obj;
+	context_draw_circle(context, p->x, p->y, 3);
+	return e_nil;
+}
+
+///~Draw a points on the screen
+///#void
+///!1Context
+///@1context
+///!2Point
+///@2points
+__attribute__((aligned(16))) List* fpointsDraw(List* a){
+	cairo_t* context = first(a);
+	List* seq = second(a);
+	if (is_vector(seq)){
+		Vector* v = (Vector*)untag_vector(seq);
+		void** data = v->data;
+		int size = v->size;
+		for (int i=0;i<size;++i){
+			gisp_object* o = (gisp_object*)untag_object((List*)data[i]);
+			gisp_point* p = (gisp_point*)o->obj;
+			context_draw_circle(context, p->x, p->y, 3);
+		}
+	}else if (is_list(seq)){
+		List* current = seq;
+		while(notNil(current)){
+			gisp_object* o = (gisp_object*)untag_object(car(current));
+			gisp_point* p = (gisp_point*)o->obj;
+			context_draw_circle(context, p->x, p->y, 3);
+			current = cdr(current);
+		}
+	}
+	return e_nil;
+}
+
 
 
 
@@ -1512,5 +1698,84 @@ __attribute__((aligned(16))) List* fprintPoint(List* a){
 	printf("{%p} X:%f Y:%f\n", p, p->x, p->y);fflush(stdout);
 	return e_nil;
 }
+
+
+// ---------------------------------------------
+///=Gisp Core: Lines
+
+
+__attribute__((aligned(16))) List* fline(List* a){
+	gisp_object* o1 = (gisp_object*)untag_object(first(a));
+	gisp_point* p1 = (gisp_point*)o1->obj;
+	gisp_object* o2 = (gisp_object*)untag_object(first(a));
+	gisp_point* p2 = (gisp_point*)o2->obj;
+	gisp_object* l = newGispLine(p1->x, p1->y, p2->x, p2->y);
+	return (List*)tag_object(l);
+}
+
+
+///~Get the first point of a line
+///#Point
+///@1l
+///!1Line
+__attribute__((aligned(16))) List* flineA(List* a){
+	gisp_point* pa = ((gisp_line*)((gisp_object*)untag_object(first(a)))->obj)->a;
+	gisp_object* o = newGispPoint(pa->x, pa->y);
+	return (List*)tag_object(o);
+}
+
+///~Get the second point of a line
+///#Point
+///@1l
+///!1Line
+__attribute__((aligned(16))) List* flineB(List* a){
+	gisp_point* pb = ((gisp_line*)((gisp_object*)untag_object(first(a)))->obj)->b;
+	gisp_object* o = newGispPoint(pb->x, pb->y);
+	return (List*)tag_object(o);
+}
+
+
+
+
+///=Gisp Core: Paths
+
+
+///~Draw a path on the screen.
+///#void
+///!1Context
+///@1context
+///!2PointSequence
+///@2points
+__attribute__((aligned(16))) List* fdrawPath(List* a){
+	cairo_t* context = first(a);
+	List* seq = second(a);
+	if (is_vector(seq)){
+		Vector* v = (Vector*)untag_vector(seq);
+		void** data = v->data;
+		int size = v->size;
+		gisp_point* prev = ((gisp_point*)((gisp_object*)untag_object(data[0]))->obj);
+		for (int i=1;i<size;++i){
+			gisp_point* current = ((gisp_point*)((gisp_object*)untag_object(data[i]))->obj);
+			context_draw_line(context, prev->x, prev->y, current->x, current->y);
+			prev = current;
+		}
+
+	}else if (is_list(seq)){
+		List* l = seq;
+		gisp_point* prev = ((gisp_point*)((gisp_object*)untag_object(car(l)))->obj);
+		l = cdr(l);
+		while(notNil(l)){
+			gisp_point* current = ((gisp_point*)((gisp_object*)untag_object(car(l)))->obj);
+			context_draw_line(context, prev->x, prev->y, current->x, current->y);
+			prev = current;
+			l = cdr(l);
+		}
+	}
+	return e_nil;
+}
+
+
+
+
 
 

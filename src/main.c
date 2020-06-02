@@ -1234,10 +1234,25 @@ int main(int argc, char* argv[]) {
 	extendEnv("take",    (void*)ftake, global_env);
 	extendEnv("drop",    (void*)fdrop, global_env);
 
-	extendEnv("fastpoint", (void*)fpoint, global_env);
-	extendEnv("point-x",   (void*)fpointx, global_env);
-	extendEnv("point-y",   (void*)fpointy, global_env);
-	extendEnv("point-print",   (void*)fprintPoint, global_env);
+	extendEnv("point",                (void*)fpoint, global_env);
+	extendEnv("point-x",              (void*)fpointx, global_env);
+	extendEnv("point-y",              (void*)fpointy, global_env);
+	extendEnv("point-print",          (void*)fprintPoint, global_env);
+	extendEnv("vec",                  (void*)fpointvec, global_env);
+	extendEnv("vec-len",              (void*)fveclen, global_env);
+	extendEnv("vec-dir",              (void*)fvecdir, global_env);
+	extendEnv("point-distance",       (void*)fpointDistance, global_env);
+	extendEnv("point-angle",          (void*)fpointAngle, global_env);
+	extendEnv("point-between",        (void*)fpointBetween, global_env);
+	extendEnv("point-move-by-vector", (void*)fpointMoveByVector, global_env);
+	extendEnv("draw-point",           (void*)fpointDraw, global_env);
+	extendEnv("draw-points",          (void*)fpointsDraw, global_env);
+
+	extendEnv("line",   (void*)fline, global_env);
+	extendEnv("line-a", (void*)flineA, global_env);
+	extendEnv("line-b", (void*)flineB, global_env);
+	extendEnv("draw-path", (void*)fdrawPath, global_env);
+
 
 	extendEnv("simplex-noise",(void*)fsimplex_noise, global_env);
 	extendEnv("simplex-noise-value",(void*)fsimplex, global_env);
@@ -1264,6 +1279,7 @@ int main(int argc, char* argv[]) {
 	INTERN_doseq	= intern("doseq");
 	INTERN_profile	= intern("profile");
 	INTERN_nil		= intern("nil");
+
 	printf("\n");
 	
 

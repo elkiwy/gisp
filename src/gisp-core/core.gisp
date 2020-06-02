@@ -38,71 +38,6 @@
 
 (def PI 3.14159265)
 
-;;;~Creates a Point with absolutes coordinates.
-;;;#Point
-;;;!1Number
-;;;!2Number
-(defn point (x y)
-    { :x x :y y })
-
-;;;~Creates a Vec structure with length len and direction dir in radians.
-;;;#Vec
-;;;!1Number
-;;;!2Number
-(defn vec (len dir)
-    { :len len :dir dir})
-
-;;;~Calculate the distance between two Points.
-;;;#Number
-;;;!1Point
-;;;!2Point
-(defn point-distance (a b)
-    (let (a2 (pow (- (:x b) (:x a)) 2)
-          b2 (pow (- (:y b) (:y a)) 2))
-        (sqrt (+ a2 b2))))
-
-;;;~Calculate the angle between two Points.
-;;;#Number
-;;;!1Point
-;;;!2Point
-(defn point-angle (a b)
-    (atan2 (- (* -1 (:y b)) (* -1 (:y a))) (- (:x b) (:x a))))
-    
-;;;~Creates a new intermediate point between two Points pos is a floating number between 0 and 1 that defines. The distance between the two points. 0 returns point a,1 returns point b, 0.5 returns the middle point between a and b, etc...
-;;;#Point
-;;;!1Point
-;;;!2Point
-;;;!3Number
-(defn point-between (a b pos)
-    (point 
-        (+ (:x a) (* pos (- (:x b) (:x a))))
-        (+ (:y a) (* pos (- (:y b) (:y a))))))
-
-;;;~Creates a new Point which is moved by a certain ammount in a certain direction defined by a Vector structure.
-;;;#Point
-;;;!1Point
-;;;!2Vec
-(defn point-move-by-vector (p vect)
-    (point 
-        (+ (:x p) (* (:len vect) (cos (:dir vect))))
-        (+ (:y p) (* -1 (:len vect) (sin (:dir vect))))))
-
-;;;~Draw a point on the screen
-;;;#void
-;;;!1Point
-(defn draw-point (p)
-    (if (not-nil? p)
-        (draw-circle c p 3)
-        nil))
-    
-;;;~Draw a points on the screen
-;;;#void
-;;;!1PointList
-(defn draw-points (points)    
-    (doseq (p points) 
-        (draw-point p)))
-
-
 
 
 
@@ -121,55 +56,48 @@
 
 ;;;=Gisp Core: Lines
 
-;;;~Creates a Line joining points.
-;;;#Line
-;;;!1Point
-;;;!2Point
-(defn line (a b)
-    {:a a :b b})
-
 ;;;~Get the slope of a line.
 ;;;#Number
 ;;;!1Line
 (defn line-slope (l)
-    (if (= 0 (- (:x (:a l)) (:x (:b l))) )
+    (if (= 0 (- (point-x (line-a l)) (point-x (line-b l))) )
         nil
-        (/ (- (:y (:a l)) (:y (:b l))) (- (:x (:a l)) (:x (:b l))))) )
+        (/ (- (point-y (line-a l)) (point-y (line-b l))) (- (point-x (line-a l)) (point-x (line-b l))))) )
 
 ;;;~Get the intersection point between two lines, uses infinite lines.
 ;;;#Point
 ;;;!1Line
 ;;;!2Line
 (defn line-intersection (l1 l2)
-    (let (a1 (:a l1)
-          b1 (:b l1)
-          a2 (:a l2)
-          b2 (:b l2)
+    (let (a1 (line-a l1)
+          b1 (line-b l1)
+          a2 (line-a l2)
+          b2 (line-b l2)
           slope1 (line-slope l1)
           slope2 (line-slope l2))
       (cond 
         (= slope1 slope2)
             nil
         (and (nil? slope1) (not-nil? slope2))
-            (point (:x a1)
-                   (+ (* (- (:x a1) (:x a2)) slope2) (:y a2)))
+            (point (point-x a1)
+                   (+ (* (- (point-x a1) (point-x a2)) slope2) (point-y a2)))
         (and (not-nil? slope1) (nil? slope2))
-            (point (:x a2)
-                   (+ (* (- (:x a2) (:x a1)) slope1) (:y a1)))
+            (point (point-x a2)
+                   (+ (* (- (point-x a2) (point-x a1)) slope1) (point-y a1)))
         :else
-            (let (A (- (* slope1 (:x a1)) (* slope2 (:x a2)))
-                  B (- (+ A (:y a2)) (:y a1))
+            (let (A (- (* slope1 (point-x a1)) (* slope2 (point-x a2)))
+                  B (- (+ A (point-y a2)) (point-y a1))
                   x (/ B (- slope1 slope2)))
-                (point x (+ (* slope2 (- x (:x a2))) (:y a2)))))))
+                (point x (+ (* slope2 (- x (point-x a2))) (point-y a2)))))))
 
 ;;;~Checks if a point is on a line
 ;;;#Boolean
 ;;;!1Point
 ;;;!2Line
 (defn point-on-line? (point line)
-    (let (ac (point-distance point (:a line))
-          bc (point-distance point (:b line))
-          ab (point-distance (:a line) (:b line))
+    (let (ac (point-distance point (line-a line))
+          bc (point-distance point (line-b line))
+          ab (point-distance (line-a line) (line-b line))
           diff (abs (- (+ ac bc) ab)))
         (< diff 0.00001)))
 
@@ -192,8 +120,8 @@
 ;;;!1Point
 ;;;!2Line
 (defn point-position-respect-line (p l)
-    (let (aaa (* (- (:x (:b l)) (:x (:a l))) (- (:y p) (:y (:a l))))
-          bbb (* (- (:y (:b l)) (:y (:a l))) (- (:x p) (:x (:a l))))
+    (let (aaa (* (- (point-x (line-b l)) (point-x (line-a l))) (- (point-y p) (point-y (line-a l))))
+          bbb (* (- (point-y (line-b l)) (point-y (line-a l))) (- (point-x p) (point-x (line-a l))))
           ccc (- aaa bbb))
         (sign ccc)))
 
@@ -269,7 +197,7 @@
 ;;;!3Number
 ;;;!4Number
 (defn reg-shape (center side-n size angle)
-    (let (cx   (:x center) cy   (:y center)
+    (let (cx   (point-x center) cy   (point-y center)
 		  step (/ (* PI 2) side-n)
 		  angles (map #(+ (* % step) (rad angle)) (range side-n))
 		  points (map #(point-move-by-vector center (vec size %)) angles))
@@ -297,8 +225,8 @@
 ;;;#Point
 ;;;!1Shape
 (defn shape-centroid (points)
-    (let (sum-x (reduce + 0 (map #(:x %) points))
-          sum-y (reduce + 0 (map #(:y %) points))
+    (let (sum-x (reduce + 0 (map #(point-x %) points))
+          sum-y (reduce + 0 (map #(point-y %) points))
           length (count points))
         (point (/ sum-x length) (/ sum-y length))))
 
@@ -325,14 +253,6 @@
 
 
 
-;;;~Draw a path on the screen.
-;;;#void
-;;;!1PointList
-(defn draw-path (points)
-    (if (nil? points)
-        nil
-        (doseq (i (range 1 (count points)))
-            (draw-line c (get points (- i 1)) (get points i)))))
 
 ;;;~Draw a list of Paths on the screen.
 ;;;#void
@@ -348,7 +268,7 @@
 (defn line-to-path (l n)
     (let (step (/ 1 n)
           cuts (map #(* step %) (range (+ n 1))))
-        (mapv #(point-between (:a l) (:b l) %) cuts)))
+        (mapv #(point-between (line-a l) (line-b l) %) cuts)))
 
 ;;;~Dispose randomly a path through its segments.
 ;;;#Path
@@ -356,7 +276,7 @@
 ;;;!2Number
 ;;;!3Number
 (defn path-dispose (p noiseX noiseY)
-    (mapv  #(point (gauss (:x %) noiseX) (gauss (:y %) noiseY)) p))
+    (mapv  #(point (gauss (point-x %) noiseX) (gauss (point-y %) noiseY)) p))
 
 ;;;~Subfunction of path-smooth
 ;;;#PointList

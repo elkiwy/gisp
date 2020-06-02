@@ -590,20 +590,21 @@ List* listCopy(List* l){
 
 List* gispObjectCopy(List* obj){
 	gisp_object* o = (gisp_object*)untag_object(obj);
+	gisp_object* newo = NULL;
 	if (o->type == GISPOBJ_POINT){
 		gisp_point* p = (gisp_point*)o->obj;
-		gisp_object* newo = malloc(sizeof(gisp_object));
-		newo->type = o->type;
-		gisp_point* newp = malloc(sizeof(gisp_point));
-		newp->x = p->x;
-		newp->y = p->y;
-		newo->obj = newp;
-		return (List*)tag_object(newo);
+		newo = newGispPoint(p->x, p->y);
+	}else if(o->type == GISPOBJ_VEC){
+		gisp_vec* v = (gisp_vec*)o->obj;
+		newo = newGispVec(v->len, v->dir);
+	}else if(o->type == GISPOBJ_LINE){
+		gisp_line* l = (gisp_line*)o->obj;
+		newo = newGispLine(l->a->x, l->a->y, l->b->x, l->b->y);
 	}else{
 		printf("TODO");
 		exit(1);
 	}
-	return NULL;
+	return (List*)tag_object(newo);
 }
 
 
@@ -612,8 +613,22 @@ void gispObjectFree(List* obj){
 	gisp_object* o = (gisp_object*)untag_object(obj);
 	if (o->type == GISPOBJ_POINT){
 		gisp_point* p = (gisp_point*)o->obj;
-		free(o);
 		free(p);
+		free(o);
+		return;
+	}else if (o->type == GISPOBJ_VEC){
+		gisp_vec* v = (gisp_vec*)o->obj;
+		free(v);
+		free(o);
+		return;
+	}else if (o->type == GISPOBJ_LINE){
+		gisp_line* l = (gisp_line*)o->obj;
+		gisp_point* a = (gisp_point*)l->a;
+		gisp_point* b = (gisp_point*)l->b;
+		free(a);
+		free(b);
+		free(l);
+		free(o);
 		return;
 	}else{
 		printf("TODO");
@@ -624,6 +639,41 @@ void gispObjectFree(List* obj){
 
 
 
+gisp_object* newGispPoint(double x, double y){
+	gisp_object* o = malloc(sizeof(gisp_object));
+	o->type = GISPOBJ_POINT;
+	gisp_point* p = malloc(sizeof(gisp_point));
+	p->x = x;
+	p->y = y;
+	o->obj = p;
+	return o;
+}
+
+gisp_object* newGispVec(double len, double dir){
+	gisp_object* o = malloc(sizeof(gisp_object));
+	o->type = GISPOBJ_VEC;
+	gisp_vec* v = malloc(sizeof(gisp_vec));
+	v->len = len;
+	v->dir = dir;
+	o->obj = v;
+	return o;
+}
+
+gisp_object* newGispLine(double ax, double ay, double bx, double by){
+	gisp_object* o = malloc(sizeof(gisp_object));
+	o->type = GISPOBJ_LINE;
+	gisp_line* line = malloc(sizeof(gisp_line));
+	gisp_point* a = malloc(sizeof(gisp_point));
+	gisp_point* b = malloc(sizeof(gisp_point));
+	line->a = a;
+	line->b = b;
+	line->a->x = ax;
+	line->a->y = ay;
+	line->b->x = bx;
+	line->b->y = by;
+	o->obj = line;
+	return o;
+}
 
 
 
