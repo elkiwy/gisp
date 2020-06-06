@@ -164,6 +164,7 @@ List* fline(List* a);
 List* flineA(List* a);
 List* flineB(List* a);
 List* fdrawPath(List* a);
+List* fpathSmooth(List* a);
 
 
 

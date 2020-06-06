@@ -1608,6 +1608,7 @@ __attribute__((aligned(16))) List* fpointAngle(List* a){
 	return (List*)value_to_number(atan2(yy, xx));
 }
 
+
 ///~Creates a new intermediate point between two Points pos is a floating number between 0 and 1 that defines. The distance between the two points. 0 returns point a,1 returns point b, 0.5 returns the middle point between a and b, etc...
 ///#Point
 ///!1Point
@@ -1775,6 +1776,85 @@ __attribute__((aligned(16))) List* fdrawPath(List* a){
 }
 
 
+
+
+
+
+
+typedef gisp_point* pair[2];
+
+gisp_object* chaikin_segment_point(gisp_point* a, gisp_point* b, double position){
+	double newx = a->x + (position * (b->x - a->x));
+	double newy = a->y + (position * (b->y - a->y));
+	return newGispPoint(newx, newy);
+}
+
+
+
+Vector* path_smooth(Vector* path, int iteration, double chaikin){
+	int iter = iteration;
+	Vector* current_path = path;
+	Vector* final_res = NULL;
+	while (iter>0){
+		//Get current iteration data
+		void** pathPoints = current_path->data;
+		int pathSize = current_path->size;
+
+		//Fill new vector data
+		Vector* iteration_res = newVec(((pathSize-1)*2)+2);
+		void** iteration_resData = iteration_res->data;
+		int i=0;
+		int j=1;
+		while (i < pathSize-1){
+			gisp_point* pa = ((gisp_point*)((gisp_object*)untag_object(pathPoints[i]))->obj);
+			gisp_point* pb = ((gisp_point*)((gisp_object*)untag_object(pathPoints[i+1]))->obj);
+			gisp_object* newoa = chaikin_segment_point(pa, pb, chaikin);
+			gisp_object* newob = chaikin_segment_point(pa, pb, 1-chaikin);
+
+			iteration_resData[j] = (List*)tag_object(newoa);
+			j++;
+			iteration_resData[j] = (List*)tag_object(newob);
+			j++;
+			i++;
+		}
+
+		//Insert fixed first and last
+		iteration_resData[0] = objCopy(pathPoints[0]);
+		iteration_resData[j] = objCopy(pathPoints[pathSize-1]);
+
+		//Iterate
+		if (final_res!=NULL){objFree((List*)tag_vector(final_res));}
+		final_res = iteration_res;
+		current_path = final_res;
+		iter--;
+	}
+
+	//Return
+	if (final_res == NULL){ //Only used when iteration = 0
+		return (Vector*)untag_vector(objCopy((List*)tag_vector(path)));
+	}else{
+		return final_res;
+	}
+}
+
+
+///~Approximate a Path with the chaikin subdivision algorythm, smoothing the original Path.
+///!1Path
+///@1path
+///!2Number
+///@2iteration
+///!3Number
+///@3chaikin-param
+__attribute__((aligned(16))) List* fpathSmooth(List* a){
+	List* path = first(a);
+	int iteration = (int)numVal(second(a));
+	double chaikin_param = numVal(third(a));
+
+	Vector* vectorPath = is_vector(path) ? (Vector*)untag_vector(path) : listToVec(path);
+
+	Vector* result = path_smooth(vectorPath, iteration, chaikin_param);
+	return (List*)tag_vector(result);
+}
 
 
 

@@ -1252,6 +1252,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("line-a", (void*)flineA, global_env);
 	extendEnv("line-b", (void*)flineB, global_env);
 	extendEnv("draw-path", (void*)fdrawPath, global_env);
+	extendEnv("path-smooth", (void*)fpathSmooth, global_env);
 
 
 	extendEnv("simplex-noise",(void*)fsimplex_noise, global_env);
