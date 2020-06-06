@@ -8,9 +8,17 @@ char* objToString(List* ob, int head_of_list){
 	buffer[0] = '\0';
 	char* target = buffer;
 	//printf("\e[100m%p\e[49m", ob);fflush(stdout);
-	if(is_string(ob)){
+	if (is_object(ob)){
+		gisp_object* o = (gisp_object*)untag_object(ob);
+		if (o->type == GISPOBJ_POINT){
+			gisp_point* p = (gisp_point*)o->obj;
+			target += sprintf(target, "{%d,%d}", (int)p->x, (int)p->y);
+		}
+		
+	}else if(is_string(ob)){
 		char* untagged = (char*)untag_string(ob);
 		target += sprintf(target, "\"%s\"", untagged);
+
 
 	}else if(is_hashmap(ob)){
 		//printf("printing hashmap\n");fflush(stdout);
