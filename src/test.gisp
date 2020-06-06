@@ -171,21 +171,23 @@
 		(point-print p)))
 
 
-(profile :oldpoints
-	(defn mirror-points-x (points)
-		(map #(point (- 1024 (get % :x)) (get % :y)) points))
-	(let (points (map #(point % %) (range 10000))
-		points (mirror-points-x points))
-		points
-	)
-)
+;;(profile :oldpoints
+;;	(defn mirror-points-x (points)
+;;		(map #(point (- 1024 (get % :x)) (get % :y)) points))
+;;	(let (points (map #(point % %) (range 10000))
+;;		points (mirror-points-x points))
+;;		points
+;;	)
+;;)
+
+
 
 (profile :newpoints
 	(defn mirror-points-x (points)
-		(map #(fastpoint (- 1024 (point-x %)) (point-y %)) points))
-	(let (points (map #(fastpoint % %) (range 10))
+		(map #(point (- 1024 (point-x %)) (point-y %)) points))
+	(let (points (map #(point % %) (range 10 20))
 		  points (mirror-points-x points))
-		(printPoints points)
+		  (printPoints points)
 	)
 )
 
