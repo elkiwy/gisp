@@ -278,6 +278,20 @@
 (defn path-dispose (p noiseX noiseY)
     (mapv  #(point (gauss (point-x %) noiseX) (gauss (point-y %) noiseY)) p))
 
+
+;;;~Dispose randomly a path through its segments, but fixing start and end point.
+;;;#Path
+;;;!1Path
+;;;!2Number
+;;;!3Number
+(defn path-dispose-fixed (p noiseX noiseY)
+	(let (disposed   (path-dispose p noiseX noiseY)
+		  fixedFirst (assoc disposed 0 (first p))
+		  fixed      (assoc fixedFirst (- (count p) 1) (last p)))
+		fixed))
+
+
+
 ;;;~Subfunction of path-smooth
 ;;;#PointList
 ;;;!1Point
