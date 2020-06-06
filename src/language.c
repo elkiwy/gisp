@@ -1707,7 +1707,7 @@ __attribute__((aligned(16))) List* fprintPoint(List* a){
 __attribute__((aligned(16))) List* fline(List* a){
 	gisp_object* o1 = (gisp_object*)untag_object(first(a));
 	gisp_point* p1 = (gisp_point*)o1->obj;
-	gisp_object* o2 = (gisp_object*)untag_object(first(a));
+	gisp_object* o2 = (gisp_object*)untag_object(second(a));
 	gisp_point* p2 = (gisp_point*)o2->obj;
 	gisp_object* l = newGispLine(p1->x, p1->y, p2->x, p2->y);
 	return (List*)tag_object(l);

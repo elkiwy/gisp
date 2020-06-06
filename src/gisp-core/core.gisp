@@ -292,7 +292,7 @@
 ;;;!1Path
 ;;;!2Number
 ;;;!3Number
-(defn path-smooth (path iteration chaikin-param)
+(defn path-smooth-old (path iteration chaikin-param)
     (if (> iteration 0)
         ;Recursive step
         (let (segmentationPoint (if (number? chaikin-param) chaikin-param (rand (first chaikin-param) (second chaikin-param)))
