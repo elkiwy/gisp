@@ -1509,6 +1509,7 @@ __attribute__((aligned(16))) List* fprintAddress(List* a){
 ///=Gisp Core: Points
 
 ///~Creates a Point with absolutes coordinates.
+///&point
 ///#Point
 ///@1x
 ///!1Number
@@ -1522,6 +1523,7 @@ __attribute__((aligned(16))) List* fpoint(List* a){
 }
 
 ///~Creates a Vec structure with length len and direction dir in radians.
+///&vec
 ///#Vec
 ///@1len
 ///!1Number
@@ -1536,6 +1538,7 @@ __attribute__((aligned(16))) List* fpointvec(List* a){
 
 
 ///~Get the length of a vec
+///&vec-len
 ///#Number
 ///@1p
 ///!1Point
@@ -1546,6 +1549,7 @@ __attribute__((aligned(16))) List* fveclen(List* a){
 
 
 ///~Get the direction of a vec
+///&vec-dir
 ///#Number
 ///@1p
 ///!1Point
@@ -1556,6 +1560,7 @@ __attribute__((aligned(16))) List* fvecdir(List* a){
 
 
 ///~Get the X coordinate of a point
+///&point-x
 ///#Number
 ///@1p
 ///!1Point
@@ -1566,6 +1571,7 @@ __attribute__((aligned(16))) List* fpointx(List* a){
 
 
 ///~Get the Y coordinate of a point
+///&point-y
 ///#Number
 ///@1p
 ///!1Point
@@ -1576,6 +1582,7 @@ __attribute__((aligned(16))) List* fpointy(List* a){
 
 
 ///~Calculate the distance between two Points.
+///&point-distance
 ///#Number
 ///!1Point
 ///@1a
@@ -1593,6 +1600,7 @@ __attribute__((aligned(16))) List* fpointDistance(List* a){
 
 
 ///~Calculate the angle between two Points.
+///&point-angle
 ///#Number
 ///!1Point
 ///@1a
@@ -1610,6 +1618,7 @@ __attribute__((aligned(16))) List* fpointAngle(List* a){
 
 
 ///~Creates a new intermediate point between two Points pos is a floating number between 0 and 1 that defines. The distance between the two points. 0 returns point a,1 returns point b, 0.5 returns the middle point between a and b, etc...
+///&point-between
 ///#Point
 ///!1Point
 ///@1a
@@ -1630,6 +1639,7 @@ __attribute__((aligned(16))) List* fpointBetween(List* a){
 }
 
 ///~Creates a new Point which is moved by a certain ammount in a certain direction defined by a Vector structure.
+///&point-move-by-vector
 ///#Point
 ///!1Point
 ///@1p
@@ -1647,6 +1657,7 @@ __attribute__((aligned(16))) List* fpointMoveByVector(List* a){
 }
 
 ///~Draw a point on the screen
+///&draw-point
 ///#void
 ///!1Context
 ///@1context
@@ -1661,6 +1672,7 @@ __attribute__((aligned(16))) List* fpointDraw(List* a){
 }
 
 ///~Draw a points on the screen
+///&draw-points
 ///#void
 ///!1Context
 ///@1context
@@ -1705,6 +1717,13 @@ __attribute__((aligned(16))) List* fprintPoint(List* a){
 ///=Gisp Core: Lines
 
 
+///~Creates a line object
+///&line
+///#Line
+///!1Point
+///@1a
+///!2Point
+///@2b
 __attribute__((aligned(16))) List* fline(List* a){
 	gisp_object* o1 = (gisp_object*)untag_object(first(a));
 	gisp_point* p1 = (gisp_point*)o1->obj;
@@ -1716,6 +1735,7 @@ __attribute__((aligned(16))) List* fline(List* a){
 
 
 ///~Get the first point of a line
+///&line-a
 ///#Point
 ///@1l
 ///!1Line
@@ -1726,6 +1746,7 @@ __attribute__((aligned(16))) List* flineA(List* a){
 }
 
 ///~Get the second point of a line
+///&line-b
 ///#Point
 ///@1l
 ///!1Line
@@ -1742,6 +1763,7 @@ __attribute__((aligned(16))) List* flineB(List* a){
 
 
 ///~Draw a path on the screen.
+///&draw-path
 ///#void
 ///!1Context
 ///@1context
@@ -1839,6 +1861,7 @@ Vector* path_smooth(Vector* path, int iteration, double chaikin){
 
 
 ///~Approximate a Path with the chaikin subdivision algorythm, smoothing the original Path.
+///&path-smooth
 ///!1Path
 ///@1path
 ///!2Number
