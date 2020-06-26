@@ -1399,7 +1399,7 @@ __attribute__((aligned(16))) List* fsvg_clean(List* a){
 
 // (line context pointA pointB)
 ///~Draw a line to a context
-///&line
+///&draw-line
 ///#void
 ///@1c
 ///!1Context
