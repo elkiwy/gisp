@@ -13,6 +13,18 @@ char* objToString(List* ob, int head_of_list){
 		if (o->type == GISPOBJ_POINT){
 			gisp_point* p = (gisp_point*)o->obj;
 			target += sprintf(target, "{%d,%d}", (int)p->x, (int)p->y);
+		}else if (o->type == GISPOBJ_LINE){
+			gisp_line* l = (gisp_line*)o->obj;
+			target += sprintf(target, "{");
+			target += sprintf(target, "A:{%d,%d}", (int)l->a->x, (int)l->a->y);
+			target += sprintf(target, "B:{%d,%d}", (int)l->b->x, (int)l->b->y);
+			target += sprintf(target, "}");
+		}else if (o->type == GISPOBJ_VEC){
+			gisp_vec* v = (gisp_vec*)o->obj;
+			target += sprintf(target, "{");
+			target += sprintf(target, "len:%d,", (int)v->len);
+			target += sprintf(target, "dir:%d", (int)v->dir);
+			target += sprintf(target, "}");
 		}
 		
 	}else if(is_string(ob)){
