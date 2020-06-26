@@ -6,6 +6,7 @@
 #include <math.h>
 #include <time.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "core.h"
 
@@ -159,6 +160,7 @@ List* fpointBetween(List* a);
 List* fpointMoveByVector(List* a);
 List* fpointDraw(List* a);
 List* fpointsDraw(List* a);
+List* flinesDraw(List* a);
 
 List* fline(List* a);
 List* flineA(List* a);
@@ -170,6 +172,24 @@ List* fpathSmooth(List* a);
 
 // ------------------------------------------------------------------
 // Cairo
+typedef struct gisp_frame{
+	cairo_t* context;
+	cairo_surface_t* surface;
+} gisp_frame;
+
+typedef struct gisp_frames{
+	gisp_frame** frames;
+	int count;
+	int active;
+} gisp_frames;
+
+List* fframes_make(List* a);
+List* fframes_setActive(List* a);
+List* fframes_save(List* a);
+List* fframes_save_gif(List* a);
+List* fframes_clean(List* a);
+
+
 List* fsvg_surface(List* a);
 List* fsvg_status(List* a);
 List* fsvg_context(List* a);

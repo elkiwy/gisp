@@ -166,9 +166,9 @@
 
 
 
-(defn printPoints (ps)
-	(doseq (p ps)
-		(point-print p)))
+;;(defn printPoints (ps)
+;;	(doseq (p ps)
+;;		(point-print p)))
 
 
 ;;(profile :oldpoints
@@ -182,14 +182,40 @@
 
 
 
-(profile :newpoints
-	(defn mirror-points-x (points)
-		(map #(point (- 1024 (point-x %)) (point-y %)) points))
-	(let (points (map #(point % %) (range 10 20))
-		  points (mirror-points-x points))
-		  (printPoints points)
-	)
+;;(profile :newpoints
+;;	(defn mirror-points-x (points)
+;;		(map #(point (- 1024 (point-x %)) (point-y %)) points))
+;;	(let (points (map #(point % %) (range 10 20))
+;;		  points (mirror-points-x points))
+;;		  (printPoints points)
+;;	)
+;;)
+
+
+
+
+
+
+
+;;Creates 30 frames for the animation
+(def sw 100)
+(def sh 100)
+(def frames (frames-make "test" 30 sw sh))
+
+;;Draw each frame
+(doseq (i (range 30))
+	(write (str "Drawing frame:" i))
+	(let (context (frames-set frames i))
+		(draw-point context (point (+ 10 (* 4 i)) (+ 10 (* 4 i)))))
 )
+
+;(frames-to-png frames (str "test"))
+(frames-to-gif frames (str "test"))
+(frames-clean frames)
+
+
+
+
 
 
 

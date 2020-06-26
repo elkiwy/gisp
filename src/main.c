@@ -1213,6 +1213,13 @@ int main(int argc, char* argv[]) {
 	extendEnv("draw-line",      (void*)fsvg_line, global_env);
 	extendEnv("draw-circle",    (void*)fsvg_circle, global_env);
 	extendEnv("surface-to-png", (void*)fsvg_to_png, global_env);
+
+	extendEnv("frames-make",   (void*)fframes_make, global_env);
+	extendEnv("frames-set",    (void*)fframes_setActive, global_env);
+	extendEnv("frames-to-png", (void*)fframes_save, global_env);
+	extendEnv("frames-to-gif", (void*)fframes_save_gif, global_env);
+	extendEnv("frames-clean",  (void*)fframes_clean, global_env);
+
 	extendEnv("str",     (void*)fstr, global_env);
 	extendEnv("include", (void*)fincludefile, global_env);
 	extendEnv("read",    (void*)freadobj, global_env);
@@ -1247,6 +1254,7 @@ int main(int argc, char* argv[]) {
 	extendEnv("point-move-by-vector", (void*)fpointMoveByVector, global_env);
 	extendEnv("draw-point",           (void*)fpointDraw, global_env);
 	extendEnv("draw-points",          (void*)fpointsDraw, global_env);
+	extendEnv("draw-lines",           (void*)flinesDraw, global_env);
 
 	extendEnv("line",   (void*)fline, global_env);
 	extendEnv("line-a", (void*)flineA, global_env);

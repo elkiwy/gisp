@@ -1484,6 +1484,164 @@ __attribute__((aligned(16))) List* fsvg_to_png(List* a){
 
 
 
+///~Creates N frames with w width and h height
+///&make-frames
+///#Frames
+///@1name
+///!1string
+///@2N
+///!2Number
+///@3w
+///!3Number
+///@4h
+///!4Number
+__attribute__((aligned(16))) List* fframes_make(List* a){
+	char* name = (char*)untag_string(first(a));
+	double n = numVal(second(a));
+	double w = numVal(third(a));
+	double h = numVal(fourth(a));
+
+	//Initialize the frames object
+	gisp_frames* framesObj = malloc(sizeof(gisp_frames));
+	gisp_frame** frames = malloc(sizeof(gisp_frame*)*n);
+	framesObj->frames = frames;
+	framesObj->active = 0;
+	framesObj->count = (int)n;
+
+	//Initialize each frame
+	for(int i=0; i<(int)n; ++i){
+		frames[i] = malloc(sizeof(gisp_frame));
+
+		cairo_surface_t* surface = cairo_svg_surface_create(name, w, h);
+		cairo_svg_surface_restrict_to_version(surface, 1);
+		cairo_surface_set_fallback_resolution(surface, 72., 72.);
+		frames[i]->surface = surface;
+
+		cairo_t* context = cairo_create(surface);
+		cairo_set_source_rgb(context, 1, 1, 1);
+		cairo_paint(context);
+		cairo_set_line_width(context, 1);
+		cairo_set_source_rgb(context, 0, 0, 0);
+		frames[i]->context = context;
+	}
+
+	return (List*)framesObj;
+}
+
+
+///~Activate the n frame, returns the active frame context.
+///&frames-set
+///#Context
+///@1frames
+///!1Frames
+///@2n
+///!2Number
+__attribute__((aligned(16))) List* fframes_setActive(List* a){
+	gisp_frames* framesObj = first(a);
+	int n = (int)numVal(second(a));
+
+	//Set the Nth frame active
+	framesObj->active = n;
+
+	//Return its context
+	return (List*)framesObj->frames[n]->context;
+}
+
+
+///~Save all the frames into png files
+///&frames-to-png
+///#void
+///@1frames
+///!1Frames
+///@2name
+///!2string
+__attribute__((aligned(16))) List* fframes_save(List* a){
+	gisp_frames* framesObj = first(a);
+	char* filename = (char*)untag_string(second(a));//trim_quotes(second(a));
+	for (int i=0; i<framesObj->count; ++i){
+		char fullPath[4096];
+		sprintf(fullPath, "%s%s%d.png", gispWorkingDir, filename, i);
+		printf("Saving frame %s.\n", fullPath);fflush(stdout);
+		cairo_surface_write_to_png(framesObj->frames[i]->surface, fullPath);
+	}
+	return e_nil;
+}
+
+
+///~Save all the frames into pngs and then merge those into a gif files
+///&frames-to-gif
+///#void
+///@1frames
+///!1Frames
+///@2name
+///!2string
+__attribute__((aligned(16))) List* fframes_save_gif(List* a){
+	gisp_frames* framesObj = first(a);
+	char* name = (char*)untag_string(second(a));//trim_quotes(second(a));
+	char* tmpname = "tmpframe_";
+	for (int i=0; i<framesObj->count; ++i){
+		char fullPath[4096];
+		sprintf(fullPath, "%s%s%04d.png", gispWorkingDir, tmpname, i);
+		cairo_surface_write_to_png(framesObj->frames[i]->surface, fullPath);
+	}
+
+	//Use ffmpeg to create the gif from the png files
+	char cmd[] = "/usr/bin/ffmpeg";
+	char flag[] = "-i";
+	char input[1024];
+	sprintf(input, "%s%s%%04d.png", gispWorkingDir, tmpname);
+	char outputMp4[1024];
+	sprintf(outputMp4, "%s%s.mp4", gispWorkingDir, name);
+	char outputGif[1024];
+	sprintf(outputGif, "%s%s.gif", gispWorkingDir, name);
+
+/*
+ffmpeg -y -i sketch%03d.png test.mp4
+ffmpeg -y -framerate 2 -i sketch%03d.png test_2.mp4
+ffmpeg -y -framerate 60 -i sketch%03d.png test_60.mp4
+*/
+
+	char fullGif[1024];
+	char fullMp4[1024];
+	char clean[1024];
+	sprintf(fullMp4, "%s -y -framerate 60 -i %s %s", cmd, input, outputMp4);
+	sprintf(fullGif, "%s -y -i %s %s", cmd, outputMp4, outputGif);
+	sprintf(clean, "rm -f %s%s*", gispWorkingDir, tmpname);
+	system(fullMp4);
+	system(fullGif);
+	system(clean);
+	
+
+
+	return e_nil;
+}
+
+
+///~Clean all the frames 
+///&frames-clean
+///#void
+///@1frames
+///!1Frames
+__attribute__((aligned(16))) List* fframes_clean(List* a){
+	gisp_frames* framesObj = first(a);
+
+	//Clean up surfaces and contexts
+	for(int i=0; i<framesObj->count; ++i){
+		cairo_surface_t* surface = framesObj->frames[i]->surface;
+		cairo_t* context = framesObj->frames[i]->context;
+		cairo_surface_flush(surface);
+		cairo_surface_finish(surface);
+		cairo_surface_destroy(surface);
+		cairo_destroy(context);
+	}
+
+	//Cleanup structures
+	for(int i=0; i<framesObj->count; i++){
+		free(framesObj->frames[i]);}
+	free(framesObj->frames);
+	free(framesObj);
+	return e_nil;
+}
 
 
 
@@ -1701,6 +1859,42 @@ __attribute__((aligned(16))) List* fpointsDraw(List* a){
 	}
 	return e_nil;
 }
+
+
+///~Draw lines on the screen
+///&draw-points
+///#void
+///!1Context
+///@1context
+///!2Point
+///@2points
+__attribute__((aligned(16))) List* flinesDraw(List* a){
+	cairo_t* context = first(a);
+	List* seq = second(a);
+	if (is_vector(seq)){
+		Vector* v = (Vector*)untag_vector(seq);
+		void** data = v->data;
+		int size = v->size;
+		for (int i=0;i<size;++i){
+			gisp_object* o = (gisp_object*)untag_object((List*)data[i]);
+			gisp_line* l = (gisp_line*)o->obj;
+			context_draw_line(context, l->a->x, l->a->y, l->b->x, l->b->y);
+		}
+	}else if (is_list(seq)){
+		List* current = seq;
+		while(notNil(current)){
+			gisp_object* o = (gisp_object*)untag_object(car(current));
+			gisp_line* l = (gisp_line*)o->obj;
+			context_draw_line(context, l->a->x, l->a->y, l->b->x, l->b->y);
+			current = cdr(current);
+		}
+	}
+	return e_nil;
+}
+
+
+
+
 
 
 
