@@ -1575,9 +1575,12 @@ __attribute__((aligned(16))) List* fframes_save(List* a){
 ///!1Frames
 ///@2name
 ///!2string
+///@3fps
+///!3Number
 __attribute__((aligned(16))) List* fframes_save_gif(List* a){
 	gisp_frames* framesObj = first(a);
 	char* name = (char*)untag_string(second(a));//trim_quotes(second(a));
+	int fps = (int)numVal(third(a));
 	char* tmpname = "tmpframe_";
 	for (int i=0; i<framesObj->count; ++i){
 		char fullPath[4096];
@@ -1604,7 +1607,7 @@ ffmpeg -y -framerate 60 -i sketch%03d.png test_60.mp4
 	char fullGif[1024];
 	char fullMp4[1024];
 	char clean[1024];
-	sprintf(fullMp4, "%s -y -framerate 60 -i %s %s", cmd, input, outputMp4);
+	sprintf(fullMp4, "%s -y -framerate %d -i %s %s", cmd, fps, input, outputMp4);
 	sprintf(fullGif, "%s -y -i %s %s", cmd, outputMp4, outputGif);
 	sprintf(clean, "rm -f %s%s*", gispWorkingDir, tmpname);
 	system(fullMp4);
