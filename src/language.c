@@ -1589,7 +1589,8 @@ __attribute__((aligned(16))) List* fframes_save_gif(List* a){
 	}
 
 	//Use ffmpeg to create the gif from the png files
-	char cmd[] = "/usr/bin/ffmpeg";
+	//char cmd[] = "/usr/bin/ffmpeg";
+	char cmd[] = "/usr/local/bin/ffmpeg";
 	char flag[] = "-i";
 	char input[1024];
 	sprintf(input, "%s%s%%04d.png", gispWorkingDir, tmpname);

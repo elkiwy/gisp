@@ -210,10 +210,11 @@
 )
 
 ;(frames-to-png frames (str "test"))
-(frames-to-gif frames (str "test"))
+(frames-to-gif frames (str "test") 30)
 (frames-clean frames)
 
 
+(write "done")
 
 
 
