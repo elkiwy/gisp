@@ -621,7 +621,7 @@ List* gispObjectCopy(List* obj){
 		gisp_line* l = (gisp_line*)o->obj;
 		newo = newGispLine(l->a->x, l->a->y, l->b->x, l->b->y);
 	}else{
-		printf("TODO");
+		printf("ERROR: Missing implementation of copy for %p\n", obj);
 		exit(1);
 	}
 	return (List*)tag_object(newo);

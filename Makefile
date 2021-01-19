@@ -3,19 +3,19 @@ OBJ := obj
 BUILD := build
 OBJPROF := obj_profiling
 
-CC := gcc
+CC := gcc-10
 
 SOURCES := $(wildcard $(SRC)/*.c)
 OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 OBJECTSPROF := $(patsubst $(SRC)/%.c, $(OBJPROF)/%.o, $(SOURCES))
-FLAGS = -g -Og -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion -fsanitize=address -fsanitize=undefined
-
+FLAGS = -I/usr/local/include -g -Og -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion #-fsanitize=address -fsanitize=undefined
+OPENMP=-fopenmp
 
 
 build/main: gispCore $(OBJECTS) 
 	mkdir -p $(BUILD)
 	mkdir -p $(OBJ)
-	$(CC) $(OBJECTS) $(FLAGS) -lcairo -lm -ldl -o $@ 
+	$(CC) $(OBJECTS) $(FLAGS) $(OPENMP) -L/usr/local/lib -lcairo -lm -ldl -ltracing -o $@
 
 gispCore:
 	rm -f $(SRC)/gispCore.h
@@ -29,7 +29,7 @@ gispCore:
 
 
 $(OBJ)/%.o: $(SRC)/%.c
-	$(CC) $(FLAGS) -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
+	$(CC) $(FLAGS) $(OPENMP) -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
 
 run: build/main
 	./build/main

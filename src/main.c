@@ -11,6 +11,8 @@
 #include "core.h"
 #include "language.h"
 
+#include "language3D.h"
+
 //Handy debug method
 #define debug(m,e) printf("%s:%d: %s:",__FILE__,__LINE__,m); print_obj(e,1); puts("");
 
@@ -1269,6 +1271,26 @@ int main(int argc, char* argv[]) {
 	extendEnv("rescale",         (void*)frescale, global_env);
 
 	extendEnv("printAddress",   (void*)fprintAddress, global_env);
+
+
+
+	extendEnv("make-group3D",             (void*)make_group3D, global_env);
+	extendEnv("make-material-lambertian", (void*)make_material_lambertian, global_env);
+	extendEnv("make-material-light",      (void*)make_material_light, global_env);
+	extendEnv("make-material-metal",      (void*)make_material_metal, global_env);
+	extendEnv("make-material-dielectric", (void*)make_material_dielectric, global_env);
+
+	extendEnv("add-to-group3D",           (void*)add_to_group3D, global_env);
+	extendEnv("flip-face",                (void*)flip_face3D, global_env);
+	extendEnv("rect3D",                   (void*)rect3D, global_env);
+	extendEnv("box3D",                    (void*)box3D, global_env);
+	extendEnv("sphere3D",                 (void*)sphere3D, global_env);
+	extendEnv("rotated3D",                (void*)rotated3D, global_env);
+	extendEnv("translated3D",             (void*)translated3D, global_env);
+
+	extendEnv("camera3D",                 (void*)camera3D, global_env);
+	extendEnv("render3D",                 (void*)render3D, global_env);
+
 
 	//Intern all the macro strings
 	INTERN_quote	= intern("quote");
