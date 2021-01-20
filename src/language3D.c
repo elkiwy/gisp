@@ -14,6 +14,7 @@ vec3 gispTaggedVectorToVec3(void* vector){
 
 ///=Gisp Core: 3D
 
+///~Creates a container group for 3D objects
 ///&make-group3D
 ///#Group3D
 __attribute__((aligned(16))) List* make_group3D(List* a){
@@ -22,6 +23,7 @@ __attribute__((aligned(16))) List* make_group3D(List* a){
     return (List*)group;
 }
 
+///~Creates a lambertian material for 3D objects
 ///&make-material-lambertian
 ///#Material3D
 ///!1Number
@@ -38,6 +40,7 @@ __attribute__((aligned(16))) List* make_material_lambertian(List* a){
     return (List*)mat;
 }
 
+///~Creates a light material for 3D objects
 ///&make-material-light
 ///#Material3D
 ///!1Number
@@ -54,6 +57,7 @@ __attribute__((aligned(16))) List* make_material_light(List* a){
     return (List*)mat;
 }
 
+///~Creates a metal material for 3D objects
 ///&make-material-metal
 ///#Material3D
 ///!1Number
@@ -73,6 +77,7 @@ __attribute__((aligned(16))) List* make_material_metal(List* a){
     return (List*)mat;
 }
 
+///~Creates a dielectric material for 3D objects
 ///&make-material-dielectric
 ///#Material3D
 ///!1Number
@@ -83,6 +88,7 @@ __attribute__((aligned(16))) List* make_material_dielectric(List* a){
     return (List*)mat;
 }
 
+///~Append a new 3D objects to the group
 ///&add-to-group3D
 ///#Group3D
 ///!1Group3D
@@ -96,6 +102,7 @@ __attribute__((aligned(16))) List* add_to_group3D(List* a){
     return (List*)group;
 }
 
+///~Creates an axis aligned rectangle
 ///&rect3D
 ///#Object3D
 ///!1Point3D / Number[3]
@@ -129,6 +136,7 @@ __attribute__((aligned(16))) List* rect3D(List* a){
 }
 
 
+///~Creates an 3D box
 ///&box3D
 ///#Object3D
 ///!1Point3D / Number[3]
@@ -145,6 +153,7 @@ __attribute__((aligned(16))) List* box3D(List* a){
 }
 
 
+///~Creates an 3D sphere
 ///&sphere3D
 ///#Object3D
 ///!1Point3D / Number[3]
@@ -163,6 +172,7 @@ __attribute__((aligned(16))) List* sphere3D(List* a){
 
 
 
+///~Wrap around a 3D object flipping its face normals
 ///&flip-face
 ///#Object3D
 ///!1Object3D
@@ -172,6 +182,7 @@ __attribute__((aligned(16))) List* flip_face3D(List* a){
     return (List*)hittable_flip_face_init(NULL, obj);
 }
 
+///~Wrap around a 3D object rotating it
 ///&rotated3D
 ///#Object3D
 ///!1Object3D
@@ -191,6 +202,7 @@ __attribute__((aligned(16))) List* rotated3D(List* a){
     return (List*)hittable_rotate_init(NULL, obj, angle, axis);
 }
 
+///~Wrap around a 3D object translating it
 ///&translated3D
 ///#Object3D
 ///!1Object3D
@@ -216,12 +228,7 @@ __attribute__((aligned(16))) List* translated3D(List* a){
 
 
 
-
-
-
-
-
-
+///~Creates a 3D camera object to render a 3D scene
 ///&camera3D
 ///#Camera3D
 ///!1Point3D / Number[3]
@@ -251,6 +258,7 @@ __attribute__((aligned(16))) List* camera3D(List* a){
     return (List*)c;
 }
 
+///~Render a 3D scene to a file
 ///&render3D
 ///#void
 ///!1String

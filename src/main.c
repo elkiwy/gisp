@@ -1273,14 +1273,20 @@ int main(int argc, char* argv[]) {
 	extendEnv("printAddress",   (void*)fprintAddress, global_env);
 
 
-
+	/**
+	 * Language 3D
+	 * */
+	//Groups
 	extendEnv("make-group3D",             (void*)make_group3D, global_env);
+	extendEnv("add-to-group3D",           (void*)add_to_group3D, global_env);
+
+	//Materials
 	extendEnv("make-material-lambertian", (void*)make_material_lambertian, global_env);
 	extendEnv("make-material-light",      (void*)make_material_light, global_env);
 	extendEnv("make-material-metal",      (void*)make_material_metal, global_env);
 	extendEnv("make-material-dielectric", (void*)make_material_dielectric, global_env);
 
-	extendEnv("add-to-group3D",           (void*)add_to_group3D, global_env);
+	//Objects
 	extendEnv("flip-face",                (void*)flip_face3D, global_env);
 	extendEnv("rect3D",                   (void*)rect3D, global_env);
 	extendEnv("box3D",                    (void*)box3D, global_env);
@@ -1288,10 +1294,14 @@ int main(int argc, char* argv[]) {
 	extendEnv("rotated3D",                (void*)rotated3D, global_env);
 	extendEnv("translated3D",             (void*)translated3D, global_env);
 
+	//Rendering
 	extendEnv("camera3D",                 (void*)camera3D, global_env);
 	extendEnv("render3D",                 (void*)render3D, global_env);
 
 
+	/**
+	 * Interns
+	 * */
 	//Intern all the macro strings
 	INTERN_quote	= intern("quote");
 	INTERN_if		= intern("if");
