@@ -16,6 +16,7 @@
 //Handy debug method
 #define debug(m,e) printf("%s:%d: %s:",__FILE__,__LINE__,m); print_obj(e,1); puts("");
 
+#define MAX_ARGS_PER_FUNCTION 64
 
 typedef struct profile_struct{
 	clock_t total;
@@ -1000,21 +1001,30 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 			} else if (primop) { 
 				if(debugPrintInfo){printf("====> %p", exp);fflush(stdout); debugPrintObj(" Evaluating ", exp);}
 
-				//Evaluate arguments and remove them from exp list
 				List* argsToEval = cdr(exp);
-				List* args = 0;
-				List** tmp = &args;
+
+
+				//Make a bunch of slots for the args value
+				List args_stack[MAX_ARGS_PER_FUNCTION] = {0};
+				List* args = (List*)tag(&args_stack[0]);
+				int args_ind = 0;
 				for ( ; notNil(argsToEval) ; argsToEval = cdr(argsToEval)) {
-					*tmp = cons(eval(car(argsToEval), env, autoclean), e_nil);
+					//Take the current slot
+					args_stack[args_ind].data = eval(car(argsToEval), env, autoclean);
+					args_stack[args_ind].next = e_nil;
+
+					//Link to previous cons
+					if (args_ind>0){ args_stack[args_ind-1].next = (List*)tag(&args_stack[args_ind]); }
+
+					//Autoclean if necessary and go next
 					if(autoclean){consSetData(argsToEval, e_nil);}
-					tmp = &((List*)untag(*tmp))->next;
+					args_ind++;
 				}
 
 				//Evaluate expression with evaluated arguments
 				List* result = ((List* (*) (List*))primop) (args);
 
 				//Free the current expression
-				objFree(args);
 				if(autoclean){objFree(exp);}
 				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("primitive Evaluated to:" , result); printf("\e[39m");fflush(stdout);}
 				return result;
