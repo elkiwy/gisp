@@ -336,7 +336,7 @@ __attribute__((aligned(16))) List* render3D(List* a){
         int thread_id = omp_get_thread_num();
         double thread_end = omp_get_wtime();
         chunksDone++;
-        printf("Thread %d (chunk: %d-%d) finished in %f, remains %d chunks.\n", thread_id, k*step, (k+1)*step, (double)(thread_end - thread_begin), THREADS-chunksDone);
+        printf("Thread %d (chunk: %d-%d) finished in %f, remains %d chunks.\n", thread_id, k*step, (k+1)*step, (double)(thread_end - thread_begin), THREADS-chunksDone);fflush(stdout);
     }
 
     //Flip the final image and save it
