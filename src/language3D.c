@@ -298,16 +298,23 @@ __attribute__((aligned(16))) List* render3D(List* a){
 
     //Setup profiling and multithreading
     double time = 0.0;
+
+#ifdef MULTI_THREADING
     double begin = omp_get_wtime();
+#endif
     int progress = 0;
     const unsigned int THREADS = 4*4;
     int step = floor(IMAGE_HEIGHT/THREADS);
     int chunksDone = 0;
 
     //Split height into chunks and give them to threads
-    //#pragma omp parallel for
+#ifdef MULTI_THREADING
+    #pragma omp parallel for
+#endif
     for(unsigned int k=0; k<THREADS; ++k){
+#ifdef MULTI_THREADING
         double thread_begin = omp_get_wtime();
+#endif
 
         //Each threads cycle a step numer of rows
         for(int sj=step-1; sj>=0; --sj){
@@ -332,11 +339,17 @@ __attribute__((aligned(16))) List* render3D(List* a){
             }
         }
 
+
+        chunksDone++;
+
+#ifdef MULTI_THREADING
         //Output feedback of chunk completed
         int thread_id = omp_get_thread_num();
         double thread_end = omp_get_wtime();
-        chunksDone++;
         printf("Thread %d (chunk: %d-%d) finished in %f, remains %d chunks.\n", thread_id, k*step, (k+1)*step, (double)(thread_end - thread_begin), THREADS-chunksDone);fflush(stdout);
+#else
+        printf("chunk: %d-%d finished, remains %d chunks.\n",  k*step, (k+1)*step,  THREADS-chunksDone);fflush(stdout);
+#endif
     }
 
     //Flip the final image and save it
@@ -344,10 +357,11 @@ __attribute__((aligned(16))) List* render3D(List* a){
     stbi_write_png(filename, IMAGE_WIDTH, IMAGE_HEIGHT, CHANNELS, pixels, IMAGE_WIDTH * CHANNELS);
 
     //Output total time elapsed
+#ifdef MULTI_THREADING
     double end = omp_get_wtime();
     time = (double)(end - begin);
     printf("Time elpased for rendering %f\n", time);
-
+#endif
 
     return e_nil;
 }

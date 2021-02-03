@@ -1,8 +1,11 @@
 #ifndef __LANGUAGE3D_H_
 #define __LANGUAGE3D_H_
 
+//#define MULTI_THREADING 1
 
+#ifdef MULTI_THREADING
 #include <omp.h>
+#endif
 
 
 #include "raytraCer/hittable_list.h"
