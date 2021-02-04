@@ -1,0 +1,33 @@
+(seed)
+(def canvas-w 1024)
+(def canvas-h 1024)
+(def name "sketch-simplex")
+(def s (make-surface (concat name ".svg") canvas-w canvas-h))
+(def c (make-context s))
+
+
+(def simplex (simplex-noise 8 0.9 (rand 99999)))
+(doseq (ts (list 64 128))
+	(let (scale    6
+		  plineMul 0.5
+		  nlineMul (* -1 plineMul)
+		  a        (* nlineMul ts)
+		  b        (* plineMul ts)
+		  nx       (/ canvas-w ts)
+		  ny       (/ canvas-h ts))
+		(doseq (j (range 1 (- ny 1)))
+			(doseq (i (range 1 (- nx 1)))
+				(let (cx  (+ (* ts i) (* ts 0.5))
+				      cy  (+ (* ts j) (* ts 0.5))
+					  val (simplex-noise-value simplex (* (/ i nx) scale) (* (/ j ny) scale))
+					  n   (* 30 (+ 0.5 val)))
+					(doseq (k (range n))
+						(draw-line c
+							(point (+ cx (rand a b)) (+ cy (rand a b)))
+							(point (+ cx (rand a b)) (+ cy (rand a b))))))))))
+
+
+(surface-to-png s (concat name ".png"))
+(surface-clean s c)
+
+
