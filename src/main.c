@@ -478,9 +478,9 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 			extendEnv(sym, val, globalEnv);
 
 			//printf("== Done Defining %s ", sym); print_obj(val, 1); printf("\n"); fflush(stdout);
-			consFree(cdr(cdr(exp)));
+			//consFree(cdr(cdr(exp)));
 			consSetNext(cdr(exp), e_nil);
-			objFree(exp);
+			//objFree(exp);
 			objFree(val);
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("def Evaluated to:" , e_nil); printf("\e[39m");fflush(stdout);}
 			return e_nil;
@@ -500,17 +500,21 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 			//Get function name
 			char* sym = second(exp);
 
-			//Expand defn macro
-			List* lambda = cons(INTERN_lambda, cons(third(exp), cdr(cdr(cdr(exp)))));
+			//Create the body and the lambda itself
+			List lambda_body;
+			lambda_body.data = third(exp);
+			lambda_body.next = cdr(cdr(cdr(exp)));
+			List lambda_obj;
+			lambda_obj.data = INTERN_lambda;
+			lambda_obj.next = (List*)tag(&lambda_body);
+			List* lambda = (List*)tag(&lambda_obj);
+
+			// Expand defn macro
 			if(debugPrintInfo){debugPrintObj("===> lambda: ", lambda);}
 
 			//Export the function into the environment
 			extendEnv(sym, lambda, env);
 
-			//Cleanup memory and return
-			consFree(cdr(lambda));
-			consFree(lambda);
-			objFree(exp);
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("defn Evaluated to:" , e_nil); printf("\e[39m");fflush(stdout);}
 			return e_nil;
 
@@ -636,64 +640,73 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 		}else if (first(exp) == INTERN_map){
 			if(debugPrintInfo){debugPrintObj("===>Evaluating map ", exp);}
 
-			//Get the sequence
-			List* seqFirst = eval(third(exp), env, true);
-			List* seq = seqFirst;
-			consSetData(cdr(cdr(exp)), e_nil);
-
-			//If I got a vector convert it into a list
-			if (is_vector(seqFirst)){
-				Vector* vec = (Vector*)untag_vector(seqFirst);
-				List* list = vecToList(vec);
-				objFree((List*)seqFirst);
-				seqFirst = list;
-				seq = list;
-			}
-
-
-			List* ret = e_nil;
-			List* function = eval(second(exp), env, true);
-			consSetData(cdr(exp), env);
-			if (is_pair(function)){
-				//Lambda
-				while (notNil(seq)){
-					List* lambdaArg = cons(objCopy(car(seq)), e_nil);
-					List* r = apply_lambda(function, lambdaArg, env, false);
-					objFree(lambdaArg);
-					ret = cons(r, ret);
-					seq = cdr(seq);
-				}
+			//Set the sequence we want to map
+			List* sequenceToMap = 0;
+			List* evaluatedSequence = eval(third(exp), env, false);
+			Vector* vec = is_vector(evaluatedSequence) ? vec = (Vector*)untag_vector(evaluatedSequence) : NULL;
+			List newList[vec == NULL ? 1 : vec->size];
+			if (vec != NULL){
+				//Convert the vector to a list since we use that in map
+				vecToList_stack(vec, &newList[0], vec->size);
+				sequenceToMap = (List*)tag(&newList[0]);
 			}else{
-				//Known function name
-				void* f = function;
-				if(nil(f)){printf("\nERROR: \"%s\" is not a valid function for map. Exiting.\n\n", (char*)second(exp));fflush(stdout);exit(1);}
-				while (notNil(seq)){
-					List* functionArg = cons(objCopy(car(seq)), e_nil);
-					List* r = ((List* (*) (List*))f)(functionArg);
-					objFree(functionArg);
-					ret = cons(r, ret);
-					seq = cdr(seq);
-				}
+				//Else just use the evaluated one
+				sequenceToMap = evaluatedSequence;
 			}
 
-			//Reverse the result list
-			List* correct = e_nil;
-			List* l = ret;
-			while(notNil(l)){
-				correct = cons(car(l), correct);
-				l = cdr(l);
+			//Setup return object
+			List* ret = e_nil;
+			List* function = eval(second(exp), env, false);
+			//consSetData(cdr(exp), env); //TODO Wtf this means?
+
+			//Apply function on each element of the sequence
+			void* f = function;
+			while (notNil(sequenceToMap)){
+				//Pack the arg
+				List arg = {objCopy(car(sequenceToMap)), e_nil};
+				List* argList = (List*)tag(&arg);
+
+				//Apply the user lambda or function primitive
+				List* result = NULL;
+				if (is_pair(function)){ result = apply_lambda(function, argList, env, false);
+				}else{result = ((List* (*) (List*))f)(argList);}
+
+				//Concatenate the current result with the other one and continue
+				ret = cons(result, ret);
+				sequenceToMap = cdr(sequenceToMap);
+				objFree(car(argList));
 			}
 
-			//Clean the previous result cons since we recycled the same objects during the reverse
-			listFreeOnlyCons(ret);
 
-			objFree(function);
-			objFree(seqFirst);
-			objFree(exp);
+			//Get the size of a temp utility array of pointers
+			List* tmp = ret; int size = 0;
+			while(notNil(tmp)){size++; tmp = cdr(tmp);}
 
-			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mmap Evaluated to:" , correct); printf("\e[39m");fflush(stdout);}
+			//Create an array of pointers to ret cells
+			List* ptrs[size]; int ptrs_ind = 0;
+			tmp = ret;
+			while(notNil(tmp)){
+				ptrs[ptrs_ind] = tmp;
+				tmp = cdr(tmp);
+				ptrs_ind++;
+			}
 
-			return correct;
+			//Fix the ->next values by reversing the direction
+			List* lastCons = e_nil; List* current = ret;
+			ptrs_ind = size;
+			for(int i = 0; i<size; i++){
+				((List*)untag(ptrs[i]))->next = lastCons;
+				lastCons = ptrs[i];
+			}
+			List* reversedRet = lastCons;
+
+
+			//Free the original evaluated list
+			objFree(evaluatedSequence);
+
+			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mmap Evaluated to:" , reversedRet); printf("\e[39m");fflush(stdout);}
+
+			return reversedRet;
 
 
 		///+Evaluate the function on the sequence seq returning a vector of evaluated elements.
@@ -1055,6 +1068,76 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 
 
 
+
+
+
+
+
+
+
+
+
+int getlist_stack(List* objects, int size, void** ret);
+
+int getobj_stack(List* objects, int size, void** ret) {
+	if (token[0] == '(') {
+		return getlist_stack(objects, size, ret);
+	}else{
+		//if (token[0] == '[') return cons(intern("vector"), getlist_stack());
+		//if (token[0] == '{') return cons(intern("hashmap"), getlist_stack());
+		if (token[0] == '#'){
+			if (look != '('){printf("ERROR: \"#\" should always be followed by a list. \"%c\" was found instead.", look); fflush(stdout); *ret = 0;return 0;}
+			look = read_char();
+
+			void* expr = 0;
+			int slots_for_expr = getlist_stack(&objects[4], size-4, &expr);
+			objects[0] = (List){intern("%"), e_nil};    // lambda_args
+			objects[1] = (List){expr, e_nil};           // lambda_expr
+			objects[2].data = (List*)tag(&objects[0]);  // lambda_body
+			objects[2].next = (List*)tag(&objects[1]);  // lambda_body
+			objects[3].data = intern("lambda");         // lambda_declaration
+			objects[3].next = (List*)tag(&objects[2]);  // lambda_declaration
+			*ret = (List*)tag(&objects[3]);
+			return 4 + slots_for_expr;
+
+		}else{
+			//Else just return the symbol
+			*ret = (List*)intern(token);
+			return 1;
+		}
+	}
+}
+
+int getlist_stack(List* objects, int size, void** ret) {
+	//Get next token
+	gettoken();
+	//Check If i'm done with this list
+	if (token[0] == ')' || token[0] == ']' || token[0] == '}') {
+		*ret = e_nil;
+		return 1;
+	}else{
+		//If I'm not done get the full object from the current token and concatenate it to the rest of the list
+		void* next_object = 0;
+		void* rest = 0;
+		int slot_for_first = getobj_stack(&objects[1], size-1, &next_object);
+		int slot_for_rest = getlist_stack(&objects[slot_for_first], size - slot_for_first, &rest);
+
+		//Create the current cons
+		objects[0].data = next_object;
+		objects[0].next = rest;
+
+		//Return the tagged version
+		*ret = (List*)tag(&objects[0]);
+		return 1 + slot_for_first + slot_for_rest;
+	}
+}
+
+
+
+
+
+
+
 //Read the current input in stdin or the inputfile if present
 List* read_and_eval(){
 	List* result = e_nil;	
@@ -1064,13 +1147,22 @@ List* read_and_eval(){
 		//Evaluate only if valid tokens
 		if (strlen(token)>0){
 			debug_printAllocations();
-			if(debugPrintInfo){printf("\n\e[36m***> Reading\n");fflush(stdout);}
+			if(!debugPrintInfo){printf("\n\e[36m***> Reading\n");fflush(stdout);}
+
+			/*/
 			List* obj = getobj();
-			if(debugPrintInfo){
-				debugPrintObj("Read: ", obj);
-				printf("\e[39m"); fflush(stdout);}
+			/*/
+			const int STACK_SIZE = 1024;
+			List objects[STACK_SIZE];
+			void* ret = 0;
+			int slots_used = getobj_stack(&objects[0], STACK_SIZE, &ret);
+			printf("Used %d slots\n", slots_used);fflush(stdout);
+			List* obj = (List*)ret;
+			/**/
+
+			if(!debugPrintInfo){debugPrintObj("Read: ", obj);printf("\e[39m"); fflush(stdout);}
 			if(notNil(result)){objFree(result);result=e_nil;}
-			result = eval(obj, global_env, true);
+			result = eval(obj, global_env, false);
 		}
 
 		if (exitFlag==0){look = read_char();
@@ -1339,8 +1431,6 @@ int main(int argc, char* argv[]) {
 	debugPrintFrees = 0;
 	debugPrintCopy = 0;
 	debugPrintAllocs = 0;
-	includeLinkedBinaryFile((unsigned char*)src_gisp_core_core_gisp, (unsigned int)src_gisp_core_core_gisp_len);
-	//includeLinkedBinaryFile((unsigned char*)src_gisp_core_simplex_noise_gisp, (unsigned int)src_gisp_core_simplex_noise_gisp_len);
 
 	//Evaluate everything 
 	debugPrintInfo = 0;
@@ -1350,6 +1440,7 @@ int main(int argc, char* argv[]) {
 	clock_t end_env = clock();
 	List* result = read_and_eval();
 	print_obj(result, 1);printf("\n");fflush(stdout);
+	//includeLinkedBinaryFile((unsigned char*)src_gisp_core_core_gisp, (unsigned int)src_gisp_core_core_gisp_len);
 	debugPrintInfo = 0;
 	debugPrintFrees = 0;
 	debugPrintCopy = 0;

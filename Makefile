@@ -3,13 +3,14 @@ OBJ := obj
 BUILD := build
 OBJPROF := obj_profiling
 
-CC := gcc-10
+CC := gcc
 
 SOURCES := $(wildcard $(SRC)/*.c)
 OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 OBJECTSPROF := $(patsubst $(SRC)/%.c, $(OBJPROF)/%.o, $(SOURCES))
-FLAGS = -I/usr/local/include -g -Og -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion #-fsanitize=address -fsanitize=undefined
-OPENMP=-fopenmp
+SANITIZE_FLAGS = -fsanitize=address -fsanitize=undefined
+FLAGS = -I/usr/local/include -g -Og -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion $(SANITIZE_FLAGS)
+OPENMP= # -fopenmp
 
 
 build/main: gispCore $(OBJECTS) 

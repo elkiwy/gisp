@@ -32,8 +32,8 @@ extern void profile(char* name, int active);
 
 //This is the main List structure
 typedef struct List {
-	struct List*  next;
 	void*  data;
+	struct List*  next;
 }List;
 
 
@@ -111,6 +111,7 @@ map_t newHashmap();
 Vector* newVec(int size);
 Vector* listToVec(List* l);
 List* vecToList(Vector* vec);
+void vecToList_stack(Vector* vec, List* result, int size);
 
 // ------------------------------------------------------------------
 //Cons utilities

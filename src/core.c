@@ -135,7 +135,7 @@ List* cons(void* _car, void* _cdr) {
 	_pair->data = _car;
 	_pair->next = _cdr;
 
-	if (debugPrintAllocs){
+	if (!debugPrintAllocs){
 		printf("\e[31m+++ cons %p", (void*)tag(_pair));
 		printf(" (%p ", _car);
 		printf(". %p) ", _cdr);
@@ -310,6 +310,19 @@ List* vecToList(Vector* vec){
 }
 
 
+void vecToList_stack(Vector* vec, List* result, int size){
+	void** data = vec->data;
+	List* l = e_nil;
+	for(int i=0; i<size-1; i++){
+		result[i].data = objCopy(data[i]);
+		result[i].next = (List*)tag(&result[i+1]);
+	}
+	result[size-1].data = objCopy(data[size-1]);
+	result[size-1].next = e_nil;
+}
+
+
+
 
 
 
@@ -415,7 +428,7 @@ void listFreeOnlyCons(List* l){
 
 
 void consFree(List* c){
-	if(debugPrintFrees){
+	if(!debugPrintFrees){
 		printf("\e[31m--- Freeing single cons: %p\n\e[39m", c);
 		debug_removeAllocation(c);
 	}
