@@ -1,13 +1,21 @@
 
 
 ;(* (+ 1 2) (- 3 4))
-(+ 1 2 7)
+;(+ 1 2 7)
 
 
 
 ;(map #(* 2 %) (list 3 4 5))
-(write (map #(* 3 %) (vector 3 4 5)))
-(write (map log (vector 3 4 5)))
+;(write (map #(* 3 %) (vector 3 4 5)))
+(write (map log [3 4 5]))
+
+
+
+(let (a 2)
+     (* 7 a)
+)
+
+;(doseq (i (range 1 10)) (write (+ i 100)))
 
 ;[1 2 3]
 ;{:a 1 :b 2 :c 3}

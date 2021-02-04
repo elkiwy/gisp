@@ -571,7 +571,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 				body = cdr(body);
 			}
 
-			objFree(exp);
+			//objFree(exp);
 
 			environmentFree(innerEnv);
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("let Evaluated to:" , result); printf("\e[39m");fflush(stdout);}
@@ -901,6 +901,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 		///!2Any
 		}else if (first(exp) == INTERN_doseq){
 			if(debugPrintInfo){debugPrintObj("===>Expanding doseq macro  ", exp);}
+
 			Environment* innerEnv = makeEnvironment(env);
 			char* sym = first(second(exp));
 
@@ -911,26 +912,28 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 
 			List* body = cdr(cdr(exp));
 			List* ret = e_nil;
+
+			debugPrintObj("body: ", body);
+
 			while(notNil(seqCurrent)){
 				//Update the symbol value
 				extendEnv(sym, car(seqCurrent), innerEnv);
 
 				//Eval the body and go to the next
-				List* bodyCopy = objCopy(body);
-				List* current = bodyCopy;
+				List* current = body;
 				while(notNil(current)){
 					//Eval the body and go to the next
 					if (notNil(ret)) objFree(ret);
-					ret = eval(car(current), innerEnv, true);
-					consSetData(current, e_nil);
+					ret = eval(car(current), innerEnv, false);
 					current = cdr(current);
 				}
-				objFree(bodyCopy);
 				seqCurrent = cdr(seqCurrent);
 			}
 
+
+
 			objFree(evaluatedSeq);
-			objFree(exp);
+
 			environmentFree(innerEnv);
 			if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96mdoseq Evaluated to:" , ret); printf("\e[39m");fflush(stdout);}
 			return ret;
@@ -1006,7 +1009,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 				List* result = eval(lambda, env, autoclean); 
 
 				//objFree(lambda);
-				if(autoclean){objFree(exp);}
+				//if(autoclean){objFree(exp);}
 				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("\e[96muser defined function Evaluated to:" , result); printf("\e[39m");fflush(stdout);}
 				return result;
 
@@ -1038,7 +1041,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 				List* result = ((List* (*) (List*))primop) (args);
 
 				//Free the current expression
-				if(autoclean){objFree(exp);}
+				//if(autoclean){objFree(exp);}
 				if(debugPrintInfo){printf("\e[96m%p : ", exp); debugPrintObj("primitive Evaluated to:" , result); printf("\e[39m");fflush(stdout);}
 				return result;
 			}

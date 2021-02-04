@@ -135,7 +135,7 @@ List* cons(void* _car, void* _cdr) {
 	_pair->data = _car;
 	_pair->next = _cdr;
 
-	if (!debugPrintAllocs){
+	if (debugPrintAllocs){
 		printf("\e[31m+++ cons %p", (void*)tag(_pair));
 		printf(" (%p ", _car);
 		printf(". %p) ", _cdr);
