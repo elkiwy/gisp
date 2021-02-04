@@ -1083,9 +1083,24 @@ int getobj_stack(List* objects, int size, void** ret) {
 	if (token[0] == '(') {
 		return getlist_stack(objects, size, ret);
 	}else{
-		//if (token[0] == '[') return cons(intern("vector"), getlist_stack());
-		//if (token[0] == '{') return cons(intern("hashmap"), getlist_stack());
-		if (token[0] == '#'){
+		//Read vector
+		if (token[0] == '['){
+			void* values = 0;
+			int slots_for_values = getlist_stack(&objects[1], size-1, &values);
+			objects[0] = (List){intern("vector"), values};
+			*ret = (List*)tag(&objects[0]);
+			return 1+slots_for_values;
+
+		//Read hashmap
+		}else if (token[0] == '{'){
+			void* values = 0;
+			int slots_for_values = getlist_stack(&objects[1], size-1, &values);
+			objects[0] = (List){intern("hashmap"), values};
+			*ret = (List*)tag(&objects[0]);
+			return 1+slots_for_values;
+
+		//Read short lambda
+		}else if (token[0] == '#'){
 			if (look != '('){printf("ERROR: \"#\" should always be followed by a list. \"%c\" was found instead.", look); fflush(stdout); *ret = 0;return 0;}
 			look = read_char();
 
