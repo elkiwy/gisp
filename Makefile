@@ -3,20 +3,21 @@ OBJ := obj
 BUILD := build
 OBJPROF := obj_profiling
 
-CC := gcc
+CC := gcc-10
 
 SOURCES := $(wildcard $(SRC)/*.c)
 OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 OBJECTSPROF := $(patsubst $(SRC)/%.c, $(OBJPROF)/%.o, $(SOURCES))
-SANITIZE_FLAGS = -fsanitize=address -fsanitize=undefined
-FLAGS = -I/usr/local/include -g -Og -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion $(SANITIZE_FLAGS)
-OPENMP= # -fopenmp
+SANITIZE_FLAGS = #-fsanitize=address -fsanitize=undefined
+WARNINGS = -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion
+OPENMP=  -fopenmp
+FLAGS = -I/usr/local/include -g -Og $(WARNINGS) $(SANITIZE_FLAGS) $(OPENMP)
 
 
 build/main: gispCore $(OBJECTS) 
 	mkdir -p $(BUILD)
 	mkdir -p $(OBJ)
-	$(CC) $(OBJECTS) $(FLAGS) $(OPENMP) -L/usr/local/lib -lcairo -lm -ldl -ltracing -o $@
+	$(CC) $(OBJECTS) $(FLAGS) -L/usr/local/lib -lcairo -lm -ldl -ltracing -o $@
 
 gispCore:
 	rm -f $(SRC)/gispCore.h
@@ -27,10 +28,10 @@ gispCore:
 	done
 	echo '#endif /* _GISPCORE_H */' >> $(SRC)/gispCore.h
 
-
-
 $(OBJ)/%.o: $(SRC)/%.c
-	$(CC) $(FLAGS) $(OPENMP) -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
+	$(CC) $(FLAGS) -c $< -I$(SRC) -I/usr/local/include/cairo -o $@
+
+
 
 run: build/main
 	./build/main

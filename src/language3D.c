@@ -19,7 +19,6 @@ vec3 gispTaggedVectorToVec3(void* vector){
 ///#Group3D
 __attribute__((aligned(16))) List* make_group3D(List* a){
     hittable_list* group = hittable_list_new(1024);
-    printf("Made group3D: %p\n", group);
     return (List*)group;
 }
 
@@ -244,9 +243,7 @@ __attribute__((aligned(16))) List* translated3D(List* a){
 __attribute__((aligned(16))) List* camera3D(List* a){
     vec3 lookfrom = gispTaggedVectorToVec3(first(a));
     vec3 lookat = gispTaggedVectorToVec3(second(a));
-    printf("look from:\n");
     vec3_print(&lookfrom);
-    printf("look at:\n");
     vec3_print(&lookat);
     vec3 vup = {0,1,0};
     double vfov = numVal(third(a));
@@ -254,7 +251,6 @@ __attribute__((aligned(16))) List* camera3D(List* a){
     double aperture = numVal(fifth(a));
     double ASPECT_RATIO = 1.0;
     camera* c = camera_new(lookfrom, lookat, vup, vfov, ASPECT_RATIO, aperture, dist_to_focus, 0.0, 1.0);
-    printf("Made camera: %p\n", c);
     return (List*)c;
 }
 

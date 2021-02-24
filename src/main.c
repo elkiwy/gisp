@@ -553,8 +553,8 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 			List *bindings = second(exp);
 			while(notNil(bindings)){
 				char* sym = first(bindings);
-				List* val = eval(second(bindings), innerEnv, true);
-				consSetData(cdr(bindings), e_nil);
+				List* val = eval(second(bindings), innerEnv, false);
+				//consSetData(cdr(bindings), e_nil);
 				extendEnv(sym, val, innerEnv);
 				objFree(val);
 				bindings = cdr(cdr(bindings));
@@ -566,8 +566,8 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 			List* result = e_nil;
 			while(notNil(body)){
 				if(notNil(result))objFree(result);
-				result = eval(car(body), innerEnv, true);
-				consSetData(body, e_nil);
+				result = eval(car(body), innerEnv, false);
+				//consSetData(body, e_nil);
 				body = cdr(body);
 			}
 
@@ -913,7 +913,7 @@ List* eval(List* exp, Environment* env, bool autoclean) {
 			List* body = cdr(cdr(exp));
 			List* ret = e_nil;
 
-			debugPrintObj("body: ", body);
+			//debugPrintObj("body: ", body);
 
 			while(notNil(seqCurrent)){
 				//Update the symbol value
@@ -1165,20 +1165,15 @@ List* read_and_eval(){
 		//Evaluate only if valid tokens
 		if (strlen(token)>0){
 			debug_printAllocations();
-			if(!debugPrintInfo){printf("\n\e[36m***> Reading\n");fflush(stdout);}
+			if(debugPrintInfo){printf("\n\e[36m***> Reading\n");fflush(stdout);}
 
-			/*/
-			List* obj = getobj();
-			/*/
-			const int STACK_SIZE = 1024;
+			const int STACK_SIZE = 1024*10;
 			List objects[STACK_SIZE];
 			void* ret = 0;
 			int slots_used = getobj_stack(&objects[0], STACK_SIZE, &ret);
-			printf("Used %d slots\n", slots_used);fflush(stdout);
 			List* obj = (List*)ret;
-			/**/
 
-			if(!debugPrintInfo){debugPrintObj("Read: ", obj);printf("\e[39m"); fflush(stdout);}
+			if(debugPrintInfo){debugPrintObj("Read: ", obj);printf("\e[39m"); fflush(stdout);}
 			if(notNil(result)){objFree(result);result=e_nil;}
 			result = eval(obj, global_env, false);
 		}
@@ -1248,16 +1243,16 @@ int main(int argc, char* argv[]) {
 		if(realpath(argv[1], gispWorkingDir)==NULL){
 			printf("Couldn't find input file '%s'.", argv[1]);exit(1);
 		}
-		printf("Reading from file \"%s\"\n", gispWorkingDir);
+		printf("Reading from file \"%s\"\n", gispWorkingDir);fflush(stdout);
 
 		//Remove the filename to get the working directory
 		while (strlen(gispWorkingDir)>=1 && gispWorkingDir[strlen(gispWorkingDir)-1] != '/'){
 			gispWorkingDir[strlen(gispWorkingDir)-1] = '\0';
 		}
-		printf("Working dir set on: \"%s\"\n", gispWorkingDir);
+		printf("Working dir set on: \"%s\"\n", gispWorkingDir);fflush(stdout);
 	}else{
 		//Ask for input file
-		printf("Please provide a .gisp file to read.\n");
+		printf("Please provide a .gisp file to read.\n");fflush(stdout);
 		exit(1);
 	}
 
