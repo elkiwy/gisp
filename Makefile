@@ -8,14 +8,22 @@ CC := gcc-10
 SOURCES := $(wildcard $(SRC)/*.c)
 OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 OBJECTSPROF := $(patsubst $(SRC)/%.c, $(OBJPROF)/%.o, $(SOURCES))
-FLAGS = -I/usr/local/include -g -Og -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion #-fsanitize=address -fsanitize=undefined
+
+WARNS = -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion
 OPENMP=-fopenmp
+
+FLAGS = -I/usr/local/include -g -Og $(WARNS)  #-fsanitize=address -fsanitize=undefined
+
+LIBCAIRO = -lcairo -lm -ldl
+LIBTRACING = -ltracing
+LIBOPENCL = -framework OpenCL -arch x86_64 -DUNIX -DDEBUG -DMAC
+LIBS = -L/usr/local/lib $(LIBCAIRO) $(LIBTRACING) $(LIBOPENCL)
 
 
 build/main: gispCore $(OBJECTS) 
 	mkdir -p $(BUILD)
 	mkdir -p $(OBJ)
-	$(CC) $(OBJECTS) $(FLAGS) $(OPENMP) -L/usr/local/lib -lcairo -lm -ldl -ltracing -o $@
+	$(CC) $(OBJECTS) $(FLAGS) $(OPENMP) $(LIBS) -o $@
 
 gispCore:
 	rm -f $(SRC)/gispCore.h
@@ -48,6 +56,8 @@ clean:
 	rm -r build && rm -r $(OBJ) && mkdir build && mkdir $(OBJ)
 
 
+test3D: clean build/main
+	./build/main src/test_raytracing_cornellbox.gisp --time --memory
 test: clean build/main
 	./build/main src/test.gisp --time --memory
 sketch: clean build/main

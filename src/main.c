@@ -1287,26 +1287,26 @@ int main(int argc, char* argv[]) {
 	 * Language 3D
 	 * */
 	//Groups
-	extendEnv("make-group3D",             (void*)make_group3D, global_env);
-	extendEnv("add-to-group3D",           (void*)add_to_group3D, global_env);
+	extendEnv("make-group3D",             (void*)gisp_make_group3D, global_env);
+	extendEnv("add-to-group3D",           (void*)gisp_add_to_group3D, global_env);
 
 	//Materials
-	extendEnv("make-material-lambertian", (void*)make_material_lambertian, global_env);
-	extendEnv("make-material-light",      (void*)make_material_light, global_env);
-	extendEnv("make-material-metal",      (void*)make_material_metal, global_env);
-	extendEnv("make-material-dielectric", (void*)make_material_dielectric, global_env);
+	extendEnv("make-material-lambertian", (void*)gisp_make_material_lambertian, global_env);
+	extendEnv("make-material-light",      (void*)gisp_make_material_light, global_env);
+	extendEnv("make-material-metal",      (void*)gisp_make_material_metal, global_env);
+	extendEnv("make-material-dielectric", (void*)gisp_make_material_dielectric, global_env);
 
 	//Objects
-	extendEnv("flip-face",                (void*)flip_face3D, global_env);
-	extendEnv("rect3D",                   (void*)rect3D, global_env);
-	extendEnv("box3D",                    (void*)box3D, global_env);
-	extendEnv("sphere3D",                 (void*)sphere3D, global_env);
-	extendEnv("rotated3D",                (void*)rotated3D, global_env);
-	extendEnv("translated3D",             (void*)translated3D, global_env);
+	extendEnv("flip-face",                (void*)gisp_flip_face3D, global_env);
+	extendEnv("rect3D",                   (void*)gisp_rect3D, global_env);
+	extendEnv("box3D",                    (void*)gisp_box3D, global_env);
+	extendEnv("sphere3D",                 (void*)gisp_sphere3D, global_env);
+	extendEnv("rotated3D",                (void*)gisp_rotated3D, global_env);
+	extendEnv("translated3D",             (void*)gisp_translated3D, global_env);
 
 	//Rendering
-	extendEnv("camera3D",                 (void*)camera3D, global_env);
-	extendEnv("render3D",                 (void*)render3D, global_env);
+	extendEnv("camera3D",                 (void*)gisp_camera3D, global_env);
+	extendEnv("render3D",                 (void*)gisp_render3D, global_env);
 
 
 	/**
